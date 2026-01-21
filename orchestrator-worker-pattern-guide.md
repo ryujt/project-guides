@@ -128,32 +128,113 @@ Worker A 이벤트 발행 → Orchestrator 수신 → Worker B 호출
 
 ## 구현 예제
 
-### Worker (실행 담당)
-
-```csharp
-// FileParserWorker.cs
-public class FileParserWorker
-{
-    public event Action<bool> OnParseCompleted;
-
-    public void StartParsing()
-    {
-        bool success = true;
-        OnParseCompleted?.Invoke(success);
-    }
-}
-```
-
-### Service (공유 자원)
+### Service (공유 자원 - Singleton)
 
 ```csharp
 // LogService.cs
 public class LogService
 {
+    private static readonly Lazy<LogService> _instance =
+        new Lazy<LogService>(() => new LogService());
+
+    public static LogService Instance => _instance.Value;
+
+    private LogService() { }
+
     public void WriteLog(string message)
     {
-        // 전역 로깅 처리
+        Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] {message}");
     }
+}
+```
+
+### Worker 1 (파일 파싱)
+
+```csharp
+// FileParserWorker.cs
+public class FileParserWorker
+{
+    public event Action<ParsedData> OnParseCompleted;
+    public event Action<string> OnParseFailed;
+
+    public void StartParsing(string filePath)
+    {
+        LogService.Instance.WriteLog($"파싱 시작: {filePath}");
+
+        try
+        {
+            var data = Parse(filePath);
+            LogService.Instance.WriteLog("파싱 완료");
+            OnParseCompleted?.Invoke(data);
+        }
+        catch (Exception ex)
+        {
+            LogService.Instance.WriteLog($"파싱 실패: {ex.Message}");
+            OnParseFailed?.Invoke(ex.Message);
+        }
+    }
+
+    private ParsedData Parse(string filePath) { /* 파싱 로직 */ }
+}
+```
+
+### Worker 2 (데이터 검증)
+
+```csharp
+// DataValidatorWorker.cs
+public class DataValidatorWorker
+{
+    public event Action<ValidatedData> OnValidationCompleted;
+    public event Action<string> OnValidationFailed;
+
+    public void Validate(ParsedData data)
+    {
+        LogService.Instance.WriteLog("검증 시작");
+
+        var errors = CheckRules(data);
+        if (errors.Count == 0)
+        {
+            LogService.Instance.WriteLog("검증 통과");
+            OnValidationCompleted?.Invoke(new ValidatedData(data));
+        }
+        else
+        {
+            LogService.Instance.WriteLog($"검증 실패: {errors.Count}건");
+            OnValidationFailed?.Invoke(string.Join(", ", errors));
+        }
+    }
+
+    private List<string> CheckRules(ParsedData data) { /* 검증 로직 */ }
+}
+```
+
+### Worker 3 (DB 업로드)
+
+```csharp
+// DbUploaderWorker.cs
+public class DbUploaderWorker
+{
+    public event Action OnUploadCompleted;
+    public event Action<string> OnUploadFailed;
+
+    public void Upload(ValidatedData data)
+    {
+        LogService.Instance.WriteLog("DB 업로드 시작");
+
+        try
+        {
+            SaveToDatabase(data);
+            LogService.Instance.WriteLog("DB 업로드 완료");
+            OnUploadCompleted?.Invoke();
+        }
+        catch (Exception ex)
+        {
+            LogService.Instance.WriteLog($"DB 업로드 실패: {ex.Message}");
+            OnUploadFailed?.Invoke(ex.Message);
+        }
+    }
+
+    private void SaveToDatabase(ValidatedData data) { /* DB 저장 로직 */ }
 }
 ```
 
@@ -164,30 +245,43 @@ public class LogService
 public class MainOrchestrator
 {
     private readonly FileParserWorker _parser;
+    private readonly DataValidatorWorker _validator;
     private readonly DbUploaderWorker _uploader;
-    private readonly LogService _logger;
 
     public MainOrchestrator()
     {
         _parser = new FileParserWorker();
+        _validator = new DataValidatorWorker();
         _uploader = new DbUploaderWorker();
-        _logger = new LogService();
 
-        _parser.OnParseCompleted += HandleParseResult;
+        WireEvents();
     }
 
-    public void Run()
+    private void WireEvents()
     {
-        _logger.WriteLog("프로세스 시작");
-        _parser.StartParsing();
+        // Parser 완료 → Validator 시작
+        _parser.OnParseCompleted += data => _validator.Validate(data);
+        _parser.OnParseFailed += HandleError;
+
+        // Validator 완료 → Uploader 시작
+        _validator.OnValidationCompleted += data => _uploader.Upload(data);
+        _validator.OnValidationFailed += HandleError;
+
+        // Uploader 완료 → 프로세스 종료
+        _uploader.OnUploadCompleted += () =>
+            LogService.Instance.WriteLog("전체 프로세스 완료");
+        _uploader.OnUploadFailed += HandleError;
     }
 
-    private void HandleParseResult(bool success)
+    public void Run(string filePath)
     {
-        if (success)
-            _uploader.Upload();
-        else
-            _logger.WriteLog("파싱 실패");
+        LogService.Instance.WriteLog("===== 프로세스 시작 =====");
+        _parser.StartParsing(filePath);
+    }
+
+    private void HandleError(string error)
+    {
+        LogService.Instance.WriteLog($"[ERROR] 프로세스 중단: {error}");
     }
 }
 ```
