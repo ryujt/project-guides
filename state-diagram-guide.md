@@ -11,6 +11,7 @@
 | --- | --- | --- | --- |
 | **Start Node** | `<s>` | `ID(( ))` + `style ID fill:#fff` | **흰색 원** (테두리 있음) |
 | **State** | `(Name)` | `ID(Name)` | **둥근 사각형** |
+| **Action (Process)** | `Name` (괄호 없음) | `ID[Name]` | **직사각형** |
 | **End Node** | `<s>` | `ID(( ))` + `style ID fill:#000` | **검은색 원** |
 
 ## 작성 규칙
@@ -72,4 +73,17 @@ graph LR
 
     style A fill:#fff,stroke:#000,stroke-width:2px
     style E fill:#000,stroke:#000,stroke-width:2px
+```
+
+## Entry Action & Exit Action
+
+상태 전환 시 수행되어야 할 액션이나 프로세스는 괄호가 없는 텍스트 노드로 명시합니다. 이는 일반적인 상태(State)와 시각적으로 구분되도록 직사각형으로 렌더링됩니다.
+
+```state
+<s> --> (StateA)
+(StateA) --> (StateB)
+(StateB) --> Save Log : Error
+Save Log --> (StateA)
+(StateB) --> (StateC)
+(StateC) --> <e>
 ```
