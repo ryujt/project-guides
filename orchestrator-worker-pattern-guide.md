@@ -9,6 +9,7 @@
 * `Main`: 시스템 전체를 관장하는 최상위 Orchestrator
 * `config`: 환경 설정 모음
 * `core`: 최상위 Worker들의 모음
+* `gateways`: 외부 시스템(DB, API, 스토리지 등)과 직접 통신하는 Gateway들의 모음. 상위 계층이 인프라 세부사항을 몰라도 되게 한다.
 * `service`: 싱글톤으로 구성된 서비스. 전역에서 상태를 공유해야 할 객체 (예: LogService, API_Service 등)
 * `utils`: 객체 생성 없이 코드 전역에서 공유되는 무상태(Stateless) 모듈
 
@@ -22,6 +23,7 @@
 | **이벤트 기반 보고** | Worker는 상위 객체에 오직 '이벤트'로만 작업 결과를 알린다. |
 | **수평적 고립** | Worker 간 직접 통신을 엄격히 금지한다. |
 | **재귀적 구조** | 복잡도가 높은 Worker는 Sub-Orchestrator로 확장한다. |
+| **외부 접근 캡슐화** | 외부 시스템과의 통신은 Gateway로 분리한다. |
 | **상태 공유** | 전역에서 공유할 상태나 자원은 Service로 분리한다. |
 
 ## 3. 구성 요소 및 역할
@@ -37,6 +39,22 @@
 * **역할:** 할당된 특정 기능만 수행하는 독립적인 실행 단위이다.
 * **책임:** 오직 자신의 임무에만 집중한다.
 * **제약:** 상위 객체(Orchestrator)나 형제 객체(다른 Worker)의 존재를 알지 못해야 한다.
+
+### Gateway
+
+* **역할:** 외부 시스템(데이터 레이크, DB, API 등)과 직접 통신하며, 특정 외부 리소스에 대한 접근을 캡슐화하는 독립 단위이다.
+* **책임:** 상위 계층(Orchestrator, Worker)이 인프라 세부사항을 몰라도 되게, 외부 시스템의 복잡성을 내부에 감추고 깔끔한 인터페이스를 제공한다.
+* **제약:** Worker와 동일하게 상위 객체나 형제 객체의 존재를 알지 못해야 한다.
+* **Worker와의 차이:**
+
+| 구분 | Worker | Gateway |
+| --- | --- | --- |
+| 통신 대상 | 시스템 내부 데이터 처리 | 외부 시스템(DB, API, 스토리지)과 통신 |
+| 핵심 역할 | 비즈니스 로직 수행 | 외부 리소스 접근 캡슐화 |
+| 의존성 | 내부 모듈만 의존 | 외부 프로토콜·SDK에 의존 |
+| 사용 시점 | 데이터 가공, 검증, 변환 등 | 데이터 조회, 저장, 외부 API 호출 등 |
+
+> **설계 기준:** 외부 시스템과의 통신이 필요한 로직은 Gateway로 분리한다. 상위 계층은 Gateway의 인터페이스만 알면 되고, 통신 프로토콜이나 인프라 설정을 직접 다루지 않는다.
 
 ### Service
 
@@ -62,12 +80,12 @@ Worker끼리는 서로 직접 호출할 수 없다. 데이터를 전달하거나
 
 * **Worker의 재귀적 분할 (Recursive Division)**
 내부 로직을 여러 하위 Worker로 분할하고, 기존 Worker는 이들을 조율하는 중간 관리자(Sub-Orchestrator) 역할을 수행한다.
+* **외부 통신의 Gateway 분리 (Gateway Extraction)**
+Worker 내부에 외부 시스템 호출 로직이 섞여 있다면, 해당 로직을 Gateway로 분리하여 Worker가 순수한 비즈니스 로직에만 집중하도록 한다.
 * **Worker 간 의존성 해소 (Dependency Resolution)**
 * **공통 데이터/기능 공유가 필요할 때:** Service로 분리하여 Orchestrator가 주입한다.
 * **기능적 결합도가 너무 높을 때:** 하나의 Worker로 병합한다.
 * **작업 순서 제어가 필요할 때:** 제어 로직을 분리하여 Orchestrator로 이관한다.
-
-
 
 ---
 
@@ -237,3 +255,71 @@ public class MainOrchestrator
 }
 
 ```
+
+### Gateway (외부 시스템 접근 캡슐화)
+
+위 예제에서 DB 업로드 Worker의 외부 시스템 접근 로직을 Gateway로 분리하는 예제이다. Worker는 비즈니스 로직에만 집중하고, Gateway가 외부 통신의 복잡성을 감춘다.
+
+```csharp
+// DatabaseGateway.cs — 외부 DB 접근을 캡슐화하는 Gateway
+public class DatabaseGateway
+{
+    private readonly string _connectionString;
+
+    public DatabaseAgent(string connectionString)
+    {
+        _connectionString = connectionString;
+    }
+
+    public void Save(ValidatedData data)
+    {
+        LogService.Instance.WriteLog("DB 연결 및 저장 시작");
+
+        using var connection = new SqlConnection(_connectionString);
+        connection.Open();
+
+        using var command = connection.CreateCommand();
+        command.CommandText = BuildInsertQuery(data);
+        command.ExecuteNonQuery();
+
+        LogService.Instance.WriteLog("DB 저장 완료");
+    }
+
+    private string BuildInsertQuery(ValidatedData data) { /* SQL 구성 */ return ""; }
+}
+```
+
+```csharp
+// DbUploaderWorker.cs — Gateway를 사용하여 외부 통신 로직을 분리한 Worker
+public class DbUploaderWorker
+{
+    private readonly DatabaseGateway _dbGateway;
+
+    public event Action OnUploadCompleted;
+    public event Action<string> OnUploadFailed;
+
+    public DbUploaderWorker(DatabaseGateway dbGateway)
+    {
+        _dbGateway = dbGateway;
+    }
+
+    public void Upload(ValidatedData data)
+    {
+        LogService.Instance.WriteLog("DB 업로드 시작");
+
+        try
+        {
+            _dbGateway.Save(data);
+            LogService.Instance.WriteLog("DB 업로드 완료");
+            OnUploadCompleted?.Invoke();
+        }
+        catch (Exception ex)
+        {
+            LogService.Instance.WriteLog($"DB 업로드 실패: {ex.Message}");
+            OnUploadFailed?.Invoke(ex.Message);
+        }
+    }
+}
+```
+
+> **핵심 포인트:** Worker는 "데이터를 저장한다"는 비즈니스 흐름만 담당하고, Gateway가 DB 연결·쿼리 실행 등 인프라 세부사항을 캡슐화한다. DB가 교체되더라도 Worker는 변경할 필요가 없다.
