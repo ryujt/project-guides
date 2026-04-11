@@ -10,6 +10,7 @@
 |------|------|
 | [system-design-framework.md](system-design-framework.md) | 시스템 요구사항 분석부터 설계, 시각화까지의 과정을 표준화한 프레임워크. Input Datas, Key Events, Services List, PBS, 다이어그램 등 8개 섹션으로 구성 |
 | [orchestrator-worker-pattern-guide.md](orchestrator-worker-pattern-guide.md) | 기능을 독립적인 단위로 분리하고 객체 간 역할 분담과 제어권 흐름을 정의하는 Orchestrator-Worker 패턴 설계 가이드 |
+| [prd-writing-guide.md](prd-writing-guide.md) | 어떤 도메인에도 적용 가능한 PRD 작성 표준. 7 파트 두괄식 구조(요약·모듈·시나리오·데이터·알고리즘·운영·설정), jobflow 직후 4 요소(객체·이벤트·시나리오 내러티브) 의무화, Must/Should/Optional 체크리스트 포함 |
 
 ### 코딩 가이드라인
 
