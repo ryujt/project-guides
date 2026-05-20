@@ -42,11 +42,40 @@ Object: [객체1], [객체2], [객체3], ...
 * 객체 내부 프로세스는 표시하지 않는다 (필요시 `Public → Private` 한 단계만 허용).
 * 메서드 파라미터는 표기하지 않는다.
 
+## 핵심 원칙 — 모든 화살표는 master 의 관점이다
+
+> jobflow 다이어그램의 모든 `-->` 는 **master(오케스트레이터) 가 본 흐름**이다.
+> 흐름을 제어하는 주체도, **결과를 받아 다음 단계로 흘려보내는 주체도 항상 master 이다**.
+
+따라서 다이어그램을 읽을 때(그리고 코드로 구현할 때)는 다음 규칙을 지킨다.
+
+* `A.Method --> B.Method` 는 "master 가 A.Method 가 끝나면 B.Method 를 호출한다" 는 뜻.
+  실제 코드도 master 의 메서드 안에서 A → B 를 순차 호출하거나, A 의 이벤트를 구독해 B 를 부르는
+  형태가 된다 — **A 가 직접 B 를 호출하는 코드가 아니다**.
+* `A.Method.result --> B.Method` 는 "master 가 A.Method 의 반환값을 받아 B.Method 의 입력으로
+  넘긴다" 는 뜻. 마찬가지로 **A 가 직접 B 를 호출하는 게 아니다**. 코드 상으로는
+  `const r = await a.method(); await b.method(r);` 같이 master 의 메서드 안에서 결과가 전달되거나,
+  `a.OnDone += (r) => b.method(r)` 같이 master 가 이벤트로 잇는다.
+* `A.Method.result --> Master.Method.result` 는 "A 의 반환값이 곧 master 메서드의 반환값이 된다"
+  는 뜻 — 마지막 단계의 산출물이 master 의 호출자로 그대로 흘러나가는 표기.
+
+이 원칙의 따름정리:
+
+* 단계 사이마다 `X.result --> Master.Method` / `Master.Method --> Y` 식으로 master 로 명시적으로
+  되돌렸다 다시 내보내는 표기는 **중복**이다. 화살표가 이미 master 관점이므로, master 가 결과를
+  받아 다음 단계로 넘긴다는 사실은 `X.result --> Y` 한 줄로 충분히 표현된다.
+* 단계 사이에 master 가 **다른 메서드로 책임을 넘긴다거나(예: `OnStart` → `InitializeOrchestrator`),
+  결과값에 따라 분기한다거나, 결과를 가공해서 별도 메서드에서 후처리해야 할 때만** 명시적으로
+  `X.result --> Master.OtherMethod` 로 표기한다. 그 경우는 표기를 통해 "master 의 메서드 경계가
+  바뀐다" 는 정보를 전달한다.
+
 ## 표현 규칙
 
 아래 예시에서 `Master`는 master 객체를 의미한다.
 * `Master.Method --> B.Method`: master가 자신의 메서드에서 B를 직접 호출
 * `A.OnEvent --> B.Method`: master가 A의 이벤트를 B의 메서드에 구독 연결
+* `A.Method.result --> B.Method`: master가 A의 반환값을 받아 B에 입력으로 넘김
+  (A 가 B 를 직접 호출하는 게 아님)
 
 ### 순차 호출
 
@@ -124,6 +153,49 @@ A.MethodName.result --> C.HandleResult
 ```
 * A가 B를 호출하고 결과를 받는다.
 * A가 받은 결과를 C에게 전달한다.
+
+### 결과를 다음 단계로 (master 관점의 기본 표기)
+
+```jobflow
+Master.MethodName --> A.Step1
+A.Step1.result --> B.Step2
+B.Step2.result --> C.Step3
+C.Step3.result --> Master.MethodName.result
+```
+
+* 핵심 원칙의 직접적 적용. master 가 `A.Step1` 의 반환값을 받아 `B.Step2` 에 넣고, `B.Step2` 의 반환값을
+  받아 `C.Step3` 에 넣은 뒤, 마지막 산출물을 자기 메서드의 반환값으로 흘려보낸다는 뜻.
+* `A.Step1.result --> B.Step2` 가 **A 가 직접 B 를 호출한다는 뜻이 아님**을 다시 강조한다. 결과를
+  넘기는 주체는 master 다. A 와 B 는 서로를 모른다.
+* N 단계 LLM 파이프라인, ETL, 컴파일러 패스, 빌드 단계 등 단계 간 변환을 master 가 직선으로 잇는
+  모든 시나리오에서 이 표기가 기본이다.
+
+> **주의 — 표기 함정**: `A.Step1 --> A`, `A --> B.Step2`, `B.Step2.result --> A`, `A --> C.Step3`,
+> `C.Step3.result --> A` … 식으로 단계마다 master 로 한 번 돌아갔다 다시 내보내는 round-trip 을
+> 반복하지 말 것. 화살표는 이미 master 관점이므로 그 round-trip 은 표기 안에 묵시적으로 포함되어
+> 있다. 매 단계 명시적으로 그리면 "master 가 매 단계 결과를 받아 무언가 가공한 뒤 다음 단계를 부른다"
+> 는 의미로 잘못 읽힌다.
+>
+> 단계 사이에 **진짜로** master 의 가공·분기·메서드 책임 전환이 들어갈 때만 `X.result --> Master.X`
+> 또는 `X.result --> Master.OtherMethod` 표기를 쓴다 (앞의 "반환값을 호출자 컨텍스트로 되돌리기" /
+> "반환값을 같은 객체의 다른 메서드로 위임" 패턴 참조).
+>
+> 잘못된 예 — 단순 3 단계를 매 단계 round-trip 으로 표기:
+> ```jobflow
+> Master.MethodName --> A.Step1
+> A.Step1.result --> Master.MethodName
+> Master.MethodName --> B.Step2
+> B.Step2.result --> Master.MethodName
+> Master.MethodName --> C.Step3
+> C.Step3.result --> Master.MethodName
+> ```
+> 올바른 예:
+> ```jobflow
+> Master.MethodName --> A.Step1
+> A.Step1.result --> B.Step2
+> B.Step2.result --> C.Step3
+> C.Step3.result --> Master.MethodName.result
+> ```
 
 ### 반환값에 따른 분기
 
