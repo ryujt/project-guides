@@ -17,6 +17,7 @@
 | "새 프로젝트를 설계해야 한다" / 요구사항을 구조화 | [system-design-framework.md](system-design-framework.md) | PBS, Input Datas, Key Events 작성법 |
 | "PRD / 제품 요구사항 문서를 쓰자" | [prd-writing-guide.md](prd-writing-guide.md) | system-design, orchestrator-worker, job-flow 를 전제로 함 |
 | "모듈을 어떻게 쪼갤까" / 객체 역할 분담 / 제어권 흐름 | [orchestrator-worker-pattern-guide.md](orchestrator-worker-pattern-guide.md) | job-flow-diagram-guide |
+| "여러 서비스의 전체 흐름 문서를 만들자" / SERVICE_FLOW.md / 서비스 간 호출 경계 | [service-flow-document-guide.md](service-flow-document-guide.md) | job-flow, navigation, orchestrator-worker |
 | "객체 간 메서드 호출·이벤트 흐름을 그려야 한다" | [job-flow-diagram-guide.md](job-flow-diagram-guide.md) | orchestrator-worker, 각 언어별 이벤트 지침 |
 | "화면 전환 / API 호출 흐름을 정리" | [navigation-diagram-guide.md](navigation-diagram-guide.md) | screen-layout-guide |
 | "객체의 상태 전이를 표현" | [state-diagram-guide.md](state-diagram-guide.md) | job-flow-diagram-guide |
@@ -42,6 +43,7 @@
 
 - **[system-design-framework.md](system-design-framework.md)** — Input Datas → Key Events → Services List → PBS → 4종 다이어그램 (Job Flow / Navigation / State / Screen Layout) 의 8 섹션 파이프라인. **가장 먼저 읽는 문서.**
 - **[orchestrator-worker-pattern-guide.md](orchestrator-worker-pattern-guide.md)** — Services List 를 실제 코드 모듈로 펼치는 아키텍처 원칙 (Main · core · gateways · service · utils).
+- **[service-flow-document-guide.md](service-flow-document-guide.md)** — 여러 런타임 서비스의 현재 코드 기준 흐름을 `SERVICE_FLOW.md` 로 정리하는 문서 작성 가이드. 전체 classDiagram, 최상위 jobflow, API navigation, 서비스별 트리, 소유 경계 표를 한 문서에 묶는다.
 
 ### 2. 설계 시각화 (Diagram DSL)
 
@@ -81,6 +83,7 @@ flowchart TB
     OWP["orchestrator-worker-pattern<br/>아키텍처 원칙"]:::core
     PRD["prd-writing-guide<br/>7-Part PRD 템플릿"]:::spec
     README["wrtite-readme-guide<br/>README 목차"]:::spec
+    SFD["service-flow-document<br/>SERVICE_FLOW.md 작성"]:::spec
 
     JFD["job-flow-diagram<br/>jobflow DSL"]:::dsl
     NAV["navigation-diagram<br/>navigation DSL"]:::dsl
@@ -99,7 +102,9 @@ flowchart TB
     SDF --> JFD & NAV & STT & LAY
     SDF --> OWP
     SDF --> README
+    SDF --> SFD
     OWP --> JFD
+    OWP --> SFD
     OWP --> PY & JS & CS & ZIG
 
     PRD --> SDF
@@ -107,6 +112,8 @@ flowchart TB
     PRD --> JFD
     PRD --> NAV
     PRD --> STT
+    SFD --> JFD
+    SFD --> NAV
 
     CSG --> PPR
     PPR --> PY
@@ -140,6 +147,11 @@ flowchart TB
 - **언제 쓰는가**: 모듈 경계를 잡고 **제어권 흐름(누가 누구를 호출하는가 / 누가 이벤트를 올리는가)** 을 확정해야 할 때.
 - **핵심 내용**: `Main`(Orchestrator) / `core`(Worker) / `gateways`(외부 통신) / `service`(싱글톤) / `utils`(무상태) 구조. 단방향 제어 · 이벤트 기반 보고 · 수평적 고립 · 재귀적 Sub-Orchestrator · 외부 접근 캡슐화의 6 원칙.
 - **연계 문서**: job-flow-diagram-guide (이 원칙을 다이어그램으로 표현), 각 언어별 event-handling 지침 (이 원칙을 코드로 구현).
+
+#### [service-flow-document-guide.md](service-flow-document-guide.md)
+- **언제 쓰는가**: 여러 backend service, worker, gateway, external API 가 섞인 시스템의 **현재 코드 기준 전체 흐름 문서** 를 작성할 때. `SERVICE_FLOW.md` 같은 운영/구현 기준 문서가 필요할 때.
+- **핵심 내용**: 서비스 목록 → 전체 Mermaid classDiagram → 최상위 service jobflow → API navigation → 서비스별 orchestrator/worker 트리 → 공통 런타임 경계 → 서비스별 소유 경계 표. `jobflow` 에 HTTP path 를 쓰지 않고, Client 입력은 `Client.Send...Message`, Client 반응은 `Client.On...` 으로 표기한다.
+- **연계 문서**: job-flow-diagram-guide (메서드/이벤트 흐름), navigation-diagram-guide (API 흐름), orchestrator-worker-pattern-guide (orchestrator/worker/gateway 역할).
 
 #### [prd-writing-guide.md](prd-writing-guide.md)
 - **언제 쓰는가**: 도메인과 무관하게 **PRD 한 편을 처음부터 끝까지** 작성할 때. 리뷰어와 구현자 모두를 독자로 삼는다.
@@ -219,6 +231,7 @@ flowchart TB
 |---|---|---|
 | [system-design-framework.md](system-design-framework.md) | 설계 | 요구사항 → 설계 → 시각화 8 섹션 파이프라인 |
 | [orchestrator-worker-pattern-guide.md](orchestrator-worker-pattern-guide.md) | 설계 | 모듈 경계 및 제어권 흐름 6 원칙 |
+| [service-flow-document-guide.md](service-flow-document-guide.md) | 문서 | 다중 서비스 `SERVICE_FLOW.md` 작성 가이드 |
 | [prd-writing-guide.md](prd-writing-guide.md) | 스펙 | 7 Part 두괄식 범용 PRD 템플릿 |
 | [job-flow-diagram-guide.md](job-flow-diagram-guide.md) | DSL | `jobflow` — 객체 간 호출·이벤트 흐름 |
 | [navigation-diagram-guide.md](navigation-diagram-guide.md) | DSL | `navigation` — 화면 · API · 프로세스 흐름 |
