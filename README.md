@@ -16,6 +16,7 @@
 |---|---|---|
 | "새 프로젝트를 설계해야 한다" / 요구사항을 구조화 | [system-design-framework.md](system-design-framework.md) | PBS, Input Datas, Key Events 작성법 |
 | "PRD / 제품 요구사항 문서를 쓰자" | [prd-writing-guide.md](prd-writing-guide.md) | system-design, orchestrator-worker, job-flow 를 전제로 함 |
+| "아키텍처 패턴을 고르자" / Layered, Clean, DDD, Event-Driven, Saga 비교 | [architecture-pattern-diagram-guide.md](architecture-pattern-diagram-guide.md) | system-design, job-flow, navigation, state |
 | "모듈을 어떻게 쪼갤까" / 객체 역할 분담 / 제어권 흐름 | [orchestrator-worker-pattern-guide.md](orchestrator-worker-pattern-guide.md) | job-flow-diagram-guide |
 | "시스템 전체를 쉽게 설명하는 문서를 만들자" / SYSTEM_FLOW.md / 동적 흐름과 정적 구성 | [system-flow-document-guide.md](system-flow-document-guide.md) | job-flow, navigation, orchestrator-worker |
 | "객체 간 메서드 호출·이벤트 흐름을 그려야 한다" | [job-flow-diagram-guide.md](job-flow-diagram-guide.md) | orchestrator-worker, 각 언어별 이벤트 지침 |
@@ -42,6 +43,7 @@
 ### 1. 요구사항 & 설계 (What to build)
 
 - **[system-design-framework.md](system-design-framework.md)** — Input Datas → Key Events → Services List → PBS → 4종 다이어그램 (Job Flow / Navigation / State / Screen Layout) 의 8 섹션 파이프라인. **가장 먼저 읽는 문서.**
+- **[architecture-pattern-diagram-guide.md](architecture-pattern-diagram-guide.md)** — Layered / Clean / DDD / Pipeline / Event-Driven / State Machine / Saga 등 아키텍처 패턴별 분해 기준과 다이어그램 샘플.
 - **[orchestrator-worker-pattern-guide.md](orchestrator-worker-pattern-guide.md)** — Services List 를 실제 코드 모듈로 펼치는 아키텍처 원칙 (Main · core · gateways · service · utils).
 - **[system-flow-document-guide.md](system-flow-document-guide.md)** — 시스템을 이해하는 데 필요한 최소 조각에서 시작해 전체를 설명하는 문서 작성 가이드. 동적 흐름(jobflow/navigation)과 정적 구성(classDiagram/책임 표)을 함께 사용한다.
 
@@ -80,6 +82,7 @@
 ```mermaid
 flowchart TB
     SDF["system-design-framework<br/>8-section 파이프라인"]:::core
+    APD["architecture-pattern-diagram<br/>패턴별 분해 기준"]:::core
     OWP["orchestrator-worker-pattern<br/>아키텍처 원칙"]:::core
     PRD["prd-writing-guide<br/>7-Part PRD 템플릿"]:::spec
     README["wrtite-readme-guide<br/>README 목차"]:::spec
@@ -100,6 +103,10 @@ flowchart TB
     LOG["detailed-logging-prompt<br/>2계층 로깅 프롬프트"]:::ops
 
     SDF --> JFD & NAV & STT & LAY
+    SDF --> APD
+    APD --> JFD
+    APD --> NAV
+    APD --> STT
     SDF --> OWP
     SDF --> README
     SDF --> SFD
@@ -142,6 +149,11 @@ flowchart TB
 - **언제 쓰는가**: 새 시스템·기능의 요구사항을 **구조화된 양식** 으로 정리해야 할 때. PRD 나 README 작성 직전의 선행 단계.
 - **핵심 내용**: 8 섹션 파이프라인 — ① Input Datas ② Key Events ③ Services List ④ PBS(Process Breakdown Structure) ⑤ Job Flow ⑥ Navigation ⑦ State ⑧ Screen Layout. ⑤~⑧ 은 별도의 DSL 가이드로 분기된다.
 - **연계 문서**: orchestrator-worker-pattern-guide (③ Services List 펼치기), 4 종 다이어그램 가이드 (⑤~⑧ 시각화), prd-writing-guide · wrtite-readme-guide (이 프레임워크를 전제로 하는 소비자).
+
+#### [architecture-pattern-diagram-guide.md](architecture-pattern-diagram-guide.md)
+- **언제 쓰는가**: 시스템을 어떤 기준으로 나눌지 정해야 할 때. Layered, Clean/Hexagonal, DDD, Pipeline, Event-Driven, Actor, State Machine, Command/Handler, CQRS, Microservices, Saga, Plugin 구조를 비교해야 할 때.
+- **핵심 내용**: 패턴별 분해 기준 / 적합한 경우 / 추천 다이어그램 / Mermaid·jobflow·navigation 샘플. jobflow를 전체 아키텍처 패턴이 아니라 실행 흐름을 설명하고 세분화하는 표현 방식으로 정리한다.
+- **연계 문서**: system-design-framework (상위 설계 흐름), job-flow-diagram-guide (Pipeline/Event/Command/Saga 상세 흐름), navigation-diagram-guide (화면/API 흐름), state-diagram-guide (상태 전이).
 
 #### [orchestrator-worker-pattern-guide.md](orchestrator-worker-pattern-guide.md)
 - **언제 쓰는가**: 모듈 경계를 잡고 **제어권 흐름(누가 누구를 호출하는가 / 누가 이벤트를 올리는가)** 을 확정해야 할 때.
