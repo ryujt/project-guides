@@ -14,6 +14,7 @@
 
 | 상황 / 키워드 | 우선 참조 문서 | 보조 문서 |
 |---|---|---|
+| "시스템을 계층적으로(매크로→시스템→모듈→상세) 재귀 분할하는 방법론이 필요" / 메시지 vs 이벤트 기반 선택 | [method-R.md](method-R.md) | system-design-framework, orchestrator-worker, job-flow |
 | "새 프로젝트를 설계해야 한다" / 요구사항을 구조화 | [system-design-framework.md](system-design-framework.md) | PBS, Input Datas, Key Events 작성법 |
 | "PRD / 제품 요구사항 문서를 쓰자" | [prd-writing-guide.md](prd-writing-guide.md) | system-design, orchestrator-worker, job-flow 를 전제로 함 |
 | "아키텍처 패턴을 고르자" / Layered, Clean, DDD, Event-Driven, Saga 비교 | [architecture-pattern-diagram-guide.md](architecture-pattern-diagram-guide.md) | system-design, job-flow, navigation, state |
@@ -42,6 +43,7 @@
 
 ### 1. 요구사항 & 설계 (What to build)
 
+- **[method-R.md](method-R.md)** — 시스템을 매크로 → 시스템 → 모듈 → 상세의 4 단계로 **재귀적으로 분할** 하는 설계 방법론. 외부 경계는 📨 메시지 기반(강제), 내부는 ⚡ 이벤트 기반(강제), 그 중간(시스템 단계)은 선택. 마스터 역할이 계층마다 재정의된다.
 - **[system-design-framework.md](system-design-framework.md)** — Input Datas → Key Events → Services List → PBS → 4종 다이어그램 (Job Flow / Navigation / State / Screen Layout) 의 8 섹션 파이프라인. **가장 먼저 읽는 문서.**
 - **[architecture-pattern-diagram-guide.md](architecture-pattern-diagram-guide.md)** — Layered / Clean / DDD / Pipeline / Event-Driven / State Machine / Saga 등 아키텍처 패턴별 분해 기준과 다이어그램 샘플.
 - **[orchestrator-worker-pattern-guide.md](orchestrator-worker-pattern-guide.md)** — Services List 를 실제 코드 모듈로 펼치는 아키텍처 원칙 (Main · core · gateways · service · utils).
@@ -81,6 +83,7 @@
 
 ```mermaid
 flowchart TB
+    MR["method-R<br/>계층별 재귀 분할 방법론"]:::core
     SDF["system-design-framework<br/>8-section 파이프라인"]:::core
     APD["architecture-pattern-diagram<br/>패턴별 분해 기준"]:::core
     OWP["orchestrator-worker-pattern<br/>아키텍처 원칙"]:::core
@@ -102,6 +105,9 @@ flowchart TB
 
     LOG["detailed-logging-prompt<br/>2계층 로깅 프롬프트"]:::ops
 
+    MR --> SDF
+    MR --> OWP
+    MR --> JFD
     SDF --> JFD & NAV & STT & LAY
     SDF --> APD
     APD --> JFD
@@ -144,6 +150,11 @@ flowchart TB
 각 항목은 **언제 쓰는가 / 핵심 내용 / 연계 문서** 3 요소로 정리한다.
 
 ### 설계 프레임워크
+
+#### [method-R.md](method-R.md)
+- **언제 쓰는가**: 시스템 전체를 어떤 깊이로, 어떤 순서로 쪼갤지 결정해야 할 때. system-design-framework 의 상위 설계 철학으로 작동한다.
+- **핵심 내용**: 4 단계 재귀 분할 — ① **매크로 설계** (시스템 경계, 📨 메시지 강제) ② **시스템 설계** (서비스 분할, 📨/⚡ 선택) ③ **모듈 설계** (Main = Orchestrator, ⚡ 이벤트 강제) ④ **상세 설계** (Sub-Orchestrator 승격, ⚡ 이벤트 강제, 재귀). 핵심 원칙: 재귀적 분할 · 조각 간 무지 · 단방향 호출 + 이벤트 보고 · 결과 연결은 마스터의 책임 · 오케스트레이터 승격. 단계별 멈춤 휴리스틱 제공.
+- **연계 문서**: system-design-framework (Method-R 의 8 섹션 산출물 양식), orchestrator-worker-pattern-guide (모듈/상세 단계의 6 원칙), job-flow-diagram-guide (모든 단계의 표현 DSL).
 
 #### [system-design-framework.md](system-design-framework.md)
 - **언제 쓰는가**: 새 시스템·기능의 요구사항을 **구조화된 양식** 으로 정리해야 할 때. PRD 나 README 작성 직전의 선행 단계.
@@ -241,6 +252,7 @@ flowchart TB
 
 | 파일 | 분류 | 한 줄 역할 |
 |---|---|---|
+| [method-R.md](method-R.md) | 설계 | 매크로 → 시스템 → 모듈 → 상세의 4 단계 재귀 분할 방법론 |
 | [system-design-framework.md](system-design-framework.md) | 설계 | 요구사항 → 설계 → 시각화 8 섹션 파이프라인 |
 | [orchestrator-worker-pattern-guide.md](orchestrator-worker-pattern-guide.md) | 설계 | 모듈 경계 및 제어권 흐름 6 원칙 |
 | [system-flow-document-guide.md](system-flow-document-guide.md) | 문서 | 최소 조각에서 전체 시스템을 설명하는 흐름 문서 작성 가이드 |
