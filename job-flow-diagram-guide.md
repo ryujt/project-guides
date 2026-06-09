@@ -115,38 +115,75 @@ B.MethodName.result --> A.HandleResult
 * B의 반환값을 `.result`로 표기한다.
 * A가 B를 호출하고 결과를 받아 후속 처리한다.
 
-### 반환값을 호출자 컨텍스트로 되돌리기 (동일 메서드 이어서)
+### 다른 객체의 결과를 caller 흐름에서 이어 쓰기
 
-```jobflow
-A.MethodName --> B.MethodName
-B.MethodName.result --> A.MethodName
-```
-* `A.MethodName` 이 `B.MethodName` 을 호출한 뒤, B의 반환값을 받아 **A.MethodName 자신의 흐름을 이어간다**.
-* 별도의 핸들러 분리 없이 caller 의 같은 컨텍스트에서 결과를 계속 사용하는 경우에 쓴다.
-* 예:
-    ```jobflow
-    Main.OnStart --> Config.Load
-    Config.Load.result --> Main.OnStart
-    ```
-    "Main.OnStart 에서 Config.Load 를 호출하고, 반환된 Config 를 Main.OnStart 의 다음 라인에서 계속 사용한다" 는 의미.
+caller 메서드가 다른 객체에게 무언가 요청하고, 그 결과를 바탕으로 처리를 이어가야 하는 경우가 있다.
+"caller 자신이 결과를 받아 계속 일한다" 가 의미상 맞지만, 다이어그램이 **orchestrator 관점**이기 때문에
+`B.result --> A.MethodName` 으로 적으면 `A.MethodName` 이 두 번 호출되는 것처럼 오독된다
+(§"주의 — 표기 함정"). orchestrator 는 객체 내부의 일을 알 수 없으므로, 표기 차원에서 두 가지 케이스로
+나눠 표현한다.
 
-### 반환값을 같은 객체의 다른 메서드로 위임
+#### Case 1 — 다른 메서드로 결과를 위임
 
 ```jobflow
 A.MethodName --> B.MethodName
 B.MethodName.result --> A.OtherMethod
 ```
-* `A.MethodName` 이 `B.MethodName` 을 호출해 결과를 받은 뒤, **자기 자신의 다른 메서드 `A.OtherMethod` 에 그 결과를 넘긴다**.
-* "결과가 같은 객체 안에서 흐름을 바꾸어 다른 책임의 메서드로 이동한다" 는 의미이며, **단일 책임 원칙을 따른 위임**을 표현한다.
-* 위의 "동일 메서드 이어서" 패턴과 다른 점: 반환값을 받은 caller 메서드가 끝나고, 흐름이 같은 객체 내부의 **다른 메서드**로 넘어간다. 즉 함수 경계가 바뀐다.
+
+* orchestrator 가 `A.MethodName` 을 호출한 뒤 `B.MethodName` 을 호출하고, `B.MethodName` 의 반환값을
+  `A.OtherMethod` 에 전달하면서 호출한다.
+* `A.MethodName` 과 `A.OtherMethod` 는 같은 객체의 **서로 다른 메서드**이므로 round-trip 안티패턴이
+  아니다. caller 의 책임이 메서드 경계에서 자연스럽게 분리된다.
 * 예:
     ```jobflow
     Main.OnStart --> Container.BuildContainer
     Container.BuildContainer.result --> Main.InitializeOrchestrator
     Main.InitializeOrchestrator --> Orchestrator.NewOrchestrator
     ```
-    "Main.OnStart 는 Container 생성까지만 하고, 생성된 Container 는 Main.InitializeOrchestrator 가 받아 Orchestrator 조립을 책임진다" 는 의미.
-* 이 패턴을 쓰면 `OnStart` 는 "전체 라이프사이클 지휘", `InitializeOrchestrator` 는 "Orchestrator 조립" 처럼 **한 객체 안에서도 메서드별로 책임을 분리**할 수 있다.
+    "Main.OnStart 는 Container 생성까지만, 생성된 Container 는 Main.InitializeOrchestrator 가 받아
+    Orchestrator 조립을 책임진다."
+
+#### Case 2 — 이벤트로 데이터를 요청해 내부에서 이어 쓰기
+
+caller 메서드가 **자기 자신의 흐름 안에서** 외부 데이터를 끌어와 계속 처리해야 한다면, caller 가
+이벤트를 발생시키고 그 결과를 이벤트의 반환값으로 받아 내부에서 소비하는 형태로 표기한다.
+
+```jobflow
+A.MethodName --> A.OnNeedData
+A.OnNeedData --> B.MethodName
+B.MethodName.result --> A.OnNeedData.result
+```
+
+* `A.MethodName` 이 진행 도중 `A.OnNeedData` 이벤트를 발생시킨다 (이 줄은 내부 동작이므로 생략 가능).
+* orchestrator 가 `A.OnNeedData` 를 `B.MethodName` 에 바인딩해 두었기 때문에, 이벤트 발생 시
+  `B.MethodName` 이 실행된다.
+* `B.MethodName` 의 반환값이 `A.OnNeedData` 의 반환값으로 흘러 들어가고, 그 값을 `A.MethodName` 이
+  내부에서 받아 처리를 이어간다.
+* orchestrator 는 "A 가 데이터를 요청하면 B 에게서 받아다 준다" 만 알 뿐, A 내부의 분기·재개는 관여하지
+  않는다.
+
+A 클래스 코드 예시:
+```
+MethodName() {
+    ...
+    if (...) {
+        data = OnNeedData()
+    }
+    ...
+}
+```
+
+orchestrator 코드 예시:
+```
+main() {
+    A.OnNeedData = handleData
+}
+
+handleData() {
+    ...
+    return data
+}
+```
 
 ### 반환값을 다른 객체에 전달
 
@@ -183,15 +220,27 @@ C.Step3.result --> Orchestrator.MethodName.result
 * N 단계 LLM 파이프라인, ETL, 컴파일러 패스, 빌드 단계 등 단계 간 변환을 orchestrator 가 직선으로 잇는
   모든 시나리오에서 이 표기가 기본이다.
 
-> **주의 — 표기 함정**: `A.Step1 --> A`, `A --> B.Step2`, `B.Step2.result --> A`, `A --> C.Step3`,
-> `C.Step3.result --> A` … 식으로 단계마다 orchestrator 로 한 번 돌아갔다 다시 내보내는 round-trip 을
-> 반복하지 말 것. 화살표는 이미 orchestrator 관점이므로 그 round-trip 은 표기 안에 묵시적으로 포함되어
-> 있다. 매 단계 명시적으로 그리면 "orchestrator 가 매 단계 결과를 받아 무언가 가공한 뒤 다음 단계를 부른다"
-> 는 의미로 잘못 읽힌다.
+> **주의 — 표기 함정 (가장 자주 발생하는 안티패턴)**: `A.Step1 --> A`, `A --> B.Step2`,
+> `B.Step2.result --> A`, `A --> C.Step3`, `C.Step3.result --> A` … 식으로 단계마다 orchestrator 로
+> 한 번 돌아갔다 다시 내보내는 round-trip 을 반복하지 말 것. 화살표는 이미 orchestrator 관점이므로
+> 그 round-trip 은 표기 안에 묵시적으로 포함되어 있다.
+>
+> **이 안티패턴의 핵심 실패 모드**: orchestrator 의 동일 메서드가 화살표의 타겟으로 여러 번 등장하면
+> (예: `B.result --> Orchestrator.Run` 뒤에 다시 `Orchestrator.Run --> C.Step3`), 그 메서드가
+> **실제로는 한 번만 진입했음에도 마치 여러 번 호출되는 것처럼** 오독된다. 호출 횟수, 진입점,
+> 동시성에 대한 잘못된 멘탈모델로 직결되므로 가장 우선해서 피해야 할 표기 실수이다.
+>
+> 검증 휴리스틱 — "한 다이어그램 안에서 같은 `Orchestrator.Method` 가 화살표 **타겟**(`--> Orchestrator.Method`)
+> 으로 두 번 이상 나타나면 의심하라". 그 중 한 번이라도 단순히 결과를 받아 곧바로 다음 단계로
+> 내보내는 용도라면 round-trip 안티패턴이다. **그냥 직접 chaining 으로 바꿔라**:
+> `B.result --> Orchestrator.Method` + `Orchestrator.Method --> C.Step3` → `B.result --> C.Step3`.
 >
 > 단계 사이에 **진짜로** orchestrator 의 가공·분기·메서드 책임 전환이 들어갈 때만 `X.result --> Orchestrator.X`
-> 또는 `X.result --> Orchestrator.OtherMethod` 표기를 쓴다 (앞의 "반환값을 호출자 컨텍스트로 되돌리기" /
-> "반환값을 같은 객체의 다른 메서드로 위임" 패턴 참조).
+> 또는 `X.result --> Orchestrator.OtherMethod` 표기를 쓴다 (앞의 "반환값을 같은 객체의 다른 메서드로 위임" 패턴 참조).
+> 단, `X.result --> Orchestrator.X` 처럼 **같은 메서드명으로 되돌아오는 표기는 금지**한다 — A.MethodName 이
+> 두 번 호출되는 것처럼 오독되기 때문이다. 책임 전환이 필요하면 반드시 **다른 메서드명**으로 위임한다. 그 경우 같은 메서드명이 두 번 나타나더라도,
+> 두 등장 사이에 진짜 가공·분기 단계가 명시적으로 들어가 있으므로 "여러 번 호출되는 것처럼 보이는"
+> 오독이 발생하지 않는다.
 >
 > 잘못된 예 — 단순 3 단계를 매 단계 round-trip 으로 표기:
 > ```jobflow
@@ -270,8 +319,7 @@ VideoDecoder.GetFrameBitmap.result --> VideoRenderer.DrawFrame
 orchestrator: Orchestrator
 Object: Orchestrator, Main, Config, Container, MarketOrchestrator, PremarketOrchestrator
 Main.OnStart --> Config.Load
-Config.Load.result --> Main.OnStart
-Main.OnStart --> Container.BuildContainer
+Config.Load.result --> Container.BuildContainer
 Container.BuildContainer.result --> Main.InitializeOrchestrator
 Main.InitializeOrchestrator --> Orchestrator.NewOrchestrator
 Orchestrator.NewOrchestrator --> MarketOrchestrator.NewOrchestrator
@@ -283,8 +331,10 @@ Orchestrator.Run --> PremarketOrchestrator.Run
 
 **읽는 법**:
 - `Main.OnStart` 는 프로세스 진입점 이벤트 — orchestrator 가 아니어도 시작점이 될 수 있다.
-- `Config.Load.result --> Main.OnStart` 는 **반환값을 호출자 컨텍스트로 되돌려 흐름을 이어가는** 패턴 (동일 메서드 이어서).
-- `Container.BuildContainer.result --> Main.InitializeOrchestrator` 는 **반환값을 같은 객체의 다른 메서드로 위임**하는 패턴. Main 은 `OnStart` 에서 설정·컨테이너 준비까지만 담당하고, 조립 요청은 `InitializeOrchestrator` 라는 별도 메서드가 받는다.
+- `Config.Load.result --> Container.BuildContainer` 는 orchestrator 관점의 **직접 chaining**.
+  `Main.OnStart` 로 결과를 한 번 돌려보냈다 다시 내보내는 round-trip 표기는 “Main.OnStart 가
+  두 번 호출되는 것처럼” 오독을 낳으므로 쓰지 않는다 (§“주의 — 표기 함정”).
+- `Container.BuildContainer.result --> Main.InitializeOrchestrator` 는 **반환값을 같은 객체의 다른 메서드로 위임**하는 패턴. Main 은 `OnStart` 에서 설정·컨테이너 준비까지만 담당하고, 조립 요청은 `InitializeOrchestrator` 라는 별도 메서드가 받는다. 같은 `Main` 객체이지만 메서드 경계가 바뀌므로 round-trip 안티패턴이 아니다.
 - `Main.InitializeOrchestrator --> Orchestrator.NewOrchestrator` 는 조립 메서드가 최상위 객체의 생성자를 호출하는 흐름이다. `NewOrchestrator` 안에서 `MarketOrchestrator.NewOrchestrator`, `PremarketOrchestrator.NewOrchestrator` 조립 트리가 전개된다.
 - 중요한 전환: **`Orchestrator.NewOrchestrator --> Orchestrator.Run`** 은 "조립이 끝나면 Orchestrator 가 스스로 Run 루프로 진입한다" 는 **객체 내부 수명주기 전환**을 표현한다. Main 이 `Run` 을 직접 호출하지 않는다. 이 시점부터 제어권이 orchestrator(Orchestrator) 로 완전히 넘어간다.
 - `Orchestrator.Run` 이 하위 Sub-Orchestrator 들을 errgroup 으로 동시 기동한다.
