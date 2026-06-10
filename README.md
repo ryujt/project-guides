@@ -17,16 +17,12 @@
 | "새 프로젝트를 설계해야 한다" / 요구사항을 구조화 | [system-design-framework.md](system-design-framework.md) | PBS, Input Datas, Key Events 작성법 |
 | "PRD / 제품 요구사항 문서를 쓰자" | [prd-writing-guide.md](prd-writing-guide.md) | system-design, orchestrator-worker, job-flow 를 전제로 함 |
 | "모듈을 어떻게 쪼갤까" / 객체 역할 분담 / 제어권 흐름 | [orchestrator-worker-pattern-guide.md](orchestrator-worker-pattern-guide.md) | job-flow-diagram-guide |
-| "객체 간 메서드 호출·이벤트 흐름을 그려야 한다" | [job-flow-diagram-guide.md](job-flow-diagram-guide.md) | orchestrator-worker, 각 언어별 이벤트 지침 |
+| "객체 간 메서드 호출·이벤트 흐름을 그려야 한다" | [job-flow-diagram-guide.md](job-flow-diagram-guide.md) | orchestrator-worker |
 | "화면 전환 / API 호출 흐름을 정리" | [navigation-diagram-guide.md](navigation-diagram-guide.md) | screen-layout-guide |
 | "객체의 상태 전이를 표현" | [state-diagram-guide.md](state-diagram-guide.md) | job-flow-diagram-guide |
 | "화면 레이아웃 구조를 정의" | [screen-layout-guide.md](screen-layout-guide.md) | navigation-diagram-guide |
 | "코드 스타일 / 파일 분리 / 주석 정책" | [code-structure-guidelines.md](code-structure-guidelines.md) | 각 언어별 프로젝트 룰 |
-| "Python 프로젝트 구조 / 네이밍 / import 순서" | [python-project-rules.md](python-project-rules.md) | python-event-handling |
-| "Python 이벤트 콜백 패턴" | [python-event-handling-guidelines.md](python-event-handling-guidelines.md) | orchestrator-worker |
-| "Node.js / JS 이벤트 — EventEmitter 없이" | [js-event-handling-guidelines.md](js-event-handling-guidelines.md) | orchestrator-worker |
-| "C# event Action<T> 패턴" | [csharp-event-handling-guidelines.md](csharp-event-handling-guidelines.md) | orchestrator-worker |
-| "Zig 함수 포인터 + ctx 이벤트 패턴" | [zig-event-handling-guidelines.md](zig-event-handling-guidelines.md) | orchestrator-worker |
+| "Python 프로젝트 구조 / 네이밍 / import 순서" | [python-project-rules.md](python-project-rules.md) | code-structure-guidelines |
 | "프로젝트 README 템플릿을 만들자" | [wrtite-readme-guide.md](wrtite-readme-guide.md) | system-design-framework (8 섹션이 README 목차와 일치) |
 | "LLM · API 호출 · 상태 스냅샷을 깊이 있게 로깅하고 싶다" / 2계층 로깅 / 세션 기반 로그 | [detailed-logging-prompt.md](detailed-logging-prompt.md) | — (독립 프롬프트) |
 
@@ -60,11 +56,6 @@
 
 - **공통 스타일**: [code-structure-guidelines.md](code-structure-guidelines.md) — 가독성·단일책임·탑다운·상수·주석 금지.
 - **언어별 프로젝트 룰**: [python-project-rules.md](python-project-rules.md).
-- **언어별 이벤트 패턴** (Orchestrator-Worker 의 "이벤트 기반 보고" 원칙을 언어별로 구현):
-  - [python-event-handling-guidelines.md](python-event-handling-guidelines.md) — `on_event` 속성 할당.
-  - [js-event-handling-guidelines.md](js-event-handling-guidelines.md) — EventEmitter 없이 콜백 속성.
-  - [csharp-event-handling-guidelines.md](csharp-event-handling-guidelines.md) — `event Action<T>`.
-  - [zig-event-handling-guidelines.md](zig-event-handling-guidelines.md) — 함수 포인터 + ctx 포인터 쌍.
 
 ### 5. 문서화 & 관측성 (How to document & observe)
 
@@ -89,10 +80,6 @@ flowchart TB
 
     CSG["code-structure-guidelines<br/>공통 코드 스타일"]:::impl
     PPR["python-project-rules"]:::impl
-    PY["python-event-handling"]:::impl
-    JS["js-event-handling"]:::impl
-    CS["csharp-event-handling"]:::impl
-    ZIG["zig-event-handling"]:::impl
 
     LOG["detailed-logging-prompt<br/>2계층 로깅 프롬프트"]:::ops
 
@@ -100,7 +87,6 @@ flowchart TB
     SDF --> OWP
     SDF --> README
     OWP --> JFD
-    OWP --> PY & JS & CS & ZIG
 
     PRD --> SDF
     PRD --> OWP
@@ -109,7 +95,6 @@ flowchart TB
     PRD --> STT
 
     CSG --> PPR
-    PPR --> PY
 
     classDef core fill:#fef3c7,stroke:#d97706,color:#78350f
     classDef spec fill:#fde68a,stroke:#b45309,color:#78350f
@@ -139,7 +124,7 @@ flowchart TB
 #### [orchestrator-worker-pattern-guide.md](orchestrator-worker-pattern-guide.md)
 - **언제 쓰는가**: 모듈 경계를 잡고 **제어권 흐름(누가 누구를 호출하는가 / 누가 이벤트를 올리는가)** 을 확정해야 할 때.
 - **핵심 내용**: `Main`(Orchestrator) / `core`(Worker) / `gateways`(외부 통신) / `service`(싱글톤) / `utils`(무상태) 구조. 단방향 제어 · 이벤트 기반 보고 · 수평적 고립 · 재귀적 Sub-Orchestrator · 외부 접근 캡슐화의 6 원칙.
-- **연계 문서**: job-flow-diagram-guide (이 원칙을 다이어그램으로 표현), 각 언어별 event-handling 지침 (이 원칙을 코드로 구현).
+- **연계 문서**: job-flow-diagram-guide (이 원칙을 다이어그램으로 표현).
 
 #### [prd-writing-guide.md](prd-writing-guide.md)
 - **언제 쓰는가**: 도메인과 무관하게 **PRD 한 편을 처음부터 끝까지** 작성할 때. 리뷰어와 구현자 모두를 독자로 삼는다.
@@ -182,18 +167,7 @@ flowchart TB
 #### [python-project-rules.md](python-project-rules.md)
 - **언제 쓰는가**: Python 프로젝트를 **디렉토리부터** 세팅할 때.
 - **핵심 내용**: `run.py` 엔트리 / `src/main.py` 부트스트랩 / `src/core/ModuleName/ModuleName.py` (PascalCase 디렉토리 & 파일, 동일 이름 메인 클래스) / `src/services` / `src/utils` / `src/test/test_ModuleName.py`. 네이밍: 디렉토리·파일·클래스 PascalCase, 함수·변수 snake_case, 상수 UPPER_SNAKE_CASE. Import 순서: 표준 → 3rd-party → `src.*`. 이벤트 wiring 은 `main.py` 에서 `self.a.on_x = self.b.method` 식으로.
-- **연계 문서**: python-event-handling-guidelines (callback 패턴 상세).
-
-### 언어별 이벤트 패턴
-
-**공통 원칙** (Orchestrator-Worker 의 "이벤트 기반 보고"): Worker 객체는 자신의 상위에 대해 **이벤트 속성** 을 노출하고, Orchestrator 가 그 속성에 핸들러를 바인딩한다. EventBus · PubSub · 프레임워크 상속을 쓰지 않는 **언어 네이티브 최소 패턴**.
-
-| 문서 | 메커니즘 | 핵심 syntax |
-|---|---|---|
-| [python-event-handling-guidelines.md](python-event-handling-guidelines.md) | 속성에 함수 할당 | `self.on_event = None` → 호출 전 `if self.on_event:` 체크 |
-| [js-event-handling-guidelines.md](js-event-handling-guidelines.md) | 속성에 함수 할당 (EventEmitter **사용 금지**) | `this.onEvent = null` → `this.onEvent?.(result)` |
-| [csharp-event-handling-guidelines.md](csharp-event-handling-guidelines.md) | `event Action<T>` 멀티캐스트 | `public event Action<int> Done;` → `Done?.Invoke(result);` |
-| [zig-event-handling-guidelines.md](zig-event-handling-guidelines.md) | 함수 포인터 **+ ctx 포인터 쌍** | `on_event: ?*const fn(ctx, ...) void` + `on_event_ctx: ?*anyopaque` |
+- **연계 문서**: code-structure-guidelines (공통 상위 원칙).
 
 ### 기타
 
@@ -226,9 +200,5 @@ flowchart TB
 | [screen-layout-guide.md](screen-layout-guide.md) | DSL | `layout` — V/> 연산자 기반 화면 구조 |
 | [code-structure-guidelines.md](code-structure-guidelines.md) | 구현 | 가독성·단일책임·탑다운·주석 금지 |
 | [python-project-rules.md](python-project-rules.md) | 구현 | Python 구조/네이밍/import |
-| [python-event-handling-guidelines.md](python-event-handling-guidelines.md) | 구현 | `on_event` 속성 콜백 |
-| [js-event-handling-guidelines.md](js-event-handling-guidelines.md) | 구현 | EventEmitter 없이 콜백 속성 |
-| [csharp-event-handling-guidelines.md](csharp-event-handling-guidelines.md) | 구현 | `event Action<T>` |
-| [zig-event-handling-guidelines.md](zig-event-handling-guidelines.md) | 구현 | 함수 포인터 + ctx 포인터 |
 | [wrtite-readme-guide.md](wrtite-readme-guide.md) | 문서 | README 목차 템플릿 (8 섹션 매핑) |
 | [detailed-logging-prompt.md](detailed-logging-prompt.md) | 운영 | 2 계층 로깅 시스템 구현 프롬프트 |
