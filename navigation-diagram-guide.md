@@ -16,6 +16,10 @@
 * **(process)**: 내부 로직 또는 처리 단계
  * 예: (toast_error), (validation)
 
+* **`message`**: 모듈 사이를 흐르는 메시지 또는 데이터 객체
+ * 백틱(`` ` ``)으로 감싸 표기한다.
+ * 예: `` `credentials` ``, `` `userInfo` ``, `` `errorResult` ``
+
 ## 작성 규칙
 
 1. **Page → Page**
@@ -44,6 +48,16 @@
     ```
     (validation) --> (/create_order)
     (/create_order) --> OrderConfirmation : success
+    ```
+
+6. **Message / Data 전달**
+  * 모듈 사이를 흐르는 메시지나 데이터 객체는 백틱으로 감싸 노드로 표현한다.
+  * 예:
+    ```
+    LoginForm --> `credentials`
+    `credentials` --> (/login)
+    (/login) --> `authToken` : success
+    `authToken` --> Dashboard
     ```
 
 ## 분기
