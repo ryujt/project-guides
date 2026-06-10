@@ -176,12 +176,15 @@ MethodName() {
 orchestrator 코드 예시:
 ```
 main() {
-    A.OnNeedData = handleData
+    A.OnNeedData = B. MethodName
 }
+```
 
-handleData() {
+B 클래스 코드 예시:
+```
+MethodName() {
     ...
-    return data
+    return value
 }
 ```
 
@@ -194,6 +197,20 @@ B.MethodName.result --> C.HandleResult
 * A의 이벤트로 B가 호출되고, B의 결과를 **다른 객체 C**의 메서드가 처리한다.
 * 위의 "같은 객체의 다른 메서드로 위임" 패턴과 다른 점: 결과를 받는 쪽이 **다른 객체**이다.
 
+orchestrator 코드 예시:
+```
+constructor() {
+    A.OnEventName = handleEventName
+}
+
+handleEventName() {
+    result = B.MethodName()
+    C.HandleResult(result)
+}
+```
+
+* B 의 결과를 받아 C 에 넘기는 주체는 orchestrator 다. B 와 C 는 서로를 모른다.
+
 ### 반환값을 받아 다시 전달 (체이닝)
 
 ```jobflow
@@ -203,6 +220,23 @@ A.MethodName.result --> C.HandleResult
 ```
 * A가 B를 호출하고 결과를 받는다.
 * A가 받은 결과를 C에게 전달한다.
+
+A 클래스 코드 예시:
+```
+MethodName() {
+    data = B.MethodName()
+    ...
+    return data
+}
+```
+
+orchestrator 코드 예시:
+```
+main() {
+    result = A.MethodName()
+    C.HandleResult(result)
+}
+```
 
 ### 결과를 다음 단계로 (orchestrator 관점의 기본 표기)
 
