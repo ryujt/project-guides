@@ -28,6 +28,8 @@
 | "Python 프로젝트 구조 / 네이밍 / import 순서" | [python-project-rules.md](python-project-rules.md) | code-structure-guidelines |
 | "프로젝트 README 템플릿을 만들자" | [wrtite-readme-guide.md](wrtite-readme-guide.md) | system-design-framework (8 섹션이 README 목차와 일치) |
 | "LLM · API 호출 · 상태 스냅샷을 깊이 있게 로깅하고 싶다" / 2계층 로깅 / 세션 기반 로그 | [detailed-logging-prompt.md](detailed-logging-prompt.md) | — (독립 프롬프트) |
+| "tools.camp 마크다운 에디터의 다이어그램·코드·페이지 분할 문법" | [markdown-editor-extended-syntax-guide.md](markdown-editor-extended-syntax-guide.md) | smartmd-syntax-guide, 4종 다이어그램 가이드 |
+| "콜아웃·표·변수 등 SmartMD 텍스트 확장 문법" / `:::`, `{table}`, `{{var}}` | [smartmd-syntax-guide.md](smartmd-syntax-guide.md) | markdown-editor-extended-syntax-guide |
 
 > 🔑 **키워드 기반 자동 매칭**: "PBS", "Input Datas", "Key Events" → system-design-framework · "jobflow", "master·Object" → job-flow-diagram-guide · "Orchestrator", "Worker", "Gateway" → orchestrator-worker-pattern-guide · "Screen Flow", "Logic Flow" → navigation-diagram-guide · "2계층 로그", "세션 로그", "LLM 프롬프트 로그" → detailed-logging-prompt.
 
@@ -239,3 +241,5 @@ flowchart TB
 | [python-project-rules.md](python-project-rules.md) | 구현 | Python 구조/네이밍/import |
 | [wrtite-readme-guide.md](wrtite-readme-guide.md) | 문서 | README 목차 템플릿 (8 섹션 매핑) |
 | [detailed-logging-prompt.md](detailed-logging-prompt.md) | 운영 | 2 계층 로깅 시스템 구현 프롬프트 |
+| [markdown-editor-extended-syntax-guide.md](markdown-editor-extended-syntax-guide.md) | 문서 | 마크다운 에디터 다이어그램·코드·페이지 분할 문법 |
+| [smartmd-syntax-guide.md](smartmd-syntax-guide.md) | 문서 | SmartMD 텍스트 확장 문법(콜아웃·표·변수 등) |
