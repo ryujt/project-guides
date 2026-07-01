@@ -120,6 +120,7 @@ SYSTEM_FLOW-problems.md
 > 객체 협력은 [job-flow-diagram-guide.md](...) 를 따른다.
 > 화면/API 흐름은 [navigation-diagram-guide.md](...) 를 따른다.
 > jobflow 에서는 Object.Method / Object.OnEvent 를 기본으로 표기하고 HTTP 경로·파라미터는 쓰지 않는다.
+> jobflow 헤더는 흐름을 조율하는 단일 객체가 있으면 orchestrator: X, 경계·Choreography 면 scope: X 로 쓴다 (method-R · master: 미사용).
 > HTTP/API 이름은 navigation 블록에서만 표기한다.
 > Client 입력은 Client.Send...Message, Client 내부 반응은 Client.On... 으로 표기한다.
 
@@ -269,7 +270,7 @@ private helper, DTO, config constant, 단순 formatter 는 넣지 않는다.
 가장 먼저 최상위 jobflow 를 쓰고, 그 다음 필요한 시나리오를 세분화한다.
 
 ```jobflow
-master: WholeSystem
+orchestrator: ApiServer
 Object: Client, ApiServer, Worker, Storage, ExternalSystem
 
 Client.SendCommand --> ApiServer.HandleCommand
@@ -285,7 +286,7 @@ ApiServer.HandleCommand.result --> Client.OnResult
 
 - 최소 조각만 사용한다.
 - HTTP path, payload, DB table, private method 를 넣지 않는다.
-- `A.result --> B` 는 master 가 A 결과를 받아 B 로 넘긴다는 뜻이다.
+- `A.result --> B` 는 orchestrator(ApiServer) 가 A 결과를 받아 B 로 넘긴다는 뜻이다.
 - 복잡한 내부 과정은 다음 섹션에서 새 jobflow 로 연다.
 
 ### 1-2. 화면/API/navigation 흐름
@@ -317,15 +318,17 @@ ApiServer --> (/internal/jobs/run)
 
 SSE, WebSocket, queue, scheduler, timeout/cancel 은 별도 섹션으로 분리한다.
 
+브로커/큐로 중개되는 비동기는 method-R 상 Choreography 이므로 `scope:` 로 선언하고 `MessageBus` 채널을 명시한다(중앙 조율자 없음).
+
 ```jobflow
-master: AsyncFlow
-Object: Client, ApiServer, Worker, Queue
+scope: ReportSystem
+Object: Client, ApiServer, Worker, MessageBus
 Client.SendStartMessage --> ApiServer.HandleStart
-ApiServer.HandleStart --> Queue.PublishJob
-Queue.PublishJob.result --> Worker.OnJobReceived
-Worker.OnJobReceived.result --> Queue.PublishCompleted
-Queue.PublishCompleted.result --> ApiServer.OnJobCompleted
-ApiServer.OnJobCompleted.result --> Client.OnCompleted
+ApiServer.HandleStart --> MessageBus.JobRequested
+MessageBus.JobRequested --> Worker.HandleJob
+Worker.HandleJob --> MessageBus.JobCompleted
+MessageBus.JobCompleted --> ApiServer.HandleJobCompleted
+ApiServer.HandleJobCompleted --> Client.OnCompleted
 ```
 
 비동기 흐름에서는 다음을 명시한다.
@@ -355,7 +358,7 @@ ApiServer.OnJobCompleted.result --> Client.OnCompleted
 최상위 조각 중 이해에 필요한 것만 내부로 내려간다.
 
 ```jobflow
-master: SystemOrchestrator
+orchestrator: SystemOrchestrator
 Object: ApiBoundary, SystemOrchestrator, Validator, ContextBuilder, DomainWorker, StorageGateway
 ApiBoundary.HandleCommand --> SystemOrchestrator.HandleCommand
 SystemOrchestrator.HandleCommand --> Validator.Validate
@@ -396,7 +399,7 @@ StorageGateway.Save.result --> SystemOrchestrator.HandleCommand.result
 시스템이 실제로 운영될 때 중요한 경계를 정리한다.
 
 ```jobflow
-master: Runtime
+orchestrator: Runtime
 Object: Runtime, Auth, Metrics, DisconnectWatcher, RouteHandler
 Runtime.Start --> Auth.Install
 Auth.Install.result --> Metrics.Install
@@ -420,7 +423,7 @@ DisconnectWatcher.OnClose --> RouteHandler.AbortWork
 마지막에는 책임 소유를 표로 닫는다.
 
 ```markdown
-| 책임 | 소유 조각 | 내부 master |
+| 책임 | 소유 조각 | 내부 orchestrator |
 |---|---|---|
 | 사용자 입력 진입점 | `ApiServer` | `SystemOrchestrator` |
 | 장기 작업 실행 | `Worker` | `PipelineWorker` |
@@ -444,6 +447,7 @@ DisconnectWatcher.OnClose --> RouteHandler.AbortWork
 
 ### jobflow 규칙
 
+- 헤더는 method-R 표기를 따른다 — 흐름을 조율하는 단일 객체가 있으면 `orchestrator: X`, 외부 경계나 Choreography 처럼 조율자가 없으면 `scope: X` 로 선언한다. (과거 `master:` 표기는 method-R 로 통일했으므로 쓰지 않는다.)
 - `Object.Method` / `Object.OnEvent` 형식을 사용한다.
 - HTTP path, parameter, JSON payload 는 쓰지 않는다.
 - Client 입력은 `Client.Send...Message` 로 쓴다.
