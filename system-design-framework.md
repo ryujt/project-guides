@@ -17,6 +17,19 @@
 
 ---
 
+## 다이어그램 표기는 가이드를 따른다 (링크)
+
+각 다이어그램 섹션의 **DSL 의미·문법은 아래 전용 가이드를 인용해 따르며, 이 문서에서 재서술하지 않는다.** 어떤 다이어그램도 다른 포맷으로 변환·치환하지 않는다(예: `jobflow` 를 `sequenceDiagram`·`flowchart` 로 바꾸지 않는다).
+
+| 섹션 | 표기 | 가이드 |
+|---|---|---|
+| §5 Job Flow Diagram | `jobflow` | [job-flow-diagram-guide.md](./job-flow-diagram-guide.md) · [method-R.md](./method-R.md) |
+| §6 Navigation Diagram | `navigation` | [navigation-diagram-guide.md](./navigation-diagram-guide.md) |
+| §7 State Diagram | `state` | [state-diagram-guide.md](./state-diagram-guide.md) |
+| §8 Screen Layout | `layout` | [screen-layout-guide.md](./screen-layout-guide.md) |
+
+---
+
 ## 1. Input Datas
 
 시스템이 동작하기 위해 필요한 **원천 데이터(Source Data)**를 정의합니다.
@@ -74,67 +87,28 @@
 
 ## 5. Job Flow Diagram
 
-사용자, 시스템, 외부 시스템 간의 거시적인 **업무 프로세스 흐름**을 도식화합니다.
+객체(Actor · 시스템 · 외부 시스템)들이 주고받는 **메시지와 이벤트의 흐름**을 `jobflow` 텍스트 DSL 로 정의합니다.
 
-* **목적**: 누가(Actor), 언제, 무엇을 하는지 전체 시나리오를 파악한다.
-* **작성 방식**: Swimlane 다이어그램 등을 활용하여 역할(Role)별 흐름을 표현.
+* **목적**: 누가(Actor) 언제 누구에게 도움을 요청(메시지 전송 · 이벤트 발행)하는지, 그 결과가 어디로 이어지는지를 코드에 매핑 가능한 수준으로 정한다.
+* **표기·문법**: [job-flow-diagram-guide.md](./job-flow-diagram-guide.md) 를 따른다 — 헤더(`orchestrator:`/`scope:`), `A.method`·`A.On이벤트`·`A.message.X`·`MessageBus.X`·`.result`·`.true`/`.false`/`.상태값`. method-R 표기와 일관 → [method-R.md](./method-R.md). 여기서 재서술하지 않는다.
+
+> **[필수] `jobflow` 를 `sequenceDiagram` · `flowchart` 로 대체하지 말 것.** jobflow 만이 오케스트레이터 관점의 결과 연결 · 조각 간 무지(無知) · 이벤트 발행/구독 분리 · `.true/.false/.상태값` 분기를 담는다. mermaid 는 확정된 `jobflow` 의 **보조 시각화**로만 덧붙인다.
 
 ## 6. Navigation Diagram
 
-화면 전환, API 호출, 내부 로직의 흐름을 스크립트 형식으로 정의합니다.
+화면 전환 · API 호출 · 내부 로직의 흐름을 `navigation` 텍스트 DSL 로 정의합니다 (Screen Flow · Logic Flow).
 
-### 구성 요소
-
-* **FrontPage**: 화면 이름 (예: `Home`, `LoginForm`)
-* **(/backend api)**: 백엔드 API 호출 (소문자, `/`, `_` 사용, 예: `(/signin)`)
-* **(process)**: 내부 로직 (예: `(validation)`)
-
-### 작성 규칙
-
-1. **Page  Page**: `Home --> SignupForm`
-2. **Page  API**: `SignupForm --> (/signup)`
-3. **API  Page (분기)**:
- ```navigation
- (/signup) --> SignupForm : error
- (/signup) --> Home : success
- ```
-4. **Process 연동**: `CheckoutForm --> (validation) --> (/create_order)`
+* **표기·문법**: [navigation-diagram-guide.md](./navigation-diagram-guide.md) 를 따른다 — `FrontPage` 화면, `(/backend_api)` API 호출, `(process)` 내부 로직, `-->` 전이와 `: label` 분기. 여기서 재서술하지 않는다.
 
 ## 7. State Diagram
 
-객체의 상태(State) 변화와 흐름을 정의합니다. (Mermaid `graph LR` 변환 대응)
+객체의 상태(State) 변화와 흐름을 `state` 텍스트 DSL 로 정의합니다 (mermaid `graph LR` 로 변환).
 
-### 구성 요소
-
-* **Start Node**: `<Name>` (변환: 흰색 원)
-* **State**: `(Name)` (변환: 둥근 사각형)
-* **End Node**: `.` (변환: 검은색 원)
-
-### 작성 규칙
-
-1. **시작**: `<s> --> (Ready)`
-2. **전이**: `(Ready) --> (Running)`
-3. **종료**: `(Done) --> <e>`
-4. **조건(분기)**: `(Running) --> (Error) : Timeout` (화살표 라벨로 표시)
+* **표기·문법**: [state-diagram-guide.md](./state-diagram-guide.md) 를 따른다 — `<s>` 시작 · `(State)` 상태 · `<e>` 종료 · `: label` 조건 분기. 여기서 재서술하지 않는다.
 
 ## 8. Screen Layout
 
-각 화면(Page)의 UI 구성 요소와 배치를 정의합니다.
+각 화면(Page)의 UI 구성 요소와 배치를 `layout` 텍스트 DSL 로 정의합니다.
 
-* **목적**: 구체적인 화면 구성을 시각화하여 개발 및 디자인의 기준을 잡는다.
-* **포함 내용**:
-* UI 컴포넌트 배치 (버튼, 리스트, 입력창 등)
-* 데이터 바인딩 정보 (어떤 Input Data가 어디에 표시되는지)
-* 인터랙션 요소 (클릭 가능한 영역 등)
-
-### 작성 규칙
-
-```layout
-Container1 V Child1, Child2, ...
-Container2 > Child1, Child2, ...
-```
-
-* `Container`는 “영역 컨테이너” 이름이다.
-* `Child`는 “하위 영역(컨테이너 또는 컴포넌트)” 이름이다.
-* 자식은 콤마 `,`로 구분하며, 순서가 곧 배치 순서다.
-* 이름은 공백을 포함할 수 있다. 구분은 연산자(`V` 또는 `>`)와 콤마로만 한다.
+* **목적**: 구체적인 화면 구성을 시각화하여 개발·디자인 기준을 잡는다 (컴포넌트 배치 · 데이터 바인딩 · 인터랙션 요소).
+* **표기·문법**: [screen-layout-guide.md](./screen-layout-guide.md) 를 따른다 — `V` 세로 배치 · `>` 가로 배치 · 콤마 순서. 여기서 재서술하지 않는다.
