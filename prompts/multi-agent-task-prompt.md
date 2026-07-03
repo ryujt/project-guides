@@ -105,6 +105,7 @@
 - `/Users/ryu/projects/project-guides`
   - `README.md`를 먼저 읽고, 이번 작업에 필요한 문서를 판단해줘.
   - `guides/orchestrator-worker-pattern-guide.md` 적용 여부를 우선적으로 검토해줘.
+  - 새 프로젝트를 세팅하거나 폴더·파일을 새로 추가할 때는 `guides/project-structure-guide.md`의 언어별 표준 폴더 구조와 네이밍 규칙을 따라줘. 기존 프로젝트라면 기존 구조를 우선하되, 신규로 추가하는 디렉토리·파일은 이 가이드에 맞춰줘.
 
 ## 반복 검토 루프
 
