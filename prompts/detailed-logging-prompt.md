@@ -240,7 +240,7 @@ HTTP 503 Service Unavailable
 
 ### 핵심 원칙 — 프로세스 플로우는 오케스트레이터(master) 관점이다
 
-이 다이어그램은 [`job-flow-diagram-guide.md`](./job-flow-diagram-guide.md) 의 jobflow 와 같은 시점을 공유한다.
+이 다이어그램은 [`job-flow-diagram-guide.md`](../guides/job-flow-diagram-guide.md) 의 jobflow 와 같은 시점을 공유한다.
 즉 **모든 노드와 화살표는 오케스트레이터(이 세션의 흐름을 총괄하는 객체) 가 본 흐름**이다.
 흐름을 제어하는 주체도, **각 단계의 결과를 받아 다음 단계로 흘려보내는 주체도 항상 오케스트레이터**다.
 

@@ -8,25 +8,25 @@
 
 | 가이드 | 이 프롬프트에서의 역할 |
 |---|---|
-| [method-R.md](./method-R.md) | **최상위 설계 철학** — 4계층 재귀분할·통신모드(L1 메시지·L2 선택·L3/L4 이벤트)·**method-R 6원칙**·멈춤 휴리스틱·불균등 깊이·Job Flow 표기 계약 |
-| [system-design-framework.md](./system-design-framework.md) | 산출물 양식 — **8섹션 골격**(§1 Input Datas … §8 Screen Layout) verbatim |
-| [orchestrator-worker-pattern-guide.md](./orchestrator-worker-pattern-guide.md) | **6모듈**(Main·core·gateways·service·utils·config) + **O-W 6원칙** |
-| [architecture-pattern-diagram-guide.md](./architecture-pattern-diagram-guide.md) | 섹션 성격별 **다이어그램 종류 선택** |
-| [system-flow-document-guide.md](./system-flow-document-guide.md) | **최소조각→전체** 서술·재귀 개방 게이트·책임 소유 표 |
-| [job-flow-diagram-guide.md](./job-flow-diagram-guide.md) · [navigation](./navigation-diagram-guide.md) · [state](./state-diagram-guide.md) · [screen-layout](./screen-layout-guide.md) | `jobflow`·`navigation`·`state`·`layout` DSL 의미·문법 |
+| [method-R.md](../guides/method-R.md) | **최상위 설계 철학** — 4계층 재귀분할·통신모드(L1 메시지·L2 선택·L3/L4 이벤트)·**method-R 6원칙**·멈춤 휴리스틱·불균등 깊이·Job Flow 표기 계약 |
+| [system-design-framework.md](../guides/system-design-framework.md) | 산출물 양식 — **8섹션 골격**(§1 Input Datas … §8 Screen Layout) verbatim |
+| [orchestrator-worker-pattern-guide.md](../guides/orchestrator-worker-pattern-guide.md) | **6모듈**(Main·core·gateways·service·utils·config) + **O-W 6원칙** |
+| [architecture-pattern-diagram-guide.md](../guides/architecture-pattern-diagram-guide.md) | 섹션 성격별 **다이어그램 종류 선택** |
+| [system-flow-document-guide.md](../guides/system-flow-document-guide.md) | **최소조각→전체** 서술·재귀 개방 게이트·책임 소유 표 |
+| [job-flow-diagram-guide.md](../guides/job-flow-diagram-guide.md) · [navigation](../guides/navigation-diagram-guide.md) · [state](../guides/state-diagram-guide.md) · [screen-layout](../guides/screen-layout-guide.md) | `jobflow`·`navigation`·`state`·`layout` DSL 의미·문법 |
 
 > **6원칙 혼동 금지**: **method-R 6원칙**(method-R.md)과 **O-W 6원칙**(orchestrator-worker §2)은 서로 다른 세트다. 위반 지적 시 어느 세트·어느 원칙인지 출처를 붙인다. 둘 다 SoT 로 채점한다.
 
 ## 다이어그램 표기 (가이드 DSL 직접 사용)
 
-project-guides 의 가이드들은 다이어그램을 **확장 DSL 펜스**(` ```jobflow `·` ```navigation `·` ```state `·` ```layout `)와 ` ```mermaid ` 블록으로 문서에 삽입한다. 이 프롬프트도 **가이드에 있는 그 다이어그램 코드 형식을 그대로** 쓴다 — **어떤 다이어그램도 다른 포맷으로 변환·치환하지 않는다**(예: `jobflow` 를 `sequenceDiagram`·`flowchart` 로 바꾸지 않는다). 섹션 성격별 표기는 [architecture-pattern-diagram-guide](./architecture-pattern-diagram-guide.md) 선택 규칙을 따른다.
+project-guides 의 가이드들은 다이어그램을 **확장 DSL 펜스**(` ```jobflow `·` ```navigation `·` ```state `·` ```layout `)와 ` ```mermaid ` 블록으로 문서에 삽입한다. 이 프롬프트도 **가이드에 있는 그 다이어그램 코드 형식을 그대로** 쓴다 — **어떤 다이어그램도 다른 포맷으로 변환·치환하지 않는다**(예: `jobflow` 를 `sequenceDiagram`·`flowchart` 로 바꾸지 않는다). 섹션 성격별 표기는 [architecture-pattern-diagram-guide](../guides/architecture-pattern-diagram-guide.md) 선택 규칙을 따른다.
 
 | 섹션 성격 (framework §) | 표기 |
 |---|---|
 | 계층·의존성·토폴로지·모듈 경계 (조감 §0) | mermaid `flowchart` |
 | 클래스·Handler·전체 정적 구성 (§0-1) | mermaid `classDiagram` (actor·boundary·orchestrator·worker·gateway·state 만) |
 | §4 PBS 기능 트리 | mermaid `flowchart`(System→Group→Process) |
-| **객체·이벤트·반환값 (§5 Job Flow)** | **`jobflow`** ([job-flow-diagram-guide](./job-flow-diagram-guide.md)) |
+| **객체·이벤트·반환값 (§5 Job Flow)** | **`jobflow`** ([job-flow-diagram-guide](../guides/job-flow-diagram-guide.md)) |
 | 화면·API·메시지 (§6 Navigation) | `navigation` |
 | 상태·라이프사이클 (§7 State) | `state` |
 | 데이터 모델 | mermaid `erDiagram`(흐름 필요분만, 전체 ERD 금지) |
@@ -69,7 +69,7 @@ flowchart TB
 
 **요지**
 - **첨부 AS-IS + 설계 요청**을 입력으로 "요청 반영 목표 8섹션"을 method-R 순서·깊이로 작성. 차이는 "6원칙 위반→해소"·"R-0X 이슈→변경점 C-0X" 로 서술.
-- 양식은 8섹션([framework](./system-design-framework.md)), 다이어그램은 위 선택표. **§5 Job Flow 는 `jobflow` DSL**.
+- 양식은 8섹션([framework](../guides/system-design-framework.md)), 다이어그램은 위 선택표. **§5 Job Flow 는 `jobflow` DSL**.
 - 근거 브리프 재사용, 반복 시 P0/P1 지목 섹션만 재작성(독립 상세·영향 파일 병렬). 종료: `status=clean AND p0=0 AND p1=0 AND 활성 마커 0`, dirty 면 최대 3회 반복(iter-1..4).
 
 ### 단계 입출력
