@@ -100,12 +100,11 @@
 
 ## 개발 가이드
 
-코드를 작성하고 개발을 진행할 때 아래 폴더의 가이드 문서들을 최대한 지켜서 진행해줘.
+코드를 작성하고 개발을 진행할 때 이 저장소의 가이드 문서들을 최대한 지켜서 진행해줘.
 
-- `/Users/ryu/projects/project-guides`
-  - `README.md`를 먼저 읽고, 이번 작업에 필요한 문서를 판단해줘.
-  - `guides/orchestrator-worker-pattern-guide.md` 적용 여부를 우선적으로 검토해줘.
-  - 새 프로젝트를 세팅하거나 폴더·파일을 새로 추가할 때는 `guides/project-structure-guide.md`의 언어별 표준 폴더 구조와 네이밍 규칙을 따라줘. 기존 프로젝트라면 기존 구조를 우선하되, 신규로 추가하는 디렉토리·파일은 이 가이드에 맞춰줘.
+- [`../README.md`](../README.md)를 먼저 읽고, 이번 작업에 필요한 문서를 판단해줘.
+- [`../guides/orchestrator-worker-pattern-guide.md`](../guides/orchestrator-worker-pattern-guide.md) 적용 여부를 우선적으로 검토해줘.
+- 새 프로젝트를 세팅하거나 폴더·파일을 새로 추가할 때는 [`../guides/project-structure-guide.md`](../guides/project-structure-guide.md)의 언어별 표준 폴더 구조와 네이밍 규칙을 따라줘. 기존 프로젝트라면 기존 구조를 우선하되, 신규로 추가하는 디렉토리·파일은 이 가이드에 맞춰줘.
 
 ## 반복 검토 루프
 
