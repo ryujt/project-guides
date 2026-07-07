@@ -41,6 +41,19 @@
   * 백틱(`` ` ``)으로 감싸 표기한다.
   * 예: `` `credentials` ``, `` `userInfo` ``, `` `errorResult` ``
 
+## Page와 Component
+
+* **Page**는 주소(라우트)를 가지는 단위이다.
+* **Component**는 주소를 가지지 않는 단위이다. Page에 포함되어 사용된다. (React.js처럼)
+* 페이지 이동은 하지 않지만 중요 컴포넌트가 바뀌는 경우, 예를 들어 탭으로 나뉜 콤포넌트가 있는 경우 등에는 괄호를 사용해서 페이지 이동은 없지만 콤포넌트 선택이 바뀌었음을 표시한다.
+
+```navigation
+PageA(FileList) --> PageA(ImageList) : 이미지 목록 선택
+PageA(ImageList) --> PageA(FileList) : 파일 목록 선택
+```
+
+* 하지만 콤포넌트 변동이 중요하지 않은 시나리오에서는 굳이 괄호를 사용해서 콤포넌트 변화를 네비게이션으로 설명하지 않는다.
+
 ## 작성 규칙
 
 1. **Page → Page**
