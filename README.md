@@ -4,7 +4,7 @@
 
 > 📁 **폴더 구조**
 > - **[`guides/`](guides/)** — 참조용 가이드·방법론·DSL 문서. 필요할 때 열어 읽는다.
-> - **[`prompts/`](prompts/)** — 에이전트에게 통째로 붙여 넣어 사용하는 실행 프롬프트 (`detailed-logging-prompt`, `system-design-as-is-prompt`, `system-design-to-be-prompt`, `multi-agent-task-prompt`).
+> - **[`prompts/`](prompts/)** — 에이전트에게 통째로 붙여 넣어 사용하는 실행 프롬프트 (`detailed-logging-prompt`, `system-design-as-is-prompt`, `system-design-to-be-prompt`, `feature-design-prompt`, `multi-agent-task-prompt`).
 
 > 📌 **이 README 를 읽는 법**
 > 1. 먼저 [⚡ 트리거 요약](#-트리거-요약-이런-상황--이-문서) 표에서 지금 상황에 맞는 문서를 찾는다.
@@ -31,6 +31,7 @@
 | "코드 스타일 / 파일 분리 / 주석 정책" | [code-structure-guidelines.md](guides/code-structure-guidelines.md) | 각 언어별 프로젝트 룰 |
 | "프로젝트 폴더 구조를 어떻게 잡을까" / 언어별 표준 디렉토리·네이밍 (Python·Node·React·Next·Go) | [project-structure-guide.md](guides/project-structure-guide.md) | code-structure-guidelines |
 | "프로젝트 README 템플릿을 만들자" | [wrtite-readme-guide.md](guides/wrtite-readme-guide.md) | system-design-framework (8 섹션이 README 목차와 일치) |
+| "특정 요구사항(기능 하나) 설계를 요청하자" / 기능 추가·변경의 영향 범위만 설계 / FR 추적성 | [feature-design-prompt.md](prompts/feature-design-prompt.md) | system-design-as-is-prompt, system-design-to-be-prompt (전체 재설계 시 전환) |
 | "LLM · API 호출 · 상태 스냅샷을 깊이 있게 로깅하고 싶다" / 2계층 로깅 / 세션 기반 로그 | [detailed-logging-prompt.md](prompts/detailed-logging-prompt.md) | — (독립 프롬프트) |
 | "여러 전문 에이전트로 분업·상호 견제하며 작업을 진행" / Architect·Critic·Developer·Tester 협업 루프 | [multi-agent-task-prompt.md](prompts/multi-agent-task-prompt.md) | orchestrator-worker-pattern-guide |
 | "tools.camp 마크다운 에디터 문법" / 다이어그램·코드·페이지 분할 / 콜아웃·표·변수 등 SmartMD 확장 / `:::`, `{table}`, `{{var}}` | [tools-camp-markdown-guide.md](guides/tools-camp-markdown-guide.md) | 4종 다이어그램 가이드 |
@@ -50,6 +51,7 @@
 - **[architecture-pattern-diagram-guide.md](guides/architecture-pattern-diagram-guide.md)** — Layered / Clean / DDD / Pipeline / Event-Driven / State Machine / Saga 등 아키텍처 패턴별 분해 기준과 다이어그램 샘플.
 - **[orchestrator-worker-pattern-guide.md](guides/orchestrator-worker-pattern-guide.md)** — Services List 를 실제 코드 모듈로 펼치는 아키텍처 원칙 (Main · core · gateways · service · utils).
 - **[system-flow-document-guide.md](guides/system-flow-document-guide.md)** — 시스템을 이해하는 데 필요한 최소 조각에서 시작해 전체를 설명하는 문서 작성 가이드. 동적 흐름(jobflow/navigation)과 정적 구성(classDiagram/책임 표)을 함께 사용한다.
+- **[feature-design-prompt.md](prompts/feature-design-prompt.md)** — **프롬프트 형식**. 특정 요구사항(기능 추가·변경) 하나를 입력받아 영향 범위로 한정된 기능 설계 문서를 생성한다. 요구사항을 FR-NN 으로 분해 → 영향 범위 분석 → 8섹션 선택 적용 + method-R 깊이 판정 → FR 추적성 자가검증. 전체 재설계는 as-is/to-be 프롬프트로 전환.
 
 ### 2. 설계 시각화 (Diagram DSL)
 
@@ -217,6 +219,15 @@ flowchart TB
 - **핵심 내용**: 목차 템플릿 — 시스템 개요 / 시스템 구성 / Input Datas / Key Events / Services List / PBS / Job Flow / Navigation (Screen/Logic) / Screen Layout / 프로젝트 구조 / 설정 / 실행. **system-design-framework 의 8 섹션이 그대로 README 목차가 된다.**
 - **파일명 주의**: 오타 (`wrtite`) 가 있으나 실제 파일명이 이렇게 유지되고 있다. 링크 시 정확히 복사.
 
+#### [feature-design-prompt.md](prompts/feature-design-prompt.md)
+- **언제 쓰는가**: 시스템 전체가 아니라 **특정 요구사항(신규 기능·기능 변경) 하나**의 설계 문서가 필요할 때. **에이전트에게 요구사항과 함께 붙여 넣는 프롬프트** 다.
+- **핵심 내용**:
+  - **4단계 파이프라인**: Step 0 요구사항 확정(FR-NN 분해·가정·성공 기준·Out of Scope) → Step 1 영향 범위 분석(기존 프로젝트만) → Step 2 기능 설계서(8섹션 선택 적용 + method-R 깊이 판정) → 자가검증 게이트.
+  - **범위 한정 원칙**: 요구사항 무관 영역의 분석·개선 금지(발견 문제는 보고만), 빈 섹션 날조 금지, 영향이 전체로 번지면 AS-IS→TO-BE 파이프라인 전환 권고.
+  - **FR 추적성**: 모든 FR ↔ 설계 요소 1:1 매핑 표가 종료 조건.
+  - 산출물: `docs/design/{DATE}/feature/{slug}/feature-design.md` 단일 문서.
+- **연계 문서**: system-design-as-is-prompt · system-design-to-be-prompt (전체 재설계 시 전환), prd-writing-guide (설계서를 PRD Part 입력으로 인계), multi-agent-task-prompt · comprehensive-test-prompt (구현·검증 인계).
+
 #### [detailed-logging-prompt.md](prompts/detailed-logging-prompt.md)
 - **언제 쓰는가**: 이미 만들어진 프로젝트에 **"상세 분석 로그 시스템"** 을 얹고 싶을 때. 문서가 아니라 **에이전트에게 통째로 붙여 넣는 프롬프트** 다.
 - **핵심 내용**:
@@ -244,6 +255,7 @@ flowchart TB
 | [code-structure-guidelines.md](guides/code-structure-guidelines.md) | 구현 | 가독성·단일책임·탑다운·주석 금지 |
 | [project-structure-guide.md](guides/project-structure-guide.md) | 구현 | 언어별(Python·Node·React·Next·Go) 표준 폴더 구조/네이밍 |
 | [wrtite-readme-guide.md](guides/wrtite-readme-guide.md) | 문서 | README 목차 템플릿 (8 섹션 매핑) |
+| [feature-design-prompt.md](prompts/feature-design-prompt.md) | 프롬프트 | 특정 요구사항 하나의 영향 범위 한정 기능 설계 요청 |
 | [detailed-logging-prompt.md](prompts/detailed-logging-prompt.md) | 운영 | 2 계층 로깅 시스템 구현 프롬프트 |
 | [multi-agent-task-prompt.md](prompts/multi-agent-task-prompt.md) | 프롬프트 | Architect·Critic·Developer·Tester 멀티 에이전트 협업 작업 지시 |
 | [tools-camp-markdown-guide.md](guides/tools-camp-markdown-guide.md) | 문서 | tools.camp 마크다운 문법 전체(코드·다이어그램·SmartMD·페이지 분할) |
