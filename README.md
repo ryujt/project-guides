@@ -4,7 +4,7 @@
 
 > 📁 **폴더 구조**
 > - **[`guides/`](guides/)** — 참조용 가이드·방법론·DSL 문서. 필요할 때 열어 읽는다.
-> - **[`prompts/`](prompts/)** — 에이전트에게 통째로 붙여 넣어 사용하는 실행 프롬프트 (`detailed-logging-prompt`, `system-design-as-is-prompt`, `system-design-to-be-prompt`, `feature-design-prompt`, `multi-agent-task-prompt`).
+> - **[`prompts/`](prompts/)** — 에이전트에게 통째로 붙여 넣어 사용하는 실행 프롬프트 (`detailed-logging-prompt`, `system-design-as-is-prompt`, `system-design-to-be-prompt`, `feature-design-prompt`, `frontend-user-design-prompt`, `multi-agent-task-prompt`).
 
 > 📌 **이 README 를 읽는 법**
 > 1. 먼저 [⚡ 트리거 요약](#-트리거-요약-이런-상황--이-문서) 표에서 지금 상황에 맞는 문서를 찾는다.
@@ -32,11 +32,12 @@
 | "프로젝트 폴더 구조를 어떻게 잡을까" / 언어별 표준 디렉토리·네이밍 (Python·Node·React·Next·Go) | [project-structure-guide.md](guides/project-structure-guide.md) | code-structure-guidelines |
 | "프로젝트 README 템플릿을 만들자" | [wrtite-readme-guide.md](guides/wrtite-readme-guide.md) | system-design-framework (8 섹션이 README 목차와 일치) |
 | "특정 요구사항(기능 하나) 설계를 요청하자" / 기능 추가·변경의 영향 범위만 설계 / FR 추적성 | [feature-design-prompt.md](prompts/feature-design-prompt.md) | system-design-as-is-prompt, system-design-to-be-prompt (전체 재설계 시 전환) |
+| "회원제 프론트엔드를 설계하자" / 회원가입·로그인·세션·자기 정보·탈퇴 / DynamoDB 회원 모델 | [frontend-user-design-prompt.md](prompts/frontend-user-design-prompt.md) | system-design-framework, 4종 다이어그램 DSL |
 | "LLM · API 호출 · 상태 스냅샷을 깊이 있게 로깅하고 싶다" / 2계층 로깅 / 세션 기반 로그 | [detailed-logging-prompt.md](prompts/detailed-logging-prompt.md) | — (독립 프롬프트) |
 | "여러 전문 에이전트로 분업·상호 견제하며 작업을 진행" / Architect·Critic·Developer·Tester 협업 루프 | [multi-agent-task-prompt.md](prompts/multi-agent-task-prompt.md) | orchestrator-worker-pattern-guide |
 | "tools.camp 마크다운 에디터 문법" / 다이어그램·코드·페이지 분할 / 콜아웃·표·변수 등 SmartMD 확장 / `:::`, `{table}`, `{{var}}` | [tools-camp-markdown-guide.md](guides/tools-camp-markdown-guide.md) | 4종 다이어그램 가이드 |
 
-> 🔑 **키워드 기반 자동 매칭**: "PBS", "Input Datas", "Key Events" → system-design-framework · "jobflow", "master·Object" → job-flow-diagram-guide · "Orchestrator", "Worker", "Gateway" → orchestrator-worker-pattern-guide · "Screen Flow", "Logic Flow" → navigation-diagram-guide · "2계층 로그", "세션 로그", "LLM 프롬프트 로그" → detailed-logging-prompt.
+> 🔑 **키워드 기반 자동 매칭**: "PBS", "Input Datas", "Key Events" → system-design-framework · "jobflow", "orchestrator:/scope:·Object" → job-flow-diagram-guide · "Orchestrator", "Worker", "Gateway" → orchestrator-worker-pattern-guide · "Screen Flow", "Logic Flow" → navigation-diagram-guide · "회원가입", "로그인", "세션", "탈퇴" → frontend-user-design-prompt · "2계층 로그", "세션 로그", "LLM 프롬프트 로그" → detailed-logging-prompt.
 
 ---
 
@@ -52,6 +53,7 @@
 - **[orchestrator-worker-pattern-guide.md](guides/orchestrator-worker-pattern-guide.md)** — Services List 를 실제 코드 모듈로 펼치는 아키텍처 원칙 (Main · core · gateways · service · utils).
 - **[system-flow-document-guide.md](guides/system-flow-document-guide.md)** — 시스템을 이해하는 데 필요한 최소 조각에서 시작해 전체를 설명하는 문서 작성 가이드. 동적 흐름(jobflow/navigation)과 정적 구성(classDiagram/책임 표)을 함께 사용한다.
 - **[feature-design-prompt.md](prompts/feature-design-prompt.md)** — **프롬프트 형식**. 특정 요구사항(기능 추가·변경) 하나를 입력받아 영향 범위로 한정된 기능 설계 문서를 생성한다. 요구사항을 FR-NN 으로 분해 → 영향 범위 분석 → 8섹션 선택 적용 + method-R 깊이 판정 → FR 추적성 자가검증. 전체 재설계는 as-is/to-be 프롬프트로 전환.
+- **[frontend-user-design-prompt.md](prompts/frontend-user-design-prompt.md)** — **프롬프트 형식**. 회원가입·인증·세션·계정 복구·자기 정보·탈퇴를 화면, jobflow/navigation/state/layout, API 계약, DynamoDB 접근 패턴까지 하나의 범용 설계 문서로 생성한다. 복잡한 관계형 비즈니스 규칙만 RDS 예외로 분리한다.
 
 ### 2. 설계 시각화 (Diagram DSL)
 
@@ -87,6 +89,7 @@ flowchart TB
     APD["architecture-pattern-diagram<br/>패턴별 분해 기준"]:::core
     OWP["orchestrator-worker-pattern<br/>아키텍처 원칙"]:::core
     PRD["prd-writing-guide<br/>7-Part PRD 템플릿"]:::spec
+    FUD["frontend-user-design-prompt<br/>회원 시스템 설계"]:::spec
     README["wrtite-readme-guide<br/>README 목차"]:::spec
     SFD["system-flow-document<br/>SYSTEM_FLOW.md 작성"]:::spec
 
@@ -119,6 +122,9 @@ flowchart TB
     PRD --> JFD
     PRD --> NAV
     PRD --> STT
+    FUD --> SDF
+    FUD --> OWP
+    FUD --> JFD & NAV & STT & LAY
     SFD --> JFD
     SFD --> NAV
 
@@ -182,7 +188,7 @@ flowchart TB
 
 #### [job-flow-diagram-guide.md](guides/job-flow-diagram-guide.md)
 - **언제 쓰는가**: 객체(클래스/모듈) 간 **메서드 호출과 이벤트 구독** 흐름을 한 장에 담을 때. PRD Part 3 의 주력 DSL.
-- **핵심 내용**: `master`(오케스트레이터) + `Object:` 목록으로 선언. `Object.MethodName` / `Object.OnEventName` / `.result` / `.value` 4 표기. 시나리오 시작점은 master Public 메서드, 프로세스 진입 이벤트, 외부 이벤트 중 하나.
+- **핵심 내용**: 흐름 제어 주체가 있으면 `orchestrator:`, 자율 협력 경계면 `scope:` 헤더와 `Object:` 목록으로 선언. `Object.MethodName` / `Object.OnEventName` / `.result` / `.value`를 쓰며, 시작점은 객체의 Public 메서드·프로세스 진입 이벤트·외부 이벤트 중 하나다.
 - **연계 문서**: orchestrator-worker-pattern-guide (용어 · 역할 정의), prd-writing-guide (4 요소 의무화 규칙).
 
 #### [navigation-diagram-guide.md](guides/navigation-diagram-guide.md)
@@ -228,6 +234,17 @@ flowchart TB
   - 산출물: `docs/design/{DATE}/feature/{slug}/feature-design.md` 단일 문서.
 - **연계 문서**: system-design-as-is-prompt · system-design-to-be-prompt (전체 재설계 시 전환), prd-writing-guide (설계서를 PRD Part 입력으로 인계), multi-agent-task-prompt · comprehensive-test-prompt (구현·검증 인계).
 
+#### [frontend-user-design-prompt.md](prompts/frontend-user-design-prompt.md)
+- **언제 쓰는가**: 회원제 사이트의 **프론트엔드 사용자 영역 전체**를 신규 설계하거나 기존 구현을 범용 구조로 개선할 때. 대상 프로젝트·요구사항과 선택적으로 참고 구현을 함께 입력한다.
+- **핵심 내용**:
+  - **공통 회원 흐름**: 회원가입·연락처 소유 검증·로그인/로그아웃·세션 복원/갱신·계정 복구·자기 정보·비밀번호·탈퇴/재가입을 정상/예외 흐름까지 설계한다.
+  - **실제 네비게이션 베이스라인**: 화면 색인과 공개 진입, 가입, 로그인/세션, 복구, 자기 정보, 탈퇴의 범용 `navigation` 다이어그램 6개를 프롬프트 안에 제공한다.
+  - **4종 DSL 산출물**: 객체 협력은 `jobflow`, 화면 이동은 `navigation`, 계정·세션·화면 내부 상태는 `state`, 모든 Page 구조는 `layout`으로 작성한다.
+  - **DynamoDB 기본값**: 접근 패턴부터 PK/SK·GSI·조건부 쓰기·트랜잭션·TTL·멱등성을 설계하고, 관계형 제약이 핵심인 비즈니스 데이터만 RDS 예외로 둔다.
+  - **검증 가능한 추적성**: 모든 FR을 적용 가능한 Page/Component·API·다이어그램·데이터 항목·테스트에 매핑하고, 비적용 사유와 보안·접근성·관측성 게이트를 검증해야 종료한다.
+  - 산출물: `docs/design/{DATE}/frontend-user/frontend-user-design.md` 단일 문서.
+- **연계 문서**: system-design-framework (8섹션 골격), 4종 다이어그램 가이드, method-R · orchestrator-worker-pattern-guide (경계와 책임 분리).
+
 #### [detailed-logging-prompt.md](prompts/detailed-logging-prompt.md)
 - **언제 쓰는가**: 이미 만들어진 프로젝트에 **"상세 분석 로그 시스템"** 을 얹고 싶을 때. 문서가 아니라 **에이전트에게 통째로 붙여 넣는 프롬프트** 다.
 - **핵심 내용**:
@@ -256,6 +273,7 @@ flowchart TB
 | [project-structure-guide.md](guides/project-structure-guide.md) | 구현 | 언어별(Python·Node·React·Next·Go) 표준 폴더 구조/네이밍 |
 | [wrtite-readme-guide.md](guides/wrtite-readme-guide.md) | 문서 | README 목차 템플릿 (8 섹션 매핑) |
 | [feature-design-prompt.md](prompts/feature-design-prompt.md) | 프롬프트 | 특정 요구사항 하나의 영향 범위 한정 기능 설계 요청 |
+| [frontend-user-design-prompt.md](prompts/frontend-user-design-prompt.md) | 프롬프트 | DynamoDB 기반 범용 프론트엔드 회원 시스템 설계 요청 |
 | [detailed-logging-prompt.md](prompts/detailed-logging-prompt.md) | 운영 | 2 계층 로깅 시스템 구현 프롬프트 |
 | [multi-agent-task-prompt.md](prompts/multi-agent-task-prompt.md) | 프롬프트 | Architect·Critic·Developer·Tester 멀티 에이전트 협업 작업 지시 |
 | [tools-camp-markdown-guide.md](guides/tools-camp-markdown-guide.md) | 문서 | tools.camp 마크다운 문법 전체(코드·다이어그램·SmartMD·페이지 분할) |
