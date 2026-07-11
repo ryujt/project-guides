@@ -53,7 +53,7 @@
 - **[orchestrator-worker-pattern-guide.md](guides/orchestrator-worker-pattern-guide.md)** — Services List 를 실제 코드 모듈로 펼치는 아키텍처 원칙 (Main · core · gateways · service · utils).
 - **[system-flow-document-guide.md](guides/system-flow-document-guide.md)** — 시스템을 이해하는 데 필요한 최소 조각에서 시작해 전체를 설명하는 문서 작성 가이드. 동적 흐름(jobflow/navigation)과 정적 구성(classDiagram/책임 표)을 함께 사용한다.
 - **[feature-design-prompt.md](prompts/feature-design-prompt.md)** — **프롬프트 형식**. 특정 요구사항(기능 추가·변경) 하나를 입력받아 영향 범위로 한정된 기능 설계 문서를 생성한다. 요구사항을 FR-NN 으로 분해 → 영향 범위 분석 → 8섹션 선택 적용 + method-R 깊이 판정 → FR 추적성 자가검증. 전체 재설계는 as-is/to-be 프롬프트로 전환.
-- **[frontend-user-design-prompt.md](prompts/frontend-user-design-prompt.md)** — **프롬프트 형식**. 회원가입·인증·세션·계정 복구·자기 정보·탈퇴를 화면, jobflow/navigation/state/layout, API 계약, DynamoDB 접근 패턴까지 하나의 범용 설계 문서로 생성한다. 복잡한 관계형 비즈니스 규칙만 RDS 예외로 분리한다.
+- **[frontend-user-design-prompt.md](prompts/frontend-user-design-prompt.md)** — **프롬프트 형식**. 회원가입·인증·세션·계정 복구·자기 정보·탈퇴를 화면, jobflow/navigation/state/layout, API 계약, DynamoDB 접근 패턴까지 간명한 핵심 설계 문서와 상세 파일 세트로 생성한다. 복잡한 관계형 비즈니스 규칙만 RDS 예외로 분리한다.
 
 ### 2. 설계 시각화 (Diagram DSL)
 
@@ -242,7 +242,7 @@ flowchart TB
   - **4종 DSL 산출물**: 객체 협력은 `jobflow`, 화면 이동은 `navigation`, 계정·세션·화면 내부 상태는 `state`, 모든 Page 구조는 `layout`으로 작성한다.
   - **DynamoDB 기본값**: 접근 패턴부터 PK/SK·GSI·조건부 쓰기·트랜잭션·TTL·멱등성을 설계하고, 관계형 제약이 핵심인 비즈니스 데이터만 RDS 예외로 둔다.
   - **검증 가능한 추적성**: 모든 FR을 적용 가능한 Page/Component·API·다이어그램·데이터 항목·테스트에 매핑하고, 비적용 사유와 보안·접근성·관측성 게이트를 검증해야 종료한다.
-  - 산출물: `docs/design/{DATE}/frontend-user/frontend-user-design.md` 단일 문서.
+  - 산출물: 핵심 문서 `docs/design/{DATE}/frontend-user/frontend-user-design.md` + 상세 파일 `details/{NN}-{slug}.md` 세트.
 - **연계 문서**: system-design-framework (8섹션 골격), 4종 다이어그램 가이드, method-R · orchestrator-worker-pattern-guide (경계와 책임 분리).
 
 #### [detailed-logging-prompt.md](prompts/detailed-logging-prompt.md)
