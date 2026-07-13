@@ -33,11 +33,12 @@
 | "프로젝트 README 템플릿을 만들자" | [wrtite-readme-guide.md](guides/wrtite-readme-guide.md) | system-design-framework (8 섹션이 README 목차와 일치) |
 | "특정 요구사항(기능 하나) 설계를 요청하자" / 기능 추가·변경의 영향 범위만 설계 / FR 추적성 | [feature-design-prompt.md](prompts/feature-design-prompt.md) | system-design-as-is-prompt, system-design-to-be-prompt (전체 재설계 시 전환) |
 | "회원제 프론트엔드를 설계하자" / 회원가입·로그인·세션·자기 정보·탈퇴 / 회원 데이터 모델 | [frontend-user-design-prompt.md](prompts/frontend-user-design-prompt.md) | system-design-framework, 4종 다이어그램 DSL |
+| "UX/UI 를 개선하자" / 벤치마킹 / 유사 서비스 사용설명서·오픈 소스 리서치 기반 개선안 | [ux-ui-improvement-prompt.md](prompts/ux-ui-improvement-prompt.md) | site-design-prompt, navigation·screen-layout·state 가이드 |
 | "LLM · API 호출 · 상태 스냅샷을 깊이 있게 로깅하고 싶다" / 2계층 로깅 / 세션 기반 로그 | [detailed-logging-prompt.md](prompts/detailed-logging-prompt.md) | — (독립 프롬프트) |
 | "여러 전문 에이전트로 분업·상호 견제하며 작업을 진행" / Architect·Critic·Developer·Tester 협업 루프 | [multi-agent-task-prompt.md](prompts/multi-agent-task-prompt.md) | orchestrator-worker-pattern-guide |
 | "tools.camp 마크다운 에디터 문법" / 다이어그램·코드·페이지 분할 / 콜아웃·표·변수 등 SmartMD 확장 / `:::`, `{table}`, `{{var}}` | [tools-camp-markdown-guide.md](guides/tools-camp-markdown-guide.md) | 4종 다이어그램 가이드 |
 
-> 🔑 **키워드 기반 자동 매칭**: "PBS", "Input Datas", "Key Events" → system-design-framework · "jobflow", "orchestrator:/scope:·Object" → job-flow-diagram-guide · "Orchestrator", "Worker", "Gateway" → orchestrator-worker-pattern-guide · "Screen Flow", "Logic Flow" → navigation-diagram-guide · "회원가입", "로그인", "세션", "탈퇴" → frontend-user-design-prompt · "2계층 로그", "세션 로그", "LLM 프롬프트 로그" → detailed-logging-prompt.
+> 🔑 **키워드 기반 자동 매칭**: "PBS", "Input Datas", "Key Events" → system-design-framework · "jobflow", "orchestrator:/scope:·Object" → job-flow-diagram-guide · "Orchestrator", "Worker", "Gateway" → orchestrator-worker-pattern-guide · "Screen Flow" → navigation-diagram-guide · "Logic Flow" → state-diagram-guide · "회원가입", "로그인", "세션", "탈퇴" → frontend-user-design-prompt · "2계층 로그", "세션 로그", "LLM 프롬프트 로그" → detailed-logging-prompt.
 
 ---
 
@@ -274,6 +275,7 @@ flowchart TB
 | [wrtite-readme-guide.md](guides/wrtite-readme-guide.md) | 문서 | README 목차 템플릿 (8 섹션 매핑) |
 | [feature-design-prompt.md](prompts/feature-design-prompt.md) | 프롬프트 | 특정 요구사항 하나의 영향 범위 한정 기능 설계 요청 |
 | [frontend-user-design-prompt.md](prompts/frontend-user-design-prompt.md) | 프롬프트 | 범용 프론트엔드 회원 시스템 설계 요청 |
+| [ux-ui-improvement-prompt.md](prompts/ux-ui-improvement-prompt.md) | 프롬프트 | 리서치 3트랙(검색·오픈 소스·직접 브라우징) 기반 UX/UI 개선 설계 요청 |
 | [detailed-logging-prompt.md](prompts/detailed-logging-prompt.md) | 운영 | 2 계층 로깅 시스템 구현 프롬프트 |
 | [multi-agent-task-prompt.md](prompts/multi-agent-task-prompt.md) | 프롬프트 | Architect·Critic·Developer·Tester 멀티 에이전트 협업 작업 지시 |
 | [tools-camp-markdown-guide.md](guides/tools-camp-markdown-guide.md) | 문서 | tools.camp 마크다운 문법 전체(코드·다이어그램·SmartMD·페이지 분할) |
