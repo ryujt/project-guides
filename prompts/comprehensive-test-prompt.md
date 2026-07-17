@@ -95,3 +95,20 @@
 여러 전문 에이전트(**Architect · Critic · Developer · Tester**)에게 역할을 분담시켜, 상호 견제와 반복 검토 루프로 테스트 품질을 끌어올릴 수 있다.
 공통 행동 원칙과 반복 검토 루프, 종료 조건은 [`./multi-agent-task-prompt.md`](./multi-agent-task-prompt.md) 를 함께 따른다.
 이 작업에서는 **Tester Agent**가 시나리오 도출·테스트 작성·실행·이력 관리를 주도하고, **Critic Agent**가 누락된 시나리오와 불충분한 검증을 끊임없이 지적한다.
+
+## 발견된 오류 유형 카탈로그
+
+다음 패턴은 이후 종합 테스트에서도 선제적으로 점검한다.
+
+* **낙관적 비동기 처리와 authoritative 상태의 경쟁** — 전송 함수가 서버 ACK나 버전 갱신 전에 성공 처리되어 연속 변경이 같은 stale version을 사용하는지 확인한다. 빠른 연속 클릭, 서로 다른 권한의 동시 변경, 충돌 응답 뒤 UI 대기 상태를 함께 검증한다.
+* **성공한 부수 효과와 응답 유실 사이의 복구 경쟁** — 서버 처리는 성공했지만 응답만 유실된 상황에서 일반 흐름과 자동 복구가 동시에 실행되어 중복 생성·결제·정산을 일으키지 않는지 확인한다. 최초 서버 ID와 재시도 결과의 동일성도 검증한다.
+* **비동기 로딩 중 disabled trigger의 포커스 유실** — 버튼 클릭 직후 비활성화되고 나중에 dialog가 열릴 때 `document.activeElement`가 이미 `body`로 이동할 수 있다. 명시적 복귀 target, focus trap, Escape 종료 후 복귀를 실제 브라우저에서 확인한다.
+* **엄격한 CSP와 런타임 WASM/동적 코드 생성의 비호환** — 단위 테스트에서는 동작하지만 실제 `script-src` 정책에서 WebAssembly compile 또는 eval이 차단되는지 확인한다. CSP를 불필요하게 완화하지 않고 대체 구현의 최대 입력 메모리 경계도 검증한다.
+* **오류 후 재마운트로 인한 사용자 입력 상태 유실** — 인증·비밀번호·네트워크 오류가 gate나 form을 재마운트해 표시 이름 등 재사용 가능한 입력까지 초기화하지 않는지 확인한다. 비밀번호 같은 민감 입력은 보존하지 않는 정책과 구분한다.
+* **재연결 성공 뒤 남는 stale 오류 UI** — 연결 상태는 정상으로 복구됐지만 이전 연결 오류 banner나 pending 표시가 남지 않는지 확인한다. 연결 계열 오류만 제거하고 파일 업로드 등 무관한 오류는 보존해야 한다.
+* **DOM 순서 기반 반응형 CSS의 기능 은닉** — `:first-child`, `:nth-child()` 같은 위치 선택자가 DOM 변경 후 종료·초기화 등 핵심 동작을 모바일에서 숨기지 않는지 실제 viewport와 접근성 트리에서 확인한다.
+* **테스트 base URL과 서버 Origin allowlist 불일치** — `localhost`와 `127.0.0.1`처럼 기능상 같은 로컬 주소라도 WebSocket Origin 검증에서는 다르다. 브라우저 E2E 주소와 허용 Origin을 일치시키고 실시간 연결까지 확인한다.
+* **느슨한 test double이 숨기는 브라우저 API 제약** — WebSocket close code, clipboard, media permission처럼 브라우저가 동기 예외나 별도 허용 범위를 적용하는 API는 실제 브라우저와 같은 제약을 fake에도 구현한다. 단위 테스트 통과만으로 브라우저 호환을 판단하지 않는다.
+* **재연결 중 stale CONNECTING 상태 고착** — 오프라인 자동 재시도와 online 이벤트가 경쟁할 때 이미 열린 `CONNECTING` 객체를 정상 복구로 오인하지 않는지 확인한다. 제한 시간 안에 열리지 않은 연결은 폐기하고 새 연결로 교체하며, 떠난 peer의 지연 신호 오류가 살아 있는 host 연결 전체를 종료하지 않아야 한다.
+* **중계 계층이 보강한 필드와 엄격한 parser의 계약 불일치** — 서버가 보안 라우팅을 위해 `targetPeerId` 같은 필드를 추가할 때 송신·중계·수신의 모든 중복 validator가 같은 optional bounded schema를 사용하는지 검증한다. 한 단계의 exact-key 검사가 정상 메시지를 조용히 폐기하지 않아야 한다.
+* **부분 컨테이너 재생성에 취약한 공유 네트워크 네임스페이스** — sidecar의 `network_mode: service:...`나 loopback 의존이 대상 컨테이너만 재생성했을 때 이전 namespace에 남지 않는지 확인한다. 내부 서비스 endpoint와 브라우저 공개/presign endpoint를 분리하고 partial recreate 뒤 실제 I/O를 검증한다.
