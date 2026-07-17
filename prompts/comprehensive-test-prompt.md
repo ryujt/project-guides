@@ -55,7 +55,7 @@
 
 발견된 오류와 처리 결과를 마크다운 문서로 남겨줘.
 
-* 파일 위치와 이름을 명확히 정하고(예: `test-history/오류-이력.md`), 반복 내내 같은 문서에 누적한다.
+* 파일은 **`tests/test-history/` 폴더 아래**에 두고, 이름은 **테스트 종류에 어울리는 영문 kebab-case**로 정한다(예: UI/브라우저 테스트 → `tests/test-history/ui-browser-error-history.md`, API 테스트 → `tests/test-history/api-error-history.md`). 반복 내내 같은 문서에 누적한다.
 * 오류 하나당 아래 항목을 기록한다.
 
   | 항목 | 설명 |
