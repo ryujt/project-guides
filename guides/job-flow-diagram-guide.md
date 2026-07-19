@@ -49,6 +49,7 @@ Object: [객체1], [객체2], [객체3], ...
 | 이벤트 | `Object.OnEventName` | 이벤트 발생 |
 | 반환값 | `Object.Method.result` | 메서드 반환값 |
 | 조건값 | `Object.Method.value` | 분기 조건 |
+| 무시 분기 | `Object.Method.value` 단독 줄 (화살표 없음) | 그 분기에서는 아무 일도 일어나지 않음 — §무시 분기 표기 |
 
 ### 제한 사항
 
@@ -398,6 +399,32 @@ main() {
     if (B.MethodName()) {
         C.MethodName()
     }
+}
+```
+
+### 무시 분기 표기 (화살표 없는 단독 줄)
+
+`X.result --> Orchestrator.Method.result` 는 마지막 산출물이 orchestrator 메서드의 **반환값으로 호출자에게 실제로 흘러나갈 때만** 쓴다. 반환값을 받아가는 호출자가 없는 메서드(UI 이벤트 핸들러, 콜백 등)가 분기 결과에 따라 **아무 후속 동작 없이 끝나는** 경우에 `.result` 를 종료 표기로 차용하면 "없는 반환값을 누군가 받아가는 것처럼" 오독된다. 이 경우는 다음 둘 중 하나로 표기한다.
+
+1. **기본 — 그리지 않는다**: 단일 조건 분기 패턴과 동일하게, 아무 일도 일어나지 않는 분기는 생략한다. 그 동작 사실은 다이어그램 하단 설명에 문장으로 남긴다.
+2. **명시가 필요할 때 — 분기 값만 적고 화살표를 잇지 않는다**: "조용히 무시된다"는 사실 자체가 설계 정보일 때(예: 불법 입력의 무반응 처리)는 해당 분기 값을 **화살표 없는 단독 줄**로 남긴다.
+
+```jobflow
+GameHook.HandleIntersection --> RuleEngine.TryPlace
+RuleEngine.TryPlace.false
+RuleEngine.TryPlace.true --> GameHook.RequestAI
+```
+
+* 화살표가 없는 단독 줄은 "이 분기는 존재하지만 후속 흐름이 없다(무시된다)"는 선언이다. 다이어그램에서는 후속 화살표가 달리지 않은 매달린 분기 노드로 그려진다.
+* 별도의 종료 마커(`.end` 등)를 도입하지 않는다 — 마커를 쓰면 그 이름의 메시지·이벤트가 코드에 실재하는 것으로 오독되어 독자가 코드에서 찾게 된다.
+* qualifier 없이 `--> Orchestrator.Method` 로 되돌리는 표기는 여전히 금지다(재호출 오독 — §주의 표기 함정).
+
+orchestrator 코드 예시:
+```
+HandleIntersection(x, y) {
+    result = RuleEngine.TryPlace(x, y)
+    if (!result) return      // 무시 분기 — 아무 일도 하지 않고 종료
+    RequestAI(result)
 }
 ```
 
