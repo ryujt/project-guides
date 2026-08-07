@@ -129,7 +129,7 @@ PageA(ImageList) --> PageA(FileList) : 파일 목록 선택
 
 **판단 기준**: "이 화살표가 사용자를 다른 화면(또는 오버레이)으로 이동시키거나, 그 이동 여부를 결정하는가?" 아니라면 네비게이션 다이어그램에 넣지 않는다.
 
-## 예시
+## 예시 - 온라인 클래스룸
 
 ### 직접 링크 입장 시나리오
 
@@ -197,3 +197,57 @@ ResetPassword --> (/password/reset)
 * 비밀번호 찾기는 로그인과 다른 화면·API를 쓰므로 별도 다이어그램으로 분리한다. 두 흐름은 `LoginForm --> ForgotPassword` 로만 연결된다.
 * 이메일로 발송된 인증코드를 `VerifyCode` 화면에서 입력해 본인 확인을 거친 뒤, `ResetPassword` 화면에서 새 비밀번호를 설정한다.
 * 재설정 완료 후에는 다시 로그인하도록 `LoginForm` 으로 이동시킨다.
+
+## 예시 - 쇼핑몰
+
+상품 탐색부터 주문·결제, 주문 조회까지의 화면 흐름을 표현한다. 회원가입·로그인은 위 계정 시나리오를 그대로 사용한다.
+
+### 상품 탐색 및 장바구니
+
+```navigation
+Home --> ProductList : 카테고리 선택
+Home --> SearchResult : 검색어 입력
+ProductList --> ProductDetail : 상품 선택
+SearchResult --> ProductDetail : 상품 선택
+ProductDetail --> (/cart/add) : 장바구니 담기
+(/cart/add) --> ProductDetail : error
+(/cart/add) --> Cart : success
+ProductDetail --> Cart : 장바구니 보기
+```
+
+* 담기 실패는 `ProductDetail` 에 머물고, 성공하면 `Cart` 로 이동한다.
+
+### 주문 및 결제
+
+로그인 여부에 따라 주문 화면 진입이 갈리므로 `(check_auth)` 처리로 분기한다.
+
+```navigation
+Cart --> (check_auth) : 주문하기
+(check_auth) --> LoginForm : 미로그인
+(check_auth) --> Checkout : 로그인됨
+LoginForm --> (/login)
+(/login) --> LoginForm : error
+(/login) --> Checkout : success
+Checkout --> (validate_order)
+(validate_order) --> Checkout : invalid
+(validate_order) --> (/orders) : success
+(/orders) --> Checkout : error
+(/orders) --> PaymentForm : created
+PaymentForm --> (/payment)
+(/payment) --> PaymentForm : failed
+(/payment) --> OrderComplete : paid
+```
+
+* 미로그인 사용자는 `LoginForm` 을 거쳐 다시 `Checkout` 으로 돌아온다.
+* 주문 생성`(/orders)`과 결제`(/payment)`는 별도 단계로 나누고, 각 실패는 직전 화면으로 되돌린다.
+
+### 주문 조회
+
+```navigation
+Home --> OrderList : 주문 내역
+OrderComplete --> OrderDetail : 주문 상세 보기
+OrderList --> OrderDetail : 주문 선택
+OrderDetail --> (/orders/cancel) : 주문 취소
+(/orders/cancel) --> OrderDetail : 결과 갱신
+```
+
