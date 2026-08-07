@@ -131,21 +131,6 @@ PageA(ImageList) --> PageA(FileList) : 파일 목록 선택
 
 ## 예시
 
-### 회원가입 시나리오
-
-화면 전환과 API 응답에 따른 분기를 표현한다.
-
-```navigation
-Home --> TermsAgreement : 회원가입 버튼 클릭
-TermsAgreement --> Home : 약관 거부
-TermsAgreement --> SignupForm : 약관 동의
-SignupForm --> (validate_form)
-(validate_form) --> SignupForm : invalid
-(validate_form) --> (/signup) : success
-(/signup) --> SignupForm : error
-(/signup) --> Dashboard : success
-```
-
 ### 직접 링크 입장 시나리오
 
 내부 통신(SDK 준비, 방 연결 모듈 흐름)은 화면 이동을 결정하는 지점만 처리 노드로 압축한다.
@@ -161,3 +146,54 @@ ClassroomNameOverlay --> (validate_display_name)
 
 * 방 연결 과정의 내부 모듈(SDK, PeerManager, DataChannelManager 등)은 `(connect_room)` 하나의 처리로 요약한다.
 * 결과(연결 성공 / 이름 중복)에 따른 **화면 이동**만 분기로 남긴다.
+
+### 회원가입 시나리오
+
+화면 전환과 API 응답에 따른 분기를 표현한다.
+
+```navigation
+Home --> TermsAgreement : 회원가입 버튼 클릭
+TermsAgreement --> Home : 약관 거부
+TermsAgreement --> SignupForm : 약관 동의
+SignupForm --> (validate_form)
+(validate_form) --> SignupForm : invalid
+(validate_form) --> (/signup) : success
+(/signup) --> SignupForm : error
+(/signup) --> Home : success
+```
+
+### 로그인 및 비밀번호 찾기 시나리오
+
+로그인, 로그아웃, 비밀번호 찾기·재설정 등 계정 관련 일반적인 화면 흐름을 표현한다. 회원가입은 위 회원가입 시나리오를 그대로 사용한다.
+
+**로그인 / 로그아웃**
+
+```navigation
+Home --> LoginForm : 로그인 버튼 클릭
+LoginForm --> (validate_form)
+(validate_form) --> LoginForm : invalid
+(validate_form) --> (/login) : success
+(/login) --> LoginForm : error
+(/login) --> Home : success
+Home --> (/logout) : 로그아웃
+(/logout) --> Home
+LoginForm --> ForgotPassword : 비밀번호 찾기 클릭
+```
+
+**비밀번호 찾기 / 재설정**
+
+```navigation
+ForgotPassword --> (/password/send_code)
+(/password/send_code) --> ForgotPassword : error
+(/password/send_code) --> VerifyCode : sent
+VerifyCode --> (/password/verify_code)
+(/password/verify_code) --> VerifyCode : invalid
+(/password/verify_code) --> ResetPassword : verified
+ResetPassword --> (/password/reset)
+(/password/reset) --> ResetPassword : error
+(/password/reset) --> LoginForm : success
+```
+
+* 비밀번호 찾기는 로그인과 다른 화면·API를 쓰므로 별도 다이어그램으로 분리한다. 두 흐름은 `LoginForm --> ForgotPassword` 로만 연결된다.
+* 이메일로 발송된 인증코드를 `VerifyCode` 화면에서 입력해 본인 확인을 거친 뒤, `ResetPassword` 화면에서 새 비밀번호를 설정한다.
+* 재설정 완료 후에는 다시 로그인하도록 `LoginForm` 으로 이동시킨다.
