@@ -136,7 +136,9 @@ PageA(ImageList) --> PageA(FileList) : 파일 목록 선택
 화면 전환과 API 응답에 따른 분기를 표현한다.
 
 ```navigation
-Home --> SignupForm : 회원가입 버튼 클릭
+Home --> TermsAgreement : 회원가입 버튼 클릭
+TermsAgreement --> Home : 약관 거부
+TermsAgreement --> SignupForm : 약관 동의
 SignupForm --> (validate_form)
 (validate_form) --> SignupForm : invalid
 (validate_form) --> (/signup) : success
@@ -149,7 +151,7 @@ SignupForm --> (validate_form)
 내부 통신(SDK 준비, 방 연결 모듈 흐름)은 화면 이동을 결정하는 지점만 처리 노드로 압축한다.
 
 ```navigation
-Browser --> ClassroomNameOverlay : /:roomId 직접 접속
+(/:roomId 직접 접속) --> ClassroomNameOverlay 
 ClassroomNameOverlay --> (validate_display_name)
 (validate_display_name) --> ClassroomNameOverlay : empty_name
 (validate_display_name) --> (connect_room) : success
