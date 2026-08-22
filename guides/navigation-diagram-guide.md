@@ -76,8 +76,8 @@ PageA(ImageList) --> PageA(FileList) : 파일 목록 선택
   * 페이지 내부에서 이동 판단을 위한 처리를 실행한다
   * 예: `CheckoutForm --> (validate_form)`
 
-5. **Internal Process → Page or API call**
-  * 처리 결과에 따라 화면을 전환하거나 추가 요청을 보낸다
+5. **Internal Process → Page, API call, or Internal Process**
+  * 처리 결과에 따라 화면을 전환하거나, 추가 요청을 보내거나, 다음 판단 단계로 넘어간다
   * 예:
     ```
     (validate_form) --> CheckoutForm : invalid
@@ -95,17 +95,42 @@ PageA(ImageList) --> PageA(FileList) : 파일 목록 선택
     `authToken` --> Dashboard
     ```
 
+## 직접 진입(URL 접속) 표현
+
+북마크·초대 링크·메일 링크·새로고침처럼 화면 이동이 아니라 **URL 접속으로 시작하는 시나리오**의 표기법이다.
+
+* **진입 자체를 노드나 화살표로 그리지 않는다.** 다이어그램은 **도착 화면에서 시작**하고, 어떤 주소로 어떻게 들어오는지는 산문(트리거 설명)으로 밝힌다.
+* 진입을 가드(인증 검사·접근 조건 리다이렉트)가 가로채 도착 화면이 갈리는 경우에는 그 판단 `(process)` 노드에서 시작한다. 진입 지점 노드는 대개 들어오는 화살표 없이 시작하지만, 뒤 흐름이 진입 노드로 되돌아와 화살표가 생겨도 무방하다 — **어느 노드가 진입 지점인지는 항상 산문이 밝힌다.**
+* **도착 화면이 갈리지 않는 고정 리다이렉트**(미정의 경로 → 홈 등)는 다이어그램으로 그리지 않고, 라우트 맵과 산문으로만 밝힌다.
+* **진입 즉시 API 가 호출되는 경우**에도 다이어그램을 `(backend api)` 노드로 시작하지 않는다. 호출 여부·파라미터를 읽는 판단을 가드 `(process)` 로 두고 `(process) --> (/api)` 로 잇는다.
+* **`Browser`, `User`, `Email` 같은 행위자·매체 노드를 만들지 않는다.** 노드는 화면, `(backend api)`, `(process)`, `` `message` `` 네 가지뿐이다. 모든 화면이 브라우저 위에 있으므로 `Browser` 노드는 아무 정보도 더하지 않으면서, 화면이 아닌 것이 출발점처럼 읽혀 페이지 전환 흐름을 가린다.
+
+```navigation
+(check_auth) --> LoginForm : 미로그인
+(check_auth) --> Dashboard : 로그인됨
+```
+
+* 위는 "대시보드 주소를 북마크로 직접 진입"하는 시나리오의 시작부다. `Browser --> (check_auth)` 같은 진입 화살표 없이 가드 `(check_auth)` 에서 시작하고, 진입 방법은 이 문장처럼 산문으로 밝힌다.
+
 ## 분기
 
 * `: error`, `: success`, `: invalid` 와 같이 상태만 명시한다.
 * 규칙: 콜론 뒤 설명문에는 괄호를 사용하지 않는다.
 
- * 잘못된 예: `: (오류 발생)`
- * 올바른 예: `: 오류 발생`
+  * 잘못된 예: `: (오류 발생)`
+  * 올바른 예: `: 오류 발생`
 
 ## 안티패턴
 
 네비게이션이 아닌 내용이 섞이면 다이어그램이 상태도처럼 변해 화면 이용 흐름을 읽을 수 없게 된다. 아래는 피해야 할 패턴이다.
+
+* **행위자·매체를 노드로 표현**
+  * 잘못된 예:
+    ```
+    Browser --> Home : 직접 진입
+    Email --> ResetPassword : 재설정 링크 클릭
+    ```
+  * 이유: `Browser`, `Email`, `User` 는 화면도 API 도 아니다. URL 직접 진입은 도착 화면(또는 진입을 검사하는 `(process)`)에서 다이어그램을 시작하고, 진입 방법은 산문으로 밝힌다.
 
 * **내부 모듈 간 상호작용을 노드로 표현**
   * 잘못된 예:
@@ -133,10 +158,9 @@ PageA(ImageList) --> PageA(FileList) : 파일 목록 선택
 
 ### 직접 링크 입장 시나리오
 
-내부 통신(SDK 준비, 방 연결 모듈 흐름)은 화면 이동을 결정하는 지점만 처리 노드로 압축한다.
+초대 링크(`/:roomId`)로 직접 접속하면 `ClassroomNameOverlay` 가 첫 화면으로 뜬다. 직접 진입은 노드로 그리지 않으므로 다이어그램은 도착 화면에서 시작하고, 내부 통신(SDK 준비, 방 연결 모듈 흐름)은 화면 이동을 결정하는 지점만 처리 노드로 압축한다.
 
 ```navigation
-(/:roomId 직접 접속) --> ClassroomNameOverlay 
 ClassroomNameOverlay --> (validate_display_name)
 (validate_display_name) --> ClassroomNameOverlay : empty_name
 (validate_display_name) --> (connect_room) : success
@@ -248,6 +272,9 @@ Home --> OrderList : 주문 내역
 OrderComplete --> OrderDetail : 주문 상세 보기
 OrderList --> OrderDetail : 주문 선택
 OrderDetail --> (/orders/cancel) : 주문 취소
-(/orders/cancel) --> OrderDetail : 결과 갱신
+(/orders/cancel) --> OrderDetail : success
+(/orders/cancel) --> OrderDetail : error
 ```
+
+* 취소는 성공·실패 모두 `OrderDetail` 에 머물며 결과 메시지만 갱신한다.
 
