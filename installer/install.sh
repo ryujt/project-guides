@@ -42,7 +42,6 @@ desc_of() {
     frontend-state-diagram)      echo "프론트엔드 객체·화면의 상태 전이를 state DSL 다이어그램으로 작성한다" ;;
     multi-agent-task)            echo "Architect·Critic·Developer·Tester 등 여러 전문 에이전트가 분업·상호 견제하며 작업을 수행한다" ;;
     ux-ui-improvement)           echo "유사 서비스 벤치마킹·오픈소스 리서치를 기반으로 UX/UI 개선 설계안을 도출한다" ;;
-    detailed-logging)            echo "2계층(텍스트+구조화) 세션 기반 상세 로깅 시스템을 현재 프로젝트에 구현한다" ;;
     comprehensive-test)          echo "로깅 계측·단위/통합/E2E 테스트·버그 수정·UX 리뷰를 반복해 통합 품질 검증을 수행한다" ;;
     site-design)                 echo "사이트(웹 서비스) 전체 설계 문서를 생성한다" ;;
     *)                           title_of "$2" ;;
@@ -84,6 +83,16 @@ uninstall() {
 }
 
 # ---------------------------------------------------------------- 설치
+
+remove_moved_logging_skill() {
+  [ -f "$MANIFEST" ] || return 0
+  while IFS= read -r installed_name; do
+    if [ "$installed_name" = "detailed-logging" ] && [ -d "$SKILLS_DIR/detailed-logging" ]; then
+      rm -rf "$SKILLS_DIR/detailed-logging"
+      echo "제거: /detailed-logging (가이드로 이동; /project-guides detailed-logging 사용)"
+    fi
+  done < "$MANIFEST"
+}
 
 install_shared_skill() {
   rm -rf "$SHARED_DIR"
@@ -152,6 +161,7 @@ EOF
 
 install_all() {
   mkdir -p "$SKILLS_DIR"
+  remove_moved_logging_skill
   install_shared_skill
   : > "$MANIFEST"
   printf '%s\n' "$SHARED_NAME" >> "$MANIFEST"

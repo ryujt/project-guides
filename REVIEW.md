@@ -1,5 +1,7 @@
 # 저장소 개선·교차 검토 기록
 
+기록 범위: 전체 개편 커밋 `7705db5`. 이후 문서 이동은 링크에만 반영한다.
+
 검토일: 2026-09-05. 대상은 이 저장소의 가이드·실행 프롬프트·문서 진입점이다. 목표는 **조각 간 정보 은닉, 높은 응집도, 작은 AI 작업 맥락**이며, 실제 사용자 프로젝트의 성능·토큰 사용량 개선 실험과는 구분한다.
 
 ## 1. 검토 방식
@@ -53,7 +55,7 @@
 - [Method-R](guides/method-R.md), [O-W](guides/orchestrator-worker-pattern-guide.md): 독자 분할·조율 취향을 유지하면서 과분해와 숨은 결합을 줄이는 적용 조건.
 - [PRD](guides/prd-writing-guide.md): 7 Part·점진적 상세화·다이어그램/객체/이벤트/시나리오 관점을 유지하고 계약·요구사항·검증을 연결.
 - [멀티 에이전트 프롬프트](prompts/multi-agent-task-prompt.md): 파일 소유권, 실제 모델 지원에 따른 배정, 독립 반례 검토, 명확한 완료/미완료 판정.
-- [테스트](prompts/comprehensive-test-prompt.md)·[로깅](prompts/detailed-logging-prompt.md): 경계·위험 중심 검증, 필요한 계측, 실제 출력과 부작용 확인.
+- [테스트](prompts/comprehensive-test-prompt.md)·[로깅](guides/detailed-logging-guide.md): 경계·위험 중심 검증, 필요한 계측, 실제 출력과 부작용 확인.
 - [AGENTS.md](AGENTS.md): 이후 편집에서 사용자 변경·독자 문법·원본 일관성과 검증 범위를 유지하는 규칙.
 
 ### 분량 변화

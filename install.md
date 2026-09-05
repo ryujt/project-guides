@@ -37,7 +37,6 @@ bash installer/install.sh
 | `/jobflow-walkthrough` | jobflow를 객체·계약·대표 시나리오와 연결해 해설 |
 | `/multi-agent-task` | 여러 전문 에이전트(Architect·Critic·Developer·Tester) 협업 작업 |
 | `/ux-ui-improvement` | 리서치·벤치마킹 기반 UX/UI 개선 설계 |
-| `/detailed-logging` | 2계층 상세 로깅 시스템 구현 |
 | `/comprehensive-test` | 통합 품질 검증(계측·테스트·버그 수정·UX 리뷰 반복) |
 | `/site-design` | 사이트 전체 설계 문서 생성 |
 
@@ -47,6 +46,7 @@ bash installer/install.sh
 |---|---|
 | `/project-guides` | README 트리거 표 기준으로 상황에 맞는 가이드 선택·적용 |
 | `/project-guides state-diagram` | 이름이 일치하는 가이드(예: state-diagram-guide)를 읽고 적용 |
+| `/project-guides detailed-logging` | 상세 로깅 작성·분석 중 보강·7일 보존 가이드 적용 |
 
 `~/.claude/skills/project-guides/` 에 `guides/`·`prompts/`·`README.md` 전체 사본이 함께 설치되며, 각 프롬프트 스킬은 이 사본을 참조한다. 가이드 문서(method-R, PRD, 다이어그램 DSL 등)는 별도 명령 없이도 대화 중 관련 주제가 나오면 Claude가 인덱스 스킬을 통해 자동으로 참조할 수 있다.
 
@@ -69,6 +69,8 @@ bash installer/install.sh
 ## 4. 업데이트
 
 가이드·프롬프트를 수정한 뒤 다시 설치하면 된다. 인덱스와 현재 프롬프트 이름의 스킬 디렉터리를 교체하므로 설치 사본에서 직접 수정한 내용도 덮어쓴다. 원본 수정은 이 저장소에서 관리한다.
+
+상세 로깅 문서는 `guides/detailed-logging-guide.md`로 이동했다. 이전 설치 매니페스트에 등록된 `/detailed-logging` 스킬은 업데이트 시 제거하며, 이후 `/project-guides detailed-logging`으로 가이드를 사용한다. 테스트·멀티 에이전트 프롬프트도 이 가이드를 직접 참조한다.
 
 ```
 /install-guides        # 또는 bash installer/install.sh

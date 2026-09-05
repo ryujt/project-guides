@@ -28,7 +28,6 @@
 | 화면·객체의 상태 전이 작성 | [frontend-state-diagram-prompt](prompts/frontend-state-diagram-prompt.md) | state, 해당 상태의 소유자·전이 조건 |
 | jobflow를 실제 시나리오로 해설 | [jobflow-walkthrough-prompt](prompts/jobflow-walkthrough-prompt.md) | jobflow, 등장 객체·계약의 실제 근거 |
 | UX/UI 분석과 개선 | [ux-ui-improvement-prompt](prompts/ux-ui-improvement-prompt.md) | 대상 사용자 흐름, 필요한 비교 조사 |
-| 상세 분석 로그 구현 | [detailed-logging-prompt](prompts/detailed-logging-prompt.md) | 기존 로그 구조, 필요한 진단 경계 |
 | 테스트와 결함 수정 | [comprehensive-test-prompt](prompts/comprehensive-test-prompt.md) | 변경 위험과 실제 실행 가능한 검증 |
 | 여러 에이전트의 설계·비판·구현·평가 | [multi-agent-task-prompt](prompts/multi-agent-task-prompt.md) | 독립 작업 범위, 공유 계약, 역할별 모델·비용 |
 
@@ -55,6 +54,7 @@
 | [prd-writing-guide](guides/prd-writing-guide.md) | 요구사항→책임·계약→시나리오→검증을 7개 Part로 어떻게 연결할까? |
 | [system-flow-document-guide](guides/system-flow-document-guide.md) | 최소 책임 조각부터 전체 시스템 흐름을 어떻게 설명할까? |
 | [wrtite-readme-guide](guides/wrtite-readme-guide.md) | 빠른 실행과 필요한 상세 문서 탐색을 어떻게 돕는 README를 쓸까? |
+| [detailed-logging-guide](guides/detailed-logging-guide.md) | 상세 로그를 작성·보강하고 7일 지난 기록을 어떻게 자동 삭제할까? |
 | [tools-camp-markdown-guide](guides/tools-camp-markdown-guide.md) | tools.camp용 Markdown·SmartMD·다이어그램 표기를 어떻게 사용할까? |
 
 `wrtite-readme-guide.md`는 기존 링크 호환성을 위해 현재 파일명을 유지한다.
