@@ -20,7 +20,7 @@
 | 하려는 일 | 시작 문서 | 추가로 읽을 기준 |
 | --- | --- | --- |
 | 기존 시스템의 현재 구조 분석 | [system-design-as-is-prompt](prompts/system-design-as-is-prompt.md) | 확인한 코드와 계약, 필요한 설계 관점 |
-| 시스템 개선안 설계 | [system-design-to-be-prompt](prompts/system-design-to-be-prompt.md) | 기존 분석의 유효성, 변경 계약·소비자 |
+| 시스템 신규·개선 설계 | [system-design-to-be-prompt](prompts/system-design-to-be-prompt.md) | 요구·제약으로 시작; 기존 시스템은 현재 계약·소비자와 분석 유효성도 확인 |
 | 기능 하나 추가·변경 설계 | [feature-design-prompt](prompts/feature-design-prompt.md) | 대상 책임 모듈과 직접 관련된 계약 |
 | 사이트 전체 설계 | [site-design-prompt](prompts/site-design-prompt.md) | 채택한 기능·화면에 해당하는 DSL |
 | 회원·인증·세션·탈퇴 설계 | [frontend-user-design-prompt](prompts/frontend-user-design-prompt.md) | 채택할 회원 흐름, 보안·데이터 경계 |
@@ -84,7 +84,7 @@
 
 | 상황 | 진행 순서 |
 | --- | --- |
-| 신규 프로젝트 | 목표·수용 기준 → 모듈 경계 → 필요한 설계 관점·PRD → 구현 → 계약·통합 검증 |
+| 신규 프로젝트 | 목표·수용 기준 → to-be 신규 설계(AS-IS 없이 시작) → 필요한 설계 관점·PRD → 구현 → 계약·통합 검증 |
 | 기존 기능 변경 | feature-design → 대상 계약·소비자 조사 → 변경·검증; 전체 설계는 영향이 실제로 커질 때 |
 | 구조 개선 | as-is 근거 확인 → to-be 경계·호환성 설계 → 단계적 변경 → 소비자 회귀 검증 |
 | 복잡한 협업 작업 | 작업 맥락 패킷 → 독립 조사 → 설계 비판 → 파일 소유권을 나눠 구현 → 독립 검증·재평가 |

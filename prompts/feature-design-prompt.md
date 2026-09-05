@@ -1,6 +1,6 @@
 # 특정 요구사항 설계 요청 프롬프트
 
-한 요구사항이 건드리는 모듈과 계약을 설계한다. **담당 모듈의 계약·관련 구현·테스트만으로 구현을 시작할 수 있는 문서**가 목표다. 전체 시스템 분석은 [AS-IS](./system-design-as-is-prompt.md), 전체 재설계는 [TO-BE](./system-design-to-be-prompt.md), 사이트 설계는 [사이트 프롬프트](./site-design-prompt.md)를 사용한다.
+한 요구사항이 건드리는 모듈과 계약을 설계한다. **담당 모듈의 계약·관련 구현·테스트만으로 구현을 시작할 수 있는 문서**가 목표다. 전체 시스템 분석은 [AS-IS](./system-design-as-is-prompt.md), 전체 신규 설계·재설계는 [TO-BE](./system-design-to-be-prompt.md), 사이트 설계는 [사이트 프롬프트](./site-design-prompt.md)를 사용한다.
 
 ## 입력과 실행 규칙
 

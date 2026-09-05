@@ -29,7 +29,7 @@ bash installer/install.sh
 | 명령 | 하는 일 |
 |---|---|
 | `/system-design-as-is` | 기존 코드베이스를 분석해 AS-IS 설계 분석 문서 생성 |
-| `/system-design-to-be` | AS-IS 산출물 + 설계 요청으로 TO-BE 설계 분석 문서 생성 |
+| `/system-design-to-be` | 요구·제약으로 신규·개선 TO-BE 설계 문서 생성(AS-IS 없이 시작 가능) |
 | `/feature-design` | 특정 요구사항 하나를 영향 범위로 한정한 기능 설계 문서 생성 |
 | `/frontend-user-design` | 회원가입·로그인·세션·탈퇴 등 회원제 프론트엔드 설계 |
 | `/frontend-navigation-diagram` | 화면·API 흐름 navigation 다이어그램 작성 |

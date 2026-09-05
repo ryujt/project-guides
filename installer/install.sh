@@ -35,7 +35,7 @@ desc_of() {
   # 스킬 검색·자동 매칭에 쓰이는 한 줄 설명. 미등록 프롬프트는 제목으로 대체한다.
   case "$1" in
     system-design-as-is)         echo "기존 코드베이스를 분석해 AS-IS 설계 분석 문서를 생성한다. '현재 시스템 분석', 'AS-IS 설계 문서' 요청 시 사용" ;;
-    system-design-to-be)         echo "AS-IS 산출물과 설계 요청을 입력받아 TO-BE 설계 분석 문서를 생성한다. '개선 설계', 'TO-BE 설계 문서' 요청 시 사용" ;;
+    system-design-to-be)         echo "요구사항과 제약으로 신규·개선 TO-BE 설계 문서를 생성한다. AS-IS 없이 최초 설계가 가능하며 기존 자료는 있을 때 활용한다. '신규 시스템 설계', '개선 설계', 'TO-BE 설계 문서' 요청 시 사용" ;;
     feature-design)              echo "특정 요구사항(기능 추가·변경) 하나를 영향 범위로 한정해 기능 설계 문서를 생성한다. FR 분해·추적성 포함" ;;
     frontend-user-design)        echo "회원가입·로그인·세션·계정 복구·탈퇴 등 회원제 프론트엔드 설계 문서를 생성한다" ;;
     frontend-navigation-diagram) echo "프론트엔드의 화면·API·내부 프로세스 흐름을 navigation DSL 다이어그램으로 작성한다" ;;
