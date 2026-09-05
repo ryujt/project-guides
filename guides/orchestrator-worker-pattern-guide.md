@@ -1,325 +1,156 @@
 # Orchestrator-Worker 패턴 설계 가이드
 
-본 가이드는 시스템의 복잡도를 제어하기 위해 기능을 독립적인 단위로 분리하고, 각 객체의 **명확한 역할 분담**과 **제어권 흐름(호출 및 이벤트 규약)**을 확립하는 것을 목적으로 한다.
+여러 조각이 협력하는 시나리오에서는 **조각은 자기 책임을 수행하고, 상위 조율자가 결과를 연결**한다. 형제 조각의 구현과 다음 작업 순서를 몰라도 각 조각을 수정할 수 있게 하는 것이 목적이다. 책임·공개 계약·데이터 소유권의 기준은 [모듈 경계 가이드](./module-boundary-guide.md)를 따른다.
 
-## 1. 시스템 아키텍처 구조
+## 1. 적용 범위
 
-아래의 형태를 기본 구조로 삼으며, 세부 사항은 프로젝트 상황에 맞게 유연하게 구성한다.
+이 패턴은 순서, 분기, 취소, 부분 실패를 여러 독립 조각에 걸쳐 조율할 때 유용하다. 한 함수의 계산이나 한 모듈 안의 응집된 단계까지 모두 Worker로 분리하지 않는다. 단순한 기능은 함수나 객체 하나로 시작한다.
 
-* `Main`: 시스템 전체를 관장하는 최상위 Orchestrator
-* `config`: 환경 설정 모음
-* `core`: 최상위 Worker들의 모음
-* `gateways`: 외부 시스템(DB, API, 스토리지 등)과 직접 통신하는 Gateway들의 모음. 상위 계층이 인프라 세부사항을 몰라도 되게 한다.
-* `service`: 싱글톤으로 구성된 서비스. 전역에서 상태를 공유해야 할 객체 (예: LogService, API_Service 등)
-* `utils`: 객체 생성 없이 코드 전역에서 공유되는 무상태(Stateless) 모듈
+* 기본적으로 **같은 시나리오에 참여하는 형제 Worker는 서로를 호출하지 않고**, 조율자가 결과를 이어 준다.
+* Worker 내부의 순수 helper와 자신에게 주입된 좁은 Port 호출은 허용한다. Port는 외부 능력에 대한 계약이며, 다른 Worker의 내부 구현에 접근하는 우회로가 아니다.
+* 다른 모듈의 공개 API에 의존할 수는 있다. 이때 의존 방향·계약·실패 영향이 드러나야 하고 순환 의존을 만들지 않는다. 형제의 실행 순서를 결정하는 호출이라면 조율자로 옮긴다.
+* 패턴을 적용해도 데이터 의미, 호출 순서, 시간, 실패에 대한 결합은 남는다. 이벤트나 인터페이스를 썼다는 사실만으로 독립성을 판정하지 않는다.
 
-`Main`은 시스템 전체 관점에서의 Orchestrator 역할을 수행한다. 만약 특정 Worker의 내부 구현이 복잡해진다면, 해당 Worker를 Sub-Orchestrator로 승격시켜 더 작은 단위의 하위 Worker들을 관리하는 재귀적인 형태로 확장한다.
+## 2. 구성 요소
 
-## 2. 핵심 원칙 요약
+| 요소 | 소유하는 책임 | 알아야 하는 것 |
+|---|---|---|
+| 조립 진입점 (`Main`, app bootstrap) | 설정 읽기, 객체 생성, 수명·연결 구성 | 구체 구현과 조립 방식 |
+| Orchestrator | 한 유스케이스의 순서·분기·취소·부분 실패 | 참여 조각의 공개 계약 |
+| Worker | 응집된 비즈니스 규칙과 자신의 상태 | 입력, 출력, 주입된 계약 |
+| Port | 필요한 외부 능력의 경계 | 호출 의미, 데이터, 오류 계약 |
+| Gateway/Adapter | DB·API·파일 등 외부 접근과 기술 변환 | 외부 SDK·프로토콜, 구현할 Port |
+| 공용 기능 | 실제로 함께 쓰이는 좁고 안정된 능력 | 명시적으로 전달된 입력과 의존 |
 
-| 원칙 | 설명 |
-| --- | --- |
-| **단방향 제어** | Orchestrator에서 Worker 방향으로만 직접 호출한다. |
-| **이벤트 기반 보고** | Worker는 상위 객체에 오직 '이벤트'로만 작업 결과를 알린다. |
-| **수평적 고립** | Worker 간 직접 통신을 엄격히 금지한다. |
-| **재귀적 구조** | 복잡도가 높은 Worker는 Sub-Orchestrator로 확장한다. |
-| **외부 접근 캡슐화** | 외부 시스템과의 통신은 Gateway로 분리한다. |
-| **상태 공유** | 전역에서 공유할 상태나 자원은 Service로 분리한다. |
+`Main` 하나에 시스템 전체 유스케이스를 넣지 않는다. 조립과 업무 조율은 책임이 다르며, 주문·정산 등 변경 이유가 다르면 조율자도 분리한다. 작은 프로그램에서는 같은 파일에 둘 수 있다.
 
-## 3. 구성 요소 및 역할
+`Service`라는 이름은 Singleton이나 전역 상태를 뜻하지 않는다. 공유 자원의 인스턴스 수와 수명은 조립 진입점에서 정하고 주입한다. 전역 접근자나 Service Locator로 의존을 숨기지 않는다.
 
-### Orchestrator (Main)
+## 3. 호출·반환·이벤트 선택
 
-* **역할:** 전체 시스템의 시나리오 흐름을 제어하고 중재한다.
-* **책임:** Worker 객체들을 소유하고, Worker의 이벤트를 수신하여 다음 동작을 결정한다.
-* **제약:** Orchestrator가 직접 비즈니스 로직을 연산하는 것을 지양한다.
+| 상황 | 기본 표현 | 추가로 정할 것 |
+|---|---|---|
+| 요청 하나에 결과 하나, 순차 처리 | 직접 호출 + 반환값 또는 `await` | 입력·출력, 오류, 취소 |
+| 진행률·상태 변화 또는 여러 독립 구독자 | 이벤트 | 발행 시점, 구독 수명, 재진입·구독자 실패 |
+| 프로세스 밖 통신 | Gateway를 통한 요청/응답 또는 메시지 | 전달 보장, 타임아웃, 중복, 호환성 |
 
-### Worker
+Worker가 결과를 반환하는 것은 상위를 참조하는 것이 아니다. 일회성 결과를 보고하려고 완료·실패 이벤트와 구독 해제를 강제로 만들지 않는다. 이벤트가 필요하면 조율자가 구독을 연결하고 해제 책임까지 가진다. 작업 완료 결과와 완료 이벤트를 함께 제공한다면 무엇이 업무 성공의 기준인지 명시한다.
 
-* **역할:** 할당된 특정 기능만 수행하는 독립적인 실행 단위이다.
-* **책임:** 오직 자신의 임무에만 집중한다.
-* **제약:** 상위 객체(Orchestrator)나 형제 객체(다른 Worker)의 존재를 알지 못해야 한다.
+조율 방식(Orchestration/Choreography), 프로세스 경계, 동기·비동기 전송은 별개로 결정한다. Orchestrator도 메시지를 통해 비동기로 조율할 수 있다. [Method-R](./method-R.md)에서 설계 단계별로 이 결정을 기록한다.
 
-### Gateway
+## 4. 상태와 실패 책임
 
-* **역할:** 외부 시스템(데이터 레이크, DB, API 등)과 직접 통신하며, 특정 외부 리소스에 대한 접근을 캡슐화하는 독립 단위이다.
-* **책임:** 상위 계층(Orchestrator, Worker)이 인프라 세부사항을 몰라도 되게, 외부 시스템의 복잡성을 내부에 감추고 깔끔한 인터페이스를 제공한다.
-* **제약:** Worker와 동일하게 상위 객체나 형제 객체의 존재를 알지 못해야 한다.
-* **Worker와의 차이:**
+* Worker는 자신의 비즈니스 상태를 소유한다. 조율자는 현재 단계, 실행 식별자 등 워크플로 상태를 소유하며 Worker의 내부 상태를 직접 수정하지 않는다.
+* Gateway는 외부 기술 오류를 계약에서 정한 오류로 변환한다. 업무상 거절과 일시적인 통신 실패를 구별한다.
+* 취소와 타임아웃은 호출 경로에 전달한다. 재시도는 정한 계층 한 곳에서 수행하며, 부작용이 있는 호출은 멱등성·중복 방지 조건을 먼저 확인한다.
+* 여러 단계가 성공한 뒤 실패하면 조율자가 후속 정책을 결정한다. 로컬 트랜잭션의 rollback과 이미 외부에 반영된 효과의 보상을 구분한다. 보상 자체도 실패할 수 있다.
+* 이벤트에는 필요한 실행 식별자를 포함한다. 중복·지연 이벤트가 다른 실행을 완료시키거나 취소된 실행을 되살리지 않게 한다.
 
-| 구분 | Worker | Gateway |
-| --- | --- | --- |
-| 통신 대상 | 시스템 내부 데이터 처리 | 외부 시스템(DB, API, 스토리지)과 통신 |
-| 핵심 역할 | 비즈니스 로직 수행 | 외부 리소스 접근 캡슐화 |
-| 의존성 | 내부 모듈만 의존 | 외부 프로토콜·SDK에 의존 |
-| 사용 시점 | 데이터 가공, 검증, 변환 등 | 데이터 조회, 저장, 외부 API 호출 등 |
+## 5. 분할과 병합
 
-> **설계 기준:** 외부 시스템과의 통신이 필요한 로직은 Gateway로 분리한다. 상위 계층은 Gateway의 인터페이스만 알면 되고, 통신 프로토콜이나 인프라 설정을 직접 다루지 않는다.
+Sub-Orchestrator는 내부에 독립 책임과 별도 조율 규칙이 생길 때 도입한다. 단계가 세 개라는 이유나 클래스가 길다는 이유만으로 승격하지 않는다.
 
-### Service
+| 관찰 | 검토할 변경 |
+|---|---|
+| 한 Worker에 외부 SDK와 비즈니스 규칙이 섞임 | Port와 Gateway로 외부 의존 분리 |
+| Worker들이 서로 다음 단계를 지시함 | 유스케이스 조율자로 순서·분기 이동 |
+| Worker들이 같은 불변식을 나눠 갖고 항상 함께 바뀜 | 하나의 책임으로 병합 |
+| Orchestrator가 도메인 데이터의 필드를 계산·수정함 | 규칙을 데이터 소유 Worker로 이동 |
+| 조율자에 관련 없는 여러 기능이 누적됨 | 유스케이스별 조율자로 분리 |
+| 전달만 하는 Worker가 연속으로 생김 | 중간 계층의 계약 가치가 없다면 제거 |
 
-* **역할:** 시스템 전역에서 공유해야 하는 기능이나 상태를 제공한다.
-* **책임:** 애플리케이션 내에서 단일 인스턴스(Singleton)로 관리된다.
-* **특징:** 무상태(Stateless)인 Utility와 달리 지속적으로 상태(State)를 보유하고 관리한다.
+## 6. C# 예제: 가져오기 흐름
 
-## 4. 호출 및 통신 규약
-
-객체 간 결합도를 낮추고 유지보수성을 높이기 위한 필수 통신 규칙이다.
-
-* **하향식 호출 (Direct Command): `Orchestrator → Worker**`
-상위 객체가 하위 Worker의 메서드를 직접 호출하여 작업을 지시한다.
-* **상향식 보고 (Event Notification): `Worker → Orchestrator**`
-Worker는 상위 객체를 참조하지 않는다. 작업 완료, 오류 발생, 상태 변경 시 오직 **이벤트(Event)**를 발행하여 외부에 알린다.
-* **수평적 고립 (Isolation): `Worker ↔ Worker (직접 호출 금지)**`
-Worker끼리는 서로 직접 호출할 수 없다. 데이터를 전달하거나 작업 흐름을 이어가려면 반드시 Orchestrator를 거쳐야 한다.
-*(흐름: Worker A 이벤트 발행 → Orchestrator 수신 → Orchestrator가 Worker B 호출)*
-
-## 5. 구조적 확장 및 변경 기준
-
-특정 Worker가 비대해지거나 논리적 단계가 복잡해질 경우, 가독성과 독립성을 유지하기 위해 아래 기준을 따른다.
-
-* **Worker의 재귀적 분할 (Recursive Division)**
-내부 로직을 여러 하위 Worker로 분할하고, 기존 Worker는 이들을 조율하는 중간 관리자(Sub-Orchestrator) 역할을 수행한다.
-* **외부 통신의 Gateway 분리 (Gateway Extraction)**
-Worker 내부에 외부 시스템 호출 로직이 섞여 있다면, 해당 로직을 Gateway로 분리하여 Worker가 순수한 비즈니스 로직에만 집중하도록 한다.
-* **Worker 간 의존성 해소 (Dependency Resolution)**
-* **공통 데이터/기능 공유가 필요할 때:** Service로 분리하여 Orchestrator가 주입한다.
-* **기능적 결합도가 너무 높을 때:** 하나의 Worker로 병합한다.
-* **작업 순서 제어가 필요할 때:** 제어 로직을 분리하여 Orchestrator로 이관한다.
-
----
-
-## 6. 구현 예제
-
-파일을 개별적으로 분리하여 가독성을 높이고 단일 책임 원칙(SRP)을 준수한 C# 구현 예제이다.
-
-### Service (공유 자원 - Singleton)
+파싱 Worker는 저장 방식을 모르고, 저장 Port는 파싱 과정을 모른다. 조율자만 둘의 결과를 연결한다. 저장 작업을 그대로 감싸는 별도 업로드 Worker는 만들지 않는다. 아래 타입은 함께 컴파일할 수 있으며, 실제 파일 배치는 [프로젝트 구조 가이드](./project-structure-guide.md)에 따라 책임 단위로 정한다.
 
 ```csharp
-// LogService.cs
-public class LogService
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+
+public abstract record ParseResult
 {
-    private static readonly Lazy<LogService> _instance =
-        new Lazy<LogService>(() => new LogService());
+    public sealed record Valid(IReadOnlyList<string> Rows) : ParseResult;
+    public sealed record Invalid(string Code) : ParseResult;
+}
 
-    public static LogService Instance => _instance.Value;
-
-    private LogService() { }
-
-    public void WriteLog(string message)
+public sealed class FileParserWorker
+{
+    public ParseResult Parse(string text)
     {
-        Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] {message}");
+        var rows = text.Split('\n')
+            .Select(row => row.Trim())
+            .Where(row => row.Length > 0)
+            .ToArray();
+
+        if (rows.Length == 0)
+            return new ParseResult.Invalid("empty_input");
+
+        return new ParseResult.Valid(Array.AsReadOnly(rows));
     }
 }
 
-```
-
-### Worker 1 (파일 파싱)
-
-```csharp
-// FileParserWorker.cs
-public class FileParserWorker
+public interface IImportStore
 {
-    public event Action<ParsedData> OnParseCompleted;
-    public event Action<string> OnParseFailed;
-
-    public void StartParsing(string filePath)
-    {
-        LogService.Instance.WriteLog($"파싱 시작: {filePath}");
-
-        try
-        {
-            var data = Parse(filePath);
-            LogService.Instance.WriteLog("파싱 완료");
-            OnParseCompleted?.Invoke(data);
-        }
-        catch (Exception ex)
-        {
-            LogService.Instance.WriteLog($"파싱 실패: {ex.Message}");
-            OnParseFailed?.Invoke(ex.Message);
-        }
-    }
-
-    private ParsedData Parse(string filePath) { /* 파싱 로직 */ return new ParsedData(); }
+    Task SaveAsync(IReadOnlyList<string> rows, CancellationToken cancellationToken);
 }
 
-```
-
-### Worker 2 (데이터 검증)
-
-```csharp
-// DataValidatorWorker.cs
-public class DataValidatorWorker
+public sealed class ImportStoreUnavailableException : Exception
 {
-    public event Action<ValidatedData> OnValidationCompleted;
-    public event Action<string> OnValidationFailed;
-
-    public void Validate(ParsedData data)
-    {
-        LogService.Instance.WriteLog("검증 시작");
-
-        var errors = CheckRules(data);
-        if (errors.Count == 0)
-        {
-            LogService.Instance.WriteLog("검증 통과");
-            OnValidationCompleted?.Invoke(new ValidatedData(data));
-        }
-        else
-        {
-            LogService.Instance.WriteLog($"검증 실패: {errors.Count}건");
-            OnValidationFailed?.Invoke(string.Join(", ", errors));
-        }
-    }
-
-    private List<string> CheckRules(ParsedData data) { /* 검증 로직 */ return new List<string>(); }
+    public ImportStoreUnavailableException(string message) : base(message) { }
 }
 
-```
-
-### Worker 3 (DB 업로드)
-
-```csharp
-// DbUploaderWorker.cs
-public class DbUploaderWorker
+public abstract record ImportResult
 {
-    public event Action OnUploadCompleted;
-    public event Action<string> OnUploadFailed;
-
-    public void Upload(ValidatedData data)
-    {
-        LogService.Instance.WriteLog("DB 업로드 시작");
-
-        try
-        {
-            SaveToDatabase(data);
-            LogService.Instance.WriteLog("DB 업로드 완료");
-            OnUploadCompleted?.Invoke();
-        }
-        catch (Exception ex)
-        {
-            LogService.Instance.WriteLog($"DB 업로드 실패: {ex.Message}");
-            OnUploadFailed?.Invoke(ex.Message);
-        }
-    }
-
-    private void SaveToDatabase(ValidatedData data) { /* DB 저장 로직 */ }
+    public sealed record Completed(int Count) : ImportResult;
+    public sealed record Rejected(string Code) : ImportResult;
+    public sealed record Unavailable : ImportResult;
 }
 
-```
-
-### Orchestrator (흐름 제어)
-
-```csharp
-// MainOrchestrator.cs
-public class MainOrchestrator
+public sealed class ImportOrchestrator
 {
     private readonly FileParserWorker _parser;
-    private readonly DataValidatorWorker _validator;
-    private readonly DbUploaderWorker _uploader;
+    private readonly IImportStore _store;
 
-    public MainOrchestrator()
+    public ImportOrchestrator(FileParserWorker parser, IImportStore store)
     {
-        _parser = new FileParserWorker();
-        _validator = new DataValidatorWorker();
-        _uploader = new DbUploaderWorker();
-
-        WireEvents();
+        _parser = parser;
+        _store = store;
     }
 
-    private void WireEvents()
+    public async Task<ImportResult> RunAsync(
+        string text, CancellationToken cancellationToken)
     {
-        // Parser 완료 → Validator 시작
-        _parser.OnParseCompleted += data => _validator.Validate(data);
-        _parser.OnParseFailed += HandleError;
+        cancellationToken.ThrowIfCancellationRequested();
+        var parsed = _parser.Parse(text);
+        if (parsed is ParseResult.Invalid invalid)
+            return new ImportResult.Rejected(invalid.Code);
 
-        // Validator 완료 → Uploader 시작
-        _validator.OnValidationCompleted += data => _uploader.Upload(data);
-        _validator.OnValidationFailed += HandleError;
-
-        // Uploader 완료 → 프로세스 종료
-        _uploader.OnUploadCompleted += () =>
-            LogService.Instance.WriteLog("전체 프로세스 완료");
-        _uploader.OnUploadFailed += HandleError;
-    }
-
-    public void Run(string filePath)
-    {
-        LogService.Instance.WriteLog("===== 프로세스 시작 =====");
-        _parser.StartParsing(filePath);
-    }
-
-    private void HandleError(string error)
-    {
-        LogService.Instance.WriteLog($"[ERROR] 프로세스 중단: {error}");
-    }
-}
-
-```
-
-### Gateway (외부 시스템 접근 캡슐화)
-
-위 예제에서 DB 업로드 Worker의 외부 시스템 접근 로직을 Gateway로 분리하는 예제이다. Worker는 비즈니스 로직에만 집중하고, Gateway가 외부 통신의 복잡성을 감춘다.
-
-```csharp
-// DatabaseGateway.cs — 외부 DB 접근을 캡슐화하는 Gateway
-public class DatabaseGateway
-{
-    private readonly string _connectionString;
-
-    public DatabaseAgent(string connectionString)
-    {
-        _connectionString = connectionString;
-    }
-
-    public void Save(ValidatedData data)
-    {
-        LogService.Instance.WriteLog("DB 연결 및 저장 시작");
-
-        using var connection = new SqlConnection(_connectionString);
-        connection.Open();
-
-        using var command = connection.CreateCommand();
-        command.CommandText = BuildInsertQuery(data);
-        command.ExecuteNonQuery();
-
-        LogService.Instance.WriteLog("DB 저장 완료");
-    }
-
-    private string BuildInsertQuery(ValidatedData data) { /* SQL 구성 */ return ""; }
-}
-```
-
-```csharp
-// DbUploaderWorker.cs — Gateway를 사용하여 외부 통신 로직을 분리한 Worker
-public class DbUploaderWorker
-{
-    private readonly DatabaseGateway _dbGateway;
-
-    public event Action OnUploadCompleted;
-    public event Action<string> OnUploadFailed;
-
-    public DbUploaderWorker(DatabaseGateway dbGateway)
-    {
-        _dbGateway = dbGateway;
-    }
-
-    public void Upload(ValidatedData data)
-    {
-        LogService.Instance.WriteLog("DB 업로드 시작");
-
+        var valid = (ParseResult.Valid)parsed;
         try
         {
-            _dbGateway.Save(data);
-            LogService.Instance.WriteLog("DB 업로드 완료");
-            OnUploadCompleted?.Invoke();
+            await _store.SaveAsync(valid.Rows, cancellationToken);
+            return new ImportResult.Completed(valid.Rows.Count);
         }
-        catch (Exception ex)
+        catch (ImportStoreUnavailableException)
         {
-            LogService.Instance.WriteLog($"DB 업로드 실패: {ex.Message}");
-            OnUploadFailed?.Invoke(ex.Message);
+            return new ImportResult.Unavailable();
         }
     }
 }
 ```
 
-> **핵심 포인트:** Worker는 "데이터를 저장한다"는 비즈니스 흐름만 담당하고, Gateway가 DB 연결·쿼리 실행 등 인프라 세부사항을 캡슐화한다. DB가 교체되더라도 Worker는 변경할 필요가 없다.
+예제의 `IImportStore`는 **한 번의 호출에서 전체 행을 저장하거나 전혀 반영하지 않는 저장소**를 전제한다. Gateway 구현은 이 계약을 만족해야 한다. `Unavailable`은 확정된 미반영 실패에만 사용하며, 원격 저장 성공 여부를 모르는 경우는 실제 계약에 별도 결과와 조회·복구 정책을 추가한다. 예제는 자동 재시도를 하지 않는다. 반복 요청을 허용하는 제품이라면 저장 전에 실행 ID와 멱등성 계약을 추가한다.
+
+예상한 저장 불가만 결과로 변환하고 취소와 예상 밖 결함은 호출자에게 전달한다. 실제 Gateway는 좁은 저장 계약을 구현하며 연결·트랜잭션을 관리한다. 입력 형식이나 DB 구현을 바꿀 때 이 예제에 없는 요구사항까지 추정하지 않는다.
+
+## 7. 검증 기준
+
+* 빈 입력이 저장을 호출하지 않고 업무 거절로 끝나는가?
+* 유효한 입력이 한 번 저장되고 저장 완료 후에만 성공하는가?
+* 저장 실패와 취소가 성공으로 바뀌지 않는가?
+* Gateway가 약속한 원자성·오류 변환을 실제 저장소 통합 검증으로 확인했는가?
+* Worker의 내부 수정에 형제 Worker 구현을 읽을 필요가 없는가?
+* 공개 계약 변경 시 소비자, 이벤트 구독 설정, 실패 경로를 함께 확인했는가?

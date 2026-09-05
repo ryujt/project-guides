@@ -2,13 +2,15 @@
 
 아키텍처 패턴별로 **무엇을 기준으로 시스템을 나누는지** 정리하고, 그 분해 기준을 문서에서 어떤 다이어그램으로 표현할지 안내한다.
 
-이 문서는 전체 설계 패턴을 고르는 문서이면서, `jobflow` / `navigation` / Mermaid 다이어그램을 어떤 상황에 써야 하는지 연결하는 가이드다.
+이 문서는 필요한 설계 관점을 고르고 `jobflow` / `navigation` / Mermaid를 어떤 상황에 쓸지 연결하는 참고서다. 모든 패턴·모든 예시를 읽거나 프로젝트에 적용할 필요는 없다. 책임·계약·데이터 소유권과 분해 중단 기준은 [module-boundary-guide.md](module-boundary-guide.md)를 먼저 적용하고, 현재 문제에 필요한 항목만 선택한다.
+
+다이어그램은 설계 패턴 자체가 아니다. 실행 흐름이 단순해 보이더라도 타입·데이터·전역 상태·시간 순서에 숨은 의존성이 남을 수 있다. 각 그림은 경계, 공개 계약, 화살표 의미를 본문과 연결해야 한다. 선택한 독자 DSL은 원본으로 유지하고, 아래 Mermaid 예시는 정적 관계·상태 모델·시간 순서의 추가 관점으로 참고한다. 기존 DSL을 Mermaid로 일괄 대체하지 않는다. 기존 `master:` 예시는 보존하며, `orchestrator:`/`scope:`와의 의미·렌더러 호환은 [job-flow-diagram-guide.md](job-flow-diagram-guide.md)를 따른다.
 
 ---
 
 ## 핵심 관점
 
-`jobflow`는 **실행 흐름을 중심으로 시스템을 쪼개는 표현 방식**이다.
+`jobflow`는 **객체/조각의 실행 흐름을 표현하는 독자 다이어그램**이다. 흐름을 검토하며 책임을 나눌 수 있지만, 단계마다 반드시 별도 모듈을 만들라는 뜻은 아니다.
 
 오케스트레이터가 흐름을 잡고 워커가 개별 작업을 수행한다. 복잡한 워커나 모듈은 다시 별도 `jobflow`로 세분화할 수 있으므로, jobflow는 재귀적 분해와 잘 맞는다.
 
@@ -16,7 +18,7 @@
 
 | 기준 | 대표 패턴 |
 |---|---|
-| 실행 흐름 | jobflow, Pipeline, Saga |
+| 실행 흐름 | Pipeline, Saga (`jobflow`로 표현) |
 | 역할 계층 | Layered Architecture |
 | 의존성 방향 | Clean Architecture, Hexagonal Architecture |
 | 업무 의미 | DDD, Bounded Context |
@@ -26,7 +28,7 @@
 | 요청 단위 | Command / Handler, CQRS |
 | 독립 실행 단위 | Actor Model, Microservices |
 | 코어와 확장 | Microkernel / Plugin Architecture |
-| 화면/사용자 흐름 | Navigation Diagram |
+| 화면/사용자 흐름 | 사용자 시나리오 (`navigation`으로 표현) |
 
 ---
 
@@ -47,9 +49,18 @@
 | **Microservices / Modular Monolith** | 배포 또는 모듈 경계 | 기능을 독립 서비스 또는 독립 모듈로 분리 | 큰 시스템을 팀/도메인 단위로 관리 | Mermaid `flowchart`, `deployment` 스타일 |
 | **Saga Pattern** | 장기 트랜잭션 단계 | 여러 작업을 단계별로 실행하고 실패 시 보상 작업 수행 | 결제, 예약, 주문처럼 분산 트랜잭션이 필요한 경우 | `jobflow`, Mermaid `sequenceDiagram` |
 | **Microkernel / Plugin Architecture** | 코어와 확장 | 핵심 엔진은 작게 두고 기능은 플러그인으로 추가 | IDE, 에디터, 분석 도구, 확장형 플랫폼 | Mermaid `flowchart`, `classDiagram` |
-| **Navigation Flow / Screen Flow** | 화면/사용자 흐름 | 화면, API, 내부 프로세스를 순서대로 연결 | 프론트엔드, API, 사용자 시나리오 설명 | `navigation` |
+| **Navigation Flow / Screen Flow** | 화면/사용자 흐름 | 화면과 이동 판단을 연결 | 사용자 시나리오 설명 | `navigation` |
 
 ---
+
+## 선택 전 확인
+
+- 현재 변경에서 함께 바뀌는 업무 규칙과 상태 소유자는 누구인가?
+- 경계를 넘길 입력·결과·오류를 공개 계약만으로 설명할 수 있는가?
+- 새 패턴이 줄이는 구체 문제와 추가하는 맥락·운영 비용은 무엇인가?
+- 기존의 단순한 모듈과 함수로 해결할 수 있다면 추가 계층 없이 유지할 수 있는가?
+
+Layered, Clean, DDD, CQRS, Microservices는 한꺼번에 도입하는 단계가 아니다. 필요한 관점만 조합하고 선택하지 않은 패턴의 빈 산출물을 만들지 않는다.
 
 ## 전체 비교 다이어그램
 
@@ -111,7 +122,7 @@ flowchart TB
 
 * 계층 이름은 기술명이 아니라 역할명으로 쓴다.
 * `Domain`은 가능한 한 외부 기술에 의존하지 않게 표현한다.
-* 실제 요청 흐름은 별도 `jobflow`로 한 단계 더 풀어 쓴다.
+* 계층 사이 실선은 코드 의존으로 읽는다. 실제 요청 순서가 설명에 필요할 때만 별도 `jobflow`를 연결한다.
 
 ---
 
@@ -145,7 +156,7 @@ flowchart LR
 
 * 안쪽 노드는 `Domain`, `UseCase`, `Port`처럼 정책과 인터페이스로 표현한다.
 * 바깥쪽 노드는 `Adapter`, `Gateway`, `Controller`처럼 기술 접점으로 표현한다.
-* 점선은 구현 관계, 실선은 런타임 호출 방향으로 구분하면 읽기 쉽다.
+* 이 그림의 실선은 코드/계약 의존, 점선은 인터페이스 구현 관계다. 런타임 호출은 주입된 구현체로 향할 수 있으므로 별도 흐름도에서 설명한다. 의존성 방향과 런타임 호출 방향을 같은 선 의미로 섞지 않는다.
 
 ---
 
@@ -171,7 +182,7 @@ flowchart LR
 
 * Context 이름은 팀이나 DB 이름이 아니라 업무 언어로 정한다.
 * Context 사이에는 데이터베이스 테이블 공유가 아니라 API, 이벤트, 메시지 같은 통신 경계를 둔다.
-* Context 내부 구조는 Clean Architecture 또는 Layered Architecture로 다시 설계한다.
+* Context 내부 구조는 복잡도에 맞게 선택한다. 별도 계층이 필요하지 않으면 작은 모듈로 유지한다. 각 Context의 상태를 쓰는 소유자와 경계를 넘는 계약을 명시한다.
 
 ---
 
@@ -200,7 +211,7 @@ flowchart TB
 작성 가이드:
 
 * 각 컴포넌트는 입력, 출력, 이벤트를 명확히 가진 독립 부품으로 표현한다.
-* 공유 상태가 많아지면 컴포넌트 경계가 무너진다. 공유 상태는 별도 Service나 Store로 분리한다.
+* 공유 상태가 많으면 변경 책임과 소유권을 먼저 점검한다. Service/Store를 하나 더 만드는 것만으로 결합이 줄지는 않는다. 쓰기 소유자는 하나로 정하고, 소비자는 필요한 상태/명령 계약만 받는다.
 * 컴포넌트 내부의 복잡한 동작은 별도 `jobflow`로 세분화한다.
 
 ---
@@ -230,7 +241,9 @@ Saver.Save.result --> PipelineRunner.Run.result
 
 ### 6. Event-Driven Architecture
 
-이벤트를 기준으로 시스템을 연결한다. 객체들이 서로를 직접 강하게 의존하기보다 이벤트 발행/구독으로 느슨하게 연결된다.
+이벤트를 통해 사건의 발행과 후속 작업을 연결한다. 수신자 구현에 대한 직접 의존을 줄일 수 있지만 스키마·순서·시간·중복 처리에 대한 계약 의존성은 남는다.
+
+아래 jobflow는 `OrderOrchestrator`가 이벤트를 구독해 후속 작업을 연결하는 **orchestration** 예시다. 이벤트를 사용한다고 중앙 조율자가 없는 choreography가 되는 것은 아니다.
 
 ```jobflow
 master: OrderOrchestrator
@@ -241,7 +254,7 @@ PaymentService.Pay.result --> EmailService.SendReceipt
 PaymentService.Pay.result --> LogService.SavePaymentLog
 ```
 
-동일 구조를 더 큰 시스템 관점에서 보면 다음처럼 표현할 수 있다.
+브로커에 구독한 서비스들이 중앙 조율자 없이 협력하는 별도 **choreography** 예시는 다음과 같다. 아래 화살표는 코드 의존성이 아니라 사건 전달이다.
 
 ```mermaid
 flowchart LR
@@ -263,6 +276,7 @@ flowchart LR
 * `jobflow`에서는 특정 시나리오의 이벤트 구독 흐름을 보여준다.
 * Mermaid에서는 전체 이벤트 토폴로지와 Event Bus, Topic, Consumer를 보여준다.
 * 이벤트명은 과거형 도메인 사건으로 쓴다. 예: `OrderCreated`, `PaymentCompleted`.
+* 필요한 순서 보장, 멱등 처리, 소비 실패·재처리, 스키마 변경의 책임을 계약에 남긴다. 전송 기술만으로 조율 방식을 판단하지 않는다.
 
 ---
 
@@ -323,7 +337,7 @@ Payment.Request.failed --> CancelService.Cancel
 
 작성 가이드:
 
-* 상태도는 가능한 모든 상태와 전이를 보여준다.
+* 상태도는 선택한 상태 소유자와 생명주기의 허용 상태·전이를 보여준다. 다른 모듈/UI의 독립 상태까지 합치지 않는다.
 * `jobflow`는 특정 전이가 발생했을 때 어떤 객체가 어떤 작업을 하는지 보여준다.
 * 상태명은 명사 또는 과거분사, 전이 라벨은 사건이나 조건으로 쓴다.
 
@@ -387,21 +401,22 @@ flowchart LR
     QueryAPI["Query API"]
     WriteModel["Write Model<br/>Domain Aggregate"]
     ReadModel["Read Model<br/>Projection"]
-    EventStore["Event Store"]
+    WriteDB["Write DB"]
     ReadDB["Read DB"]
 
     Client --> CommandAPI
     Client --> QueryAPI
     CommandAPI --> WriteModel
-    WriteModel --> EventStore
-    EventStore --> ReadModel
+    WriteModel --> WriteDB
+    WriteDB --> ReadModel
     ReadModel --> ReadDB
     QueryAPI --> ReadDB
 ```
 
 작성 가이드:
 
-* Command 경로와 Query 경로를 한눈에 분리되게 그린다.
+* 이 예시의 화살표는 쓰기·조회·projection 갱신의 데이터 흐름이다. Command 경로와 Query 경로를 구분한다.
+* CQRS 자체가 Event Sourcing, 별도 DB, 이벤트 브로커를 요구하지는 않는다. 이 예시는 별도 읽기 모델을 갱신하는 구성이며, 갱신 책임과 일관성 요구가 있을 때 선택한다.
 * Projection 지연이 있으면 eventual consistency를 문서에 명시한다.
 * 단순 CRUD 시스템에는 과한 구조가 될 수 있으므로, 읽기 모델의 이점이 명확할 때 사용한다.
 
@@ -455,14 +470,18 @@ PaymentService.Capture.success --> InventoryService.Reserve
 PaymentService.Capture.failed --> CompensationService.CancelOrder
 InventoryService.Reserve.success --> DeliveryService.RequestDelivery
 InventoryService.Reserve.failed --> CompensationService.RefundPayment
-DeliveryService.RequestDelivery.result --> OrderSaga.Start.result
+DeliveryService.RequestDelivery.success --> OrderSaga.Start.result
+DeliveryService.RequestDelivery.failed --> CompensationService.ReleaseInventory
+CompensationService.ReleaseInventory.result --> CompensationService.RefundPayment
+CompensationService.RefundPayment.result --> CompensationService.CancelOrder
 ```
 
 작성 가이드:
 
 * 성공 경로와 실패 보상 경로를 반드시 함께 그린다.
-* 각 단계는 멱등성을 가져야 한다.
-* 보상 작업은 `Cancel`, `Refund`, `Release`처럼 원래 작업의 반대 의미가 드러나게 쓴다.
+* 재시도 가능한 단계는 멱등 키와 중복 효과 방지 책임을 정한다. 실패 응답이 부수 효과 없음과 같은지 확인한다.
+* 보상 작업은 `Cancel`, `Refund`, `Release`처럼 업무 의미를 드러내며 원래 동작을 완전히 되돌릴 수 있다고 가정하지 않는다.
+* 위는 주문 생성 성공, 결제/예약 실패 시 해당 단계의 효과 없음, 배송 요청 실패 시 접수되지 않음을 가정한 축약 예시다. 실제 구현은 timeout처럼 결과를 모르는 경우 조회·대사 계약이 필요하다. 취소 완료/보상 실패의 최종 결과, 재시도·운영 인계 책임은 별도로 명시한다.
 
 ---
 
@@ -499,7 +518,7 @@ flowchart TB
 
 ### 14. Navigation Flow / Screen Flow
 
-화면 전환, API 호출, 내부 프로세스를 기준으로 시스템을 나눈다. 사용자 시나리오와 백엔드 흐름을 함께 설명할 때 좋다.
+화면 전환과 그 판단에 필요한 API/처리를 표현한다. 화면 이름만으로 내부 모듈의 경계를 나누지 않으며 백엔드 간 통신은 이 관점에 넣지 않는다.
 
 ```navigation
 Home --> LoginForm
@@ -532,13 +551,13 @@ LoginForm --> (/signin)
 
 * `jobflow`는 전체 아키텍처 패턴 자체라기보다 **흐름을 설명하고 세분화하는 설계 표현 방식**이다.
 * DDD, Clean Architecture, Layered Architecture로 큰 구조를 잡은 뒤, 중요한 유스케이스를 `jobflow`로 풀어 쓰는 방식이 가장 자연스럽다.
-* 화면 중심 시나리오는 `navigation`, 객체/메서드 중심 시나리오는 `jobflow`, 상태 중심 로직은 `state` 또는 Mermaid `stateDiagram-v2`를 우선 사용한다.
+* 화면 중심 시나리오는 `navigation`, 객체/메서드 중심 시나리오는 `jobflow`, 상태 중심 로직은 `state`를 우선 사용하고 Mermaid `stateDiagram-v2`는 별도 관점이 필요할 때 보완한다.
 
 ---
 
 ## 실무 조합 예시
 
-보통 하나의 패턴만 쓰지 않고 다음처럼 조합한다.
+복잡한 업무 시스템에서는 필요에 따라 다음처럼 조합할 수 있다. 단순한 프로젝트의 기본 의무나 순서가 아니다.
 
 ```text
 DDD로 큰 업무 경계를 나눈다
@@ -548,14 +567,14 @@ DDD로 큰 업무 경계를 나눈다
 → 비동기 후속 처리는 Event-Driven으로 연결한다
 ```
 
-문서 작성 순서는 다음을 권장한다.
+아래는 필요한 항목만 고르는 탐색 순서다. 각 항목의 결과는 해당 경계의 계약과 링크로 연결하고 불필요한 내부 다이어그램은 생략한다.
 
 1. **큰 경계**: DDD Bounded Context 또는 Microservices/Modular Monolith 다이어그램을 먼저 그린다.
 2. **내부 구조**: 각 Context 내부를 Clean Architecture 또는 Layered Architecture로 정리한다.
 3. **요청 단위**: 주요 유스케이스를 Command/Handler로 나눈다.
 4. **실행 흐름**: 복잡한 유스케이스는 `jobflow`로 단계별 호출, 이벤트, 반환값을 표현한다.
 5. **상태 변화**: 상태가 핵심이면 State Machine을 별도 다이어그램으로 분리한다.
-6. **화면 흐름**: 사용자 화면, API, 내부 프로세스는 `navigation`으로 표현한다.
+6. **화면 흐름**: 사용자 화면 이동과 그 판단에 필요한 API/처리는 `navigation`으로 표현한다.
 
 ---
 
@@ -564,8 +583,8 @@ DDD로 큰 업무 경계를 나눈다
 | 보여주려는 것 | 우선 사용 |
 |---|---|
 | 객체 간 메서드 호출, 이벤트 구독, 반환값 전달 | `jobflow` |
-| 화면 전환, API 호출, 내부 프로세스 | `navigation` |
-| 객체 상태와 전이 | `state` 또는 Mermaid `stateDiagram-v2` |
+| 화면 전환과 그 판단에 필요한 API/처리 | `navigation` |
+| 객체 상태와 전이 | `state`; 별도 상태 모델 관점은 Mermaid `stateDiagram-v2`로 보완 |
 | 계층, 의존성 방향, 서비스 토폴로지 | Mermaid `flowchart` |
 | 클래스, 인터페이스, Handler 관계 | Mermaid `classDiagram` |
 | 시간 순서가 중요한 외부 시스템 대화 | Mermaid `sequenceDiagram` |
@@ -574,4 +593,6 @@ DDD로 큰 업무 경계를 나눈다
 
 1. **분해 기준**: 무엇을 기준으로 나누는가.
 2. **다이어그램**: 경계와 흐름이 어떻게 연결되는가.
-3. **상세 흐름 링크**: 더 복잡한 부분은 어떤 `jobflow`, `navigation`, `state` 블록으로 내려가는가.
+3. **상세 계약·흐름 링크**: 다른 조각의 구현 대신 어떤 입력·출력·오류·상태 소유권을 알면 되는가. 복잡한 부분만 하위 다이어그램으로 연결한다.
+
+검토자는 대표 변경 하나를 골라 수정해야 하는 조각과 읽어야 하는 맥락을 따라간다. 모든 그림이 작아도 관련 없는 구현을 계속 열어야 한다면 경계·계약을 다시 검토한다. 문법·의미 대조는 정적 검토이며 실제 렌더러에서의 표시 확인과 구분해 기록한다.

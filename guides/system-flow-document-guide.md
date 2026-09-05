@@ -9,7 +9,9 @@
 이 문서는 특정 백엔드 서비스 문서에만 한정하지 않는다. 프론트엔드, 백엔드, 워커, 외부 시스템,
 저장소, 배치, 사용자 인터페이스가 섞인 모든 시스템 설명 문서에 적용한다.
 
-이 문서는 다음 가이드를 함께 사용한다.
+이 문서는 작업에 해당하는 가이드만 선택해 사용한다.
+
+- [module-boundary-guide.md](module-boundary-guide.md): 책임·공개 계약·상태 소유권·최소 맥락과 분해 중단 기준
 
 - [job-flow-diagram-guide.md](job-flow-diagram-guide.md): 객체/모듈 간 메서드 호출·이벤트 흐름
 - [navigation-diagram-guide.md](navigation-diagram-guide.md): 화면/API/프로세스 흐름
@@ -58,11 +60,11 @@ Client, ChatServer, ReportDataApi, ReportGenerator, ReportRenderer
 | 정적 구성 | 어떤 조각들이 있고 누가 누구를 소유/호출하는가? | Mermaid `classDiagram`, 책임 표 |
 
 동적 흐름만 있으면 구조가 안 보이고, 정적 구성만 있으면 실제 사용 시나리오가 안 보인다.
-항상 둘을 함께 제공한다.
+전체 시스템을 설명하는 문서에는 두 관점을 함께 제공하되, 간단한 흐름은 산문·표로 충분하다. 작은 변경에는 기존 전체 문서를 링크하고 바뀐 조각과 시나리오만 갱신한다.
 
-### 3. 전체에서 부분으로 재귀적으로 내려간다
+### 3. 필요한 부분으로 재귀적으로 내려간다
 
-문서는 다음 순서로 읽히게 만든다.
+전체 문서는 아래를 탐색 순서로 삼는다. 매 작업에 모든 절을 생성하거나 읽어야 한다는 뜻은 아니다.
 
 1. 시스템 전체를 이루는 최소 조각
 2. 최소 조각 사이의 대표 흐름
@@ -112,7 +114,7 @@ SYSTEM_FLOW-problems.md
 
 ## 표준 목차
 
-아래 목차를 기본으로 사용한다.
+아래 목차는 전체 설명이 필요할 때의 선택 가능한 구성이다. 대상·독자·현재 변경을 먼저 밝히고 이미 있는 정보는 링크한다. 해당하지 않는 상태/운영/화면 절을 형식 때문에 만들지 않는다.
 
 ```markdown
 # System Flow — <시스템 요약>
@@ -120,8 +122,8 @@ SYSTEM_FLOW-problems.md
 > 객체 협력은 [job-flow-diagram-guide.md](...) 를 따른다.
 > 화면/API 흐름은 [navigation-diagram-guide.md](...) 를 따른다.
 > jobflow 에서는 Object.Method / Object.OnEvent 를 기본으로 표기하고 HTTP 경로·파라미터는 쓰지 않는다.
-> jobflow 헤더는 흐름을 조율하는 단일 객체가 있으면 orchestrator: X, 경계·Choreography 면 scope: X 로 쓴다 (method-R · master: 미사용).
-> HTTP/API 이름은 navigation 블록에서만 표기한다.
+> jobflow 헤더의 의미와 기존 master: 표기 호환은 job-flow-diagram-guide.md를 따른다. 렌더러 지원은 별도로 확인한다.
+> 실제 HTTP 경로와 queue/topic은 경계 계약 표에 적고, navigation은 사용자 화면 이동에 필요한 흐름에만 사용한다.
 > Client 입력은 Client.Send...Message, Client 내부 반응은 Client.On... 으로 표기한다.
 
 ## 0. 시스템을 이해하는 최소 조각
@@ -154,7 +156,7 @@ SYSTEM_FLOW-problems.md
 ## 6. 책임 소유 표
 ```
 
-프로젝트가 작으면 섹션 수를 줄여도 되지만 다음 네 가지는 유지한다.
+전체 설명에서 다음 정보는 찾을 수 있어야 한다. 반드시 네 개의 별도 산출물로 만들 필요는 없으며 기존 문서 링크로 대체할 수 있다.
 
 - 최소 조각
 - 동적 흐름
@@ -163,7 +165,7 @@ SYSTEM_FLOW-problems.md
 
 ## 작성 전 조사 체크리스트
 
-현재 시스템을 설명하는 경우, 문서 작성 전에 다음을 확인한다.
+현재 시스템을 설명하는 경우, 담당 조각과 공개 계약에서 시작해 다음 중 관련 항목을 확인한다. 기존 근거 파일·심볼과 기준 시점을 남기고, 모르는 항목은 추측으로 채우지 않는다.
 
 - 사용자/외부 actor 와 첫 진입점
 - 핵심 use case 2~5개
@@ -196,13 +198,13 @@ SYSTEM_FLOW-problems.md
 좋은 최소 조각은 다음 조건을 만족한다.
 
 - 독자가 이 표만 보고 시스템의 주요 역할을 말할 수 있다.
-- 조각 수가 너무 많지 않다. 보통 4~8개가 적당하다.
+- 처음 보는 독자가 한 번에 설명할 수 있는 수로 제한한다. 4~8개는 예시 규모일 뿐, 수를 맞추려고 책임을 합치거나 나누지 않는다.
 - 파일명이나 private class 보다 책임이 먼저 보인다.
 - 상세 구현을 몰라도 대표 시나리오를 따라갈 수 있다.
 
 ### 0-1. 전체 시스템 구성 다이어그램
 
-Mermaid `classDiagram` 으로 전체 구성을 보여준다.
+의존 관계가 중요한 경우 Mermaid `flowchart` 또는 `classDiagram`으로 구성을 보여준다. 화살표가 공개 계약 의존인지, 소유인지, 런타임 호출인지 범례를 정해 섞지 않는다.
 여기서 class 는 반드시 실제 OOP 클래스일 필요는 없다. 시스템 이해에 필요한 구성 단위면 된다.
 
 ```mermaid
@@ -230,15 +232,16 @@ class ExternalGateway {
   +call()
 }
 
-Client --> ApiBoundary : user input
-ApiBoundary --> SystemOrchestrator
-SystemOrchestrator --> DomainWorker : delegate work
-SystemOrchestrator --> StorageGateway : persist state
-DomainWorker --> ExternalGateway : fetch external data
-SystemOrchestrator --> Client : result event
+Client --> ApiBoundary : API contract
+ApiBoundary --> SystemOrchestrator : use case contract
+SystemOrchestrator --> DomainWorker : work contract
+SystemOrchestrator --> StorageGateway : storage contract
+DomainWorker --> ExternalGateway : external access port
 ```
 
-구성 다이어그램에는 다음만 넣는다.
+위 실선은 공개 계약에 대한 의존을 나타내며 인스턴스 소유나 응답의 이동을 뜻하지 않는다. `DomainWorker`의 외부 접근 포트는 그 책임 안의 의존성이다. Gateway가 별도의 업무 규칙을 소유하는 서비스라면 해당 모듈 경계를 따로 밝힌다.
+
+구성 다이어그램에는 해당 범위의 다음 요소만 넣는다.
 
 - 주요 actor
 - boundary: 화면, API route, queue consumer, scheduler
@@ -267,16 +270,14 @@ private helper, DTO, config constant, 단순 formatter 는 넣지 않는다.
 ### 1. 동적 흐름
 
 동적 흐름은 "시간 순서"를 설명한다.
-가장 먼저 최상위 jobflow 를 쓰고, 그 다음 필요한 시나리오를 세분화한다.
+대상 시나리오의 가장 높은 필요한 경계에서 시작하고, 복잡한 부분만 세분화한다.
 
 ```jobflow
 orchestrator: ApiServer
-Object: Client, ApiServer, Worker, Storage, ExternalSystem
+Object: Client, ApiServer, Worker, Storage
 
 Client.SendCommand --> ApiServer.HandleCommand
 ApiServer.HandleCommand --> Worker.Run
-Worker.Run --> ExternalSystem.FetchData
-ExternalSystem.FetchData.result --> Worker.Run.result
 Worker.Run.result --> Storage.SaveResult
 Storage.SaveResult.result --> ApiServer.HandleCommand.result
 ApiServer.HandleCommand.result --> Client.OnResult
@@ -287,21 +288,17 @@ ApiServer.HandleCommand.result --> Client.OnResult
 - 최소 조각만 사용한다.
 - HTTP path, payload, DB table, private method 를 넣지 않는다.
 - `A.result --> B` 는 orchestrator(ApiServer) 가 A 결과를 받아 B 로 넘긴다는 뜻이다.
-- 복잡한 내부 과정은 다음 섹션에서 새 jobflow 로 연다.
+- 복잡한 내부 과정은 다음 섹션에서 새 jobflow로 연다. 이 예시의 외부 데이터 조회는 Worker의 내부 책임이므로 상위에는 `Worker.Run`만 보인다.
+- 응답과 저장 결과의 의미는 공개 계약에서 정한다. 예시의 `Storage.SaveResult`는 저장된 결과를 반환한다.
 
 ### 1-2. 화면/API/navigation 흐름
 
-사용자 화면, API, 내부 API, queue topic 등 입출력 경계를 보여줄 때는 `navigation` 을 쓴다.
+사용자 화면 이동이나 그 이동을 판단하는 API/처리는 `navigation`을 쓴다. 내부 API·queue/topic·백엔드 모듈 협력은 경계 계약 표와 `jobflow`로 설명한다. 외부 대화의 시간 순서를 추가로 보여줄 때 Mermaid `sequenceDiagram`을 보완한다.
 
 ```navigation
-Dashboard --> (/reports/render)
-(/reports/render) --> Dashboard : progress
-(/reports/render) --> Dashboard : result
+Dashboard --> (/reports/render) : 렌더 요청
+(/reports/render) --> ReportPreview : result
 (/reports/render) --> Dashboard : error
-
-ApiServer --> (/internal/jobs/run)
-(/internal/jobs/run) --> ApiServer : done
-(/internal/jobs/run) --> ApiServer : error
 ```
 
 실제 endpoint 를 설명해야 하면 표를 붙인다.
@@ -318,7 +315,7 @@ ApiServer --> (/internal/jobs/run)
 
 SSE, WebSocket, queue, scheduler, timeout/cancel 은 별도 섹션으로 분리한다.
 
-브로커/큐로 중개되는 비동기는 method-R 상 Choreography 이므로 `scope:` 로 선언하고 `MessageBus` 채널을 명시한다(중앙 조율자 없음).
+브로커/큐 사용 여부와 중앙 조율자의 유무는 별개다. 중앙 조율자가 다음 단계를 지시하면 비동기라도 orchestration이다. 아래는 중앙 조율자 없이 발행·구독하는 예시이므로 `scope:`를 사용한다. 헤더 지원 여부는 대상 렌더러에서 별도로 확인한다.
 
 ```jobflow
 scope: ReportSystem
@@ -336,7 +333,8 @@ ApiServer.HandleJobCompleted --> Client.OnCompleted
 - 누가 연결을 열고 닫는가
 - progress/result/error event 이름
 - cancel/timeout/shutdown 때 persist 여부
-- 중복 처리나 재시도 정책
+- 중복 처리나 재시도 정책과 책임자, 순서 보장 범위, 처리 결과를 기다리는 쪽의 실패/timeout
+- 전달 성공과 업무 성공의 차이, 취소/재시도 중 상태를 변경하는 단일 소유자
 
 ### 2. 정적 구성
 
@@ -402,8 +400,8 @@ StorageGateway.Save.result --> SystemOrchestrator.HandleCommand.result
 orchestrator: Runtime
 Object: Runtime, Auth, Metrics, DisconnectWatcher, RouteHandler
 Runtime.Start --> Auth.Install
-Auth.Install.result --> Metrics.Install
-Metrics.Install.result --> RouteHandler.Mount
+Runtime.Start --> Metrics.Install
+Runtime.Start --> RouteHandler.Mount
 DisconnectWatcher.OnClose --> RouteHandler.AbortWork
 ```
 
@@ -423,15 +421,17 @@ DisconnectWatcher.OnClose --> RouteHandler.AbortWork
 마지막에는 책임 소유를 표로 닫는다.
 
 ```markdown
-| 책임 | 소유 조각 | 내부 orchestrator |
+| 책임 | 소유 조각 | 공개 접점/내부 역할 |
 |---|---|---|
-| 사용자 입력 진입점 | `ApiServer` | `SystemOrchestrator` |
-| 장기 작업 실행 | `Worker` | `PipelineWorker` |
-| 상태 저장/조회 | `Storage` | `StorageGateway` |
-| 외부 데이터 조회 | `ExternalSystem` 접근은 `ExternalGateway` 가 캡슐화 | `ExternalGateway` |
+| 사용자 입력 진입점 | `ApiServer` | `SystemOrchestrator`가 유스케이스 조율 |
+| 장기 작업 실행 | `Worker` | `Run` 계약, 필요할 때 내부 파이프라인 분해 |
+| 결과 데이터 보존 | 결과 저장 모듈 | `StorageGateway`는 저장/조회 어댑터 |
+| 외부 데이터 조회 | `Worker` | `ExternalGateway`는 외부 접근 어댑터 |
 ```
 
-이 표는 문서의 결론이다.
+Gateway가 반드시 orchestrator인 것은 아니다. 업무 상태의 변경 권한과 물리적 저장 접근 책임도 구분한다. 앞의 책임 표에 충분히 표현돼 있다면 이 표는 반복하지 않는다.
+
+이 표는 문서의 책임 색인이다.
 "누가 책임지는가"가 모호하면 시스템 설명은 끝난 것이 아니다.
 
 ## 표기 규칙
@@ -440,14 +440,17 @@ DisconnectWatcher.OnClose --> RouteHandler.AbortWork
 
 | 상황 | 사용 |
 |---|---|
-| 전체 구성, 소유/호출 관계 | Mermaid `classDiagram` |
+| 전체 구성, 소유/의존 관계 | Mermaid `flowchart` 또는 `classDiagram`, 범례로 관계 구분 |
 | 객체/모듈 간 실행 순서 | `jobflow` |
-| 화면/API/queue/topic 등 경계 흐름 | `navigation` |
-| 상태 전이 | `state` 또는 Mermaid `stateDiagram-v2` |
+| 사용자 화면 이동 및 그 판단에 필요한 API | `navigation` |
+| 내부 API/queue/topic 메시지 흐름 | 경계 계약 표와 `jobflow`; 시간 순서는 Mermaid `sequenceDiagram`으로 보완 |
+| 상태 전이 | `state`; 필요한 별도 상태 관점은 Mermaid `stateDiagram-v2`로 보완 |
+
+선택한 독자 DSL을 원본으로 유지한다. Mermaid는 정적 구성·시간 순서 같은 추가 관점을 보완하며 기존 jobflow/state를 대체하지 않는다.
 
 ### jobflow 규칙
 
-- 헤더는 method-R 표기를 따른다 — 흐름을 조율하는 단일 객체가 있으면 `orchestrator: X`, 외부 경계나 Choreography 처럼 조율자가 없으면 `scope: X` 로 선언한다. (과거 `master:` 표기는 method-R 로 통일했으므로 쓰지 않는다.)
+- 헤더의 의미는 [job-flow-diagram-guide.md](job-flow-diagram-guide.md)를 따른다. `orchestrator:`는 실제 조율자, `scope:`는 관찰 경계다. 기존 `master:`의 의미와 렌더러 지원을 확인하지 않고 일괄 치환하지 않는다.
 - `Object.Method` / `Object.OnEvent` 형식을 사용한다.
 - HTTP path, parameter, JSON payload 는 쓰지 않는다.
 - Client 입력은 `Client.Send...Message` 로 쓴다.
@@ -483,23 +486,23 @@ PaymentGateway.Charge.result --> Client.OnPaymentCompleted
 
 ## 작성 체크리스트
 
-- [ ] 시스템을 이해하는 최소 조각이 4~8개 수준으로 정리됐다.
+- [ ] 대상 조각·시나리오·기준 시점이 명확하고, 이번 작업에 필요한 맥락만 펼쳤다.
 - [ ] 최소 조각 표만 보고도 시스템의 주요 책임을 설명할 수 있다.
-- [ ] 전체 구성 다이어그램이 있다.
+- [ ] 대상 조각의 의존 관계를 도식/표 또는 기존 문서 링크로 확인할 수 있다.
 - [ ] 대표 시나리오 요약이 있다.
 - [ ] 최상위 jobflow 는 최소 조각 사이의 동적 흐름만 보여준다.
-- [ ] 화면/API/queue/topic 흐름은 navigation 으로 분리했다.
+- [ ] navigation은 화면 이동에만 쓰고 내부 API/queue/topic은 경계 계약과 실행 흐름으로 분리했다.
 - [ ] 내부 상세 흐름은 필요한 조각만 재귀적으로 펼쳤다.
 - [ ] 정적 구성과 책임 관계를 표로 정리했다.
 - [ ] 상태와 데이터는 흐름 이해에 필요한 것만 적었다.
-- [ ] 런타임/운영 경계가 있다.
-- [ ] 마지막에 책임 소유 표가 있다.
+- [ ] 해당 변경에 관련된 운영 경계와 실패/취소/중복 처리의 소유자를 설명했다.
+- [ ] 공개 계약과 데이터·상태의 단일 소유자를 표 또는 링크에서 찾을 수 있다.
 - [ ] 현재 구현과 TO-BE 설계를 섞어 쓰지 않았다.
 - [ ] jobflow 에 HTTP path, parameter, JSON payload 를 쓰지 않았다.
 
 ## 검증 방법
 
-문서 작성 후 다음을 확인한다.
+문서 작성 후 다음으로 검토할 위치와 공백 오류를 찾는다. 검색 결과가 있다는 것 자체는 실패가 아니며, `미정`은 근거 없는 확정을 피하기 위한 유효한 상태일 수 있다.
 
 ```bash
 rg -n "TODO|미정|나중에|임시" SYSTEM_FLOW.md
@@ -508,7 +511,9 @@ git diff --check -- SYSTEM_FLOW.md
 ```
 
 현재 코드 기준 문서라면 구성 단위 이름과 public method 이름을 코드에서 확인한다.
-설계 문서라면 각 조각이 실제 구현 가능한 책임 단위인지 확인한다.
+설계 문서라면 각 조각이 실제 구현 가능한 책임 단위인지 확인한다. 성공·중요 실패 시나리오를 공개 계약만으로 따라갈 수 있는지, 관련 없는 조각 내부를 열어야 하는 지점이 있는지 검토한다.
+
+이 검사는 문서 정적 검토다. 실제 파서·렌더러 실행, 제품 동작 검증과 구분하고 실행하지 않은 검증은 미실행으로 남긴다.
 
 ## 안티패턴
 
@@ -520,16 +525,16 @@ git diff --check -- SYSTEM_FLOW.md
 ### 2. 정적 구성만 쓰기
 
 컴포넌트 목록만 있으면 실제 요청이 어떻게 처리되는지 알 수 없다.
-반드시 대표 jobflow 를 함께 쓴다.
+대표 시나리오를 jobflow 또는 간단한 산문으로 연결한다.
 
 ### 3. 동적 흐름만 쓰기
 
 시나리오만 있으면 누가 무엇을 소유하는지 흐려진다.
-반드시 전체 구성 다이어그램과 책임 표를 함께 쓴다.
+해당 조각의 구성·책임 표나 기존 전체 문서 링크를 연결한다.
 
 ### 4. route 를 객체처럼 쓰기
 
-`(/reports/render)` 는 navigation 에서만 쓴다.
+`(/reports/render)`는 사용자 화면 이동을 설명하는 navigation 노드로 쓸 수 있다. 실제 HTTP 경로는 경계 계약 표에도 적는다.
 jobflow 에서는 `ReportDataApi.HandleRenderSavedReport` 처럼 객체와 메서드로 쓴다.
 
 ### 5. 구현 디테일을 이해 조각으로 착각하기

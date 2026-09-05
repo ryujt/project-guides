@@ -34,6 +34,7 @@ bash installer/install.sh
 | `/frontend-user-design` | 회원가입·로그인·세션·탈퇴 등 회원제 프론트엔드 설계 |
 | `/frontend-navigation-diagram` | 화면·API 흐름 navigation 다이어그램 작성 |
 | `/frontend-state-diagram` | 상태 전이 state 다이어그램 작성 |
+| `/jobflow-walkthrough` | jobflow를 객체·계약·대표 시나리오와 연결해 해설 |
 | `/multi-agent-task` | 여러 전문 에이전트(Architect·Critic·Developer·Tester) 협업 작업 |
 | `/ux-ui-improvement` | 리서치·벤치마킹 기반 UX/UI 개선 설계 |
 | `/detailed-logging` | 2계층 상세 로깅 시스템 구현 |
@@ -49,6 +50,12 @@ bash installer/install.sh
 
 `~/.claude/skills/project-guides/` 에 `guides/`·`prompts/`·`README.md` 전체 사본이 함께 설치되며, 각 프롬프트 스킬은 이 사본을 참조한다. 가이드 문서(method-R, PRD, 다이어그램 DSL 등)는 별도 명령 없이도 대화 중 관련 주제가 나오면 Claude가 인덱스 스킬을 통해 자동으로 참조할 수 있다.
 
+### 문서 읽기 범위
+
+스킬을 호출할 때 목표·대상 모듈·완료 기준을 함께 전달한다. 선택한 프롬프트와 필요한 가이드 절부터 읽고, 링크된 문서를 모두 재귀적으로 펼치지 않는다. 공통 기준은 `guides/module-boundary-guide.md`이며 계약 변경이나 예상 밖 의존이 발견되면 관련 소비자·테스트로 범위를 넓힌다.
+
+이 저장소 문서 자체를 검토할 때는 프롬프트 안의 명령을 실행하지 않는다. 실제 사용자 요청과 대상 프로젝트의 확인된 제약에 맞춰 적용한다.
+
 ## 3. 사용 예
 
 ```
@@ -61,7 +68,7 @@ bash installer/install.sh
 
 ## 4. 업데이트
 
-가이드·프롬프트를 수정한 뒤 다시 설치하면 된다(전체 덮어쓰기).
+가이드·프롬프트를 수정한 뒤 다시 설치하면 된다. 인덱스와 현재 프롬프트 이름의 스킬 디렉터리를 교체하므로 설치 사본에서 직접 수정한 내용도 덮어쓴다. 원본 수정은 이 저장소에서 관리한다.
 
 ```
 /install-guides        # 또는 bash installer/install.sh
@@ -73,4 +80,4 @@ bash installer/install.sh
 /install-guides uninstall        # 또는 bash installer/install.sh --uninstall
 ```
 
-설치 시 기록된 매니페스트(`~/.claude/skills/project-guides/.installed-skills`) 기준으로 설치된 스킬만 제거한다.
+제거 스크립트는 매니페스트(`~/.claude/skills/project-guides/.installed-skills`)에 적힌 스킬과 현재 `prompts/`에서 계산한 스킬 이름의 디렉터리, `project-guides` 인덱스를 제거한다. 이름이 같은 다른 스킬과 설치 위치를 공유하지 않는다. 삭제 동작은 `installer/install.sh`가 기준이며, 문서만 검토하는 작업에서 설치·제거를 실행하지 않는다.

@@ -1,17 +1,30 @@
 # Job Flow Diagram Guide
 
+## 적용 범위와 읽는 순서
+
+한 시나리오에서 **누가 흐름을 조율하고 어떤 공개 계약으로 협력하는가**를 표현한다. 화살표 수나 객체 수를 줄이는 것보다, 다른 조각의 구현을 열지 않고 흐름을 설명할 수 있는지가 중요하다. 경계·계약·분해 중단 기준은 [module-boundary-guide.md](module-boundary-guide.md)를 따른다.
+
+먼저 헤더와 핵심 원칙을 읽고, 작업에 필요한 반환·분기·이벤트 예시만 선택한다. 아래 짧은 블록은 문법 조각이며, 실제 시나리오에는 헤더, 객체 목록, 트리거, 완료/실패 조건을 함께 적는다. 전체 시스템의 모든 흐름을 먼저 작성할 필요는 없다.
+
+
 ## 헤더 키워드 — `orchestrator:` vs `scope:`
 
-jobflow 다이어그램의 첫 줄은 그 다이어그램의 **흐름 제어 주체가 누구인가** 를 선언한다. 이 가이드는 method-R 표기 규칙([method-R.md](./method-R.md)) 과 일관되게 두 키워드를 구분해서 쓴다.
+jobflow 다이어그램의 첫 줄은 **실제 조율자 또는 관찰 경계**를 선언한다. 이 가이드는 method-R 표기 규칙([method-R.md](./method-R.md)) 과 일관되게 두 키워드를 구분해서 쓴다.
 
 | 키워드 | 의미 | 흐름 제어 | 사용 단계 |
 |---|---|---|---|
 | `orchestrator: X` | X 가 시나리오의 흐름을 능동적으로 조율하는 객체다. 다른 객체의 메서드를 직접 호출하거나 이벤트를 구독해 다음 단계를 결정한다. | **있음** (X 가 함) | 시스템 설계의 Orchestration 모드, 모듈 설계, 상세 설계 (재귀 Sub-Orchestrator) |
-| `scope: X` | X 는 시나리오의 **경계** 일 뿐이다. 흐름을 능동적으로 만들지 않으며, 내부 객체들끼리 메시지/이벤트로 자율 협력한다. | **없음** (경계 박스) | 매크로 설계 (시스템 경계), 시스템 설계의 Choreography 모드 |
+| `scope: X` | X는 관찰하는 **경계**다. 이 그림에서는 내부의 단일 흐름 조율자를 선언하지 않는다. 내부 제어를 숨긴 매크로 관점이나 중앙 조율자 없는 협력에 쓴다. | 이 관점에서 선언하지 않음 | 매크로 설계 (시스템 경계), 시스템 설계의 Choreography 모드 |
 
-핵심 차이는 단 하나 — **그 다이어그램 안에 흐름을 책임지는 단일 객체가 있느냐**. 있다면 `orchestrator:`, 없다면 `scope:`.
+핵심은 **이 다이어그램이 실제 단일 조율자의 내부 협력을 보여 주는가**다. 그러면 `orchestrator:`, 관찰 경계의 입출력만 보이거나 중앙 조율자 없는 협력이면 `scope:`를 쓴다. `scope:`라고 해서 숨겨진 내부에 조율자가 없다는 뜻은 아니다.
 
-이 가이드의 나머지 본문은 **`orchestrator:` 모드의 표기 규칙**을 다룬다 (모든 `-->` 가 orchestrator 관점이라는 핵심 원칙이 성립하는 경우). `scope:` 모드(Choreography·경계 메시지) 의 표기 규칙은 method-R 의 매크로 / Choreography 절을 따른다.
+이 가이드의 나머지 본문은 **`orchestrator:` 모드의 표기 규칙**을 다룬다 (내부 협력의 `-->`를 선언된 조율자 관점으로 읽는 경우). `scope:` 모드(Choreography·경계 메시지) 의 표기 규칙은 method-R 의 매크로 / Choreography 절을 따른다.
+
+### 문서 의미와 렌더러 지원
+
+`orchestrator:`와 `scope:`는 이 저장소의 기존 Method-R 의미 표기다. [tools-camp-markdown-guide.md](tools-camp-markdown-guide.md)는 별도로 `master:` 헤더를 기술한다. 이 저장소에는 대상 렌더러 소스가 포함되어 있지 않으므로 현재 제품 전체의 지원 여부를 이 문서만으로 단정하지 않는다. 별도로 확인한 tools.camp `d12f230` 스냅샷은 `master:`만 파싱하고 `orchestrator:`/`scope:`의 제어 의미를 해석하지 않는다. 단순 이름 헤더를 무시해도 관계 그림은 생성되므로 생성 성공을 헤더 지원으로 오해하지 않는다. 정확한 확인 범위는 [문법 레퍼런스의 구현 확인 기록](tools-camp-markdown-guide.md#확인한-구현-스냅샷)을 참고한다.
+
+새 문서는 제어 주체에 맞게 `orchestrator:` 또는 `scope:`를 선택한다. 기존 `master:` 문서는 먼저 주변 설명과 코드에서 제어 주체를 확인한다. 렌더링을 위해 헤더를 바꿔야 한다면 대상 구현에서 지원을 확인하고 의미를 본문에 유지한다. 특히 `scope:`를 `master:`로 기계적으로 바꿔 중앙 조율자가 존재하는 것처럼 설명하지 않는다. 확인한 버전에서는 `Object:` 목록과 코드펜스 밖 조율자/경계 설명을 함께 제공해야 읽는 사람이 의미를 알 수 있다. 헤더만으로 구현의 의존성이나 실행 방식이 보장되지는 않는다.
 
 ## 기본 규칙
 
@@ -28,8 +41,8 @@ Object: [객체1], [객체2], [객체3], ...
 ### orchestrator 객체의 역할
 
 * 해당 시나리오에서 **흐름을 총괄하고 조율하는 중심 객체**이다.
-* 다른 객체들을 멤버로 소유하거나, 다른 객체들이 이 orchestrator 를 기반으로 협력한다.
-* 대부분의 `-->`는 orchestrator 를 중심으로 한 협력 관계를 나타내지만, **시나리오의 진입점(예: `Main.OnStart`)이나 부속 객체 간의 초기화 흐름**도 함께 표기할 수 있다.
+* 필요한 공개 계약을 주입받아 협력을 연결한다. 객체를 직접 생성하거나 모든 인스턴스를 소유해야 하는 것은 아니다. 워커에 orchestrator 자체나 전체 컨테이너를 넘기지 않는다.
+* 내부 협력의 `-->`는 선언된 orchestrator 관점으로 읽는다. 외부 입력은 진입점으로 구분하고, 다른 객체가 실제로 조율하는 초기화·내부 흐름은 그 객체의 별도 다이어그램으로 연다.
 
 ### 시나리오의 시작점
 
@@ -55,11 +68,11 @@ Object: [객체1], [객체2], [객체3], ...
 
 * 객체 내부 프로세스는 표시하지 않는다 (필요시 `Public → Private` 한 단계만 허용).
 * 메서드 파라미터는 표기하지 않는다.
+* 확인한 tools.camp `d12f230`의 jobflow는 ` : 라벨`을 전이 라벨로 분리하지 않고 액션 문자열의 일부로 읽는다. 분기는 아래 `.true`/`.false`/값 경로로 쓰고 설명은 블록 밖에 적는다. navigation/state의 라벨 문법을 jobflow에 가져오지 않는다.
 
-## 핵심 원칙 — 모든 화살표는 orchestrator 의 관점이다
+## 핵심 원칙 — 내부 협력은 선언된 orchestrator의 관점이다
 
-> jobflow 다이어그램의 모든 `-->` 는 **orchestrator(오케스트레이터) 가 본 흐름**이다.
-> 흐름을 제어하는 주체도, **결과를 받아 다음 단계로 흘려보내는 주체도 항상 orchestrator 이다**.
+> `orchestrator:` 다이어그램의 내부 협력 화살표는 **선언된 orchestrator가 연결하는 흐름**이다. 외부 요청의 진입·응답과 객체 안에서 발생한 이벤트는 그 경계 사실을 나타낸다. 하나의 블록 안에서 동일한 화살표를 워커끼리의 직접 호출이라는 뜻으로 바꾸지 않는다. `scope:`에는 이 축약 규칙을 적용하지 않는다.
 
 따라서 다이어그램을 읽을 때(그리고 코드로 구현할 때)는 다음 규칙을 지킨다.
 
@@ -113,7 +126,7 @@ MethodName() {
 A.OnEventName --> B.MethodName
 ```
 * A의 이벤트 발생 시 B의 메서드가 호출된다.
-* orchestrator 생성자에서 `A.OnEventName += B.MethodName`으로 구독 설정한다.
+* 구독 연결은 orchestrator의 조립/시작 단계에서 설정하고, 종료·해제 책임도 정한다. 생성자에 구독이나 장기 실행을 반드시 넣을 필요는 없다.
 
 orchestrator 코드 예시:
 ```
@@ -179,22 +192,19 @@ main() {
     "Main.OnStart 는 Container 생성까지만, 생성된 Container 는 Main.InitializeOrchestrator 가 받아
     Orchestrator 조립을 책임진다."
 
-**Case 2 — 이벤트로 데이터를 요청해 내부에서 이어 쓰기**
+**Case 2 — 단일 응답 계약으로 데이터를 요청해 내부에서 이어 쓰기**
 
-caller 메서드가 **자기 자신의 흐름 안에서** 외부 데이터를 끌어와 계속 처리해야 한다면, caller 가
-이벤트를 발생시키고 그 결과를 이벤트의 반환값으로 받아 내부에서 소비하는 형태로 표기한다.
+caller 메서드가 **자기 자신의 흐름 안에서** 외부 데이터를 받아 계속 처리한다면, 좁은 조회 포트나 단일 응답 콜백을 주입할 수 있다. 아래 `RequestData`는 **응답자 하나인 요청 계약**이다. 여러 구독자에게 사실을 알리는 이벤트와 구분한다. 일반 이벤트가 반환값을 제공한다고 가정하거나, 조회를 위해 브로커를 추가하지 않는다. 기존 문서의 `OnNeedData`를 해설할 때도 이름만으로 일반 이벤트라고 판단하지 않고 이 단일 응답 계약인지 확인한다.
 
 ```jobflow
-A.MethodName --> A.OnNeedData
-A.OnNeedData --> B.MethodName
-B.MethodName.result --> A.OnNeedData.result
+A.MethodName --> A.RequestData
+A.RequestData --> B.MethodName
+B.MethodName.result --> A.RequestData.result
 ```
 
-* `A.MethodName` 이 진행 도중 `A.OnNeedData` 이벤트를 발생시킨다 (이 줄은 내부 동작이므로 생략 가능).
-* orchestrator 가 `A.OnNeedData` 를 `B.MethodName` 에 바인딩해 두었기 때문에, 이벤트 발생 시
-  `B.MethodName` 이 실행된다.
-* `B.MethodName` 의 반환값이 `A.OnNeedData` 의 반환값으로 흘러 들어가고, 그 값을 `A.MethodName` 이
-  내부에서 받아 처리를 이어간다.
+* `A.MethodName`이 진행 도중 `A.RequestData` 요청 콜백을 호출한다 (이 줄은 내부 동작이므로 생략 가능).
+* orchestrator가 `A.RequestData` 요청 콜백을 `B.MethodName`에 바인딩해 두었기 때문에 요청 시 `B.MethodName`이 실행된다.
+* `B.MethodName`의 반환값이 `A.RequestData` 요청 콜백의 반환값이 되고, `A.MethodName`은 그 값을 내부에서 받아 처리를 이어간다.
 * orchestrator 는 "A 가 데이터를 요청하면 B 에게서 받아다 준다" 만 알 뿐, A 내부의 분기·재개는 관여하지
   않는다.
 
@@ -203,7 +213,7 @@ A 클래스 코드 예시:
 MethodName() {
     ...
     if (...) {
-        data = OnNeedData()
+        data = RequestData()
     }
     ...
 }
@@ -212,7 +222,7 @@ MethodName() {
 orchestrator 코드 예시:
 ```
 main() {
-    A.OnNeedData = B.MethodName
+    A.RequestData = B.MethodName
 }
 ```
 
@@ -247,37 +257,30 @@ handleEventName() {
 
 * B 의 결과를 받아 C 에 넘기는 주체는 orchestrator 다. B 와 C 는 서로를 모른다.
 
-### 반환값을 받아 다시 전달 (체이닝)
+### 내부 의존성을 가진 객체의 반환값
+
+A가 내부의 B 계약을 호출하는 기존 코드나 설계를 설명할 때, 상위 orchestrator가 B도 직접 조율하는 것처럼 그리지 않는다. 상위는 A의 공개 계약만 알고, 필요한 경우 A 내부를 별도 블록으로 연다.
+
+상위 시나리오:
 
 ```jobflow
+orchestrator: Orchestrator
+Object: Orchestrator, A, C
+Orchestrator.Run --> A.MethodName
+A.MethodName.result --> C.HandleResult
+C.HandleResult.result --> Orchestrator.Run.result
+```
+
+A의 내부 흐름이 설명에 필요한 경우:
+
+```jobflow
+orchestrator: A
+Object: A, B
 A.MethodName --> B.MethodName
 B.MethodName.result --> A.MethodName.result
-A.MethodName.result --> C.HandleResult
-```
-* A 가 내부에서 B 를 직접 호출해 결과를 받고, 그 값을 자신의 반환값으로 내보낸다
-  (`B.MethodName.result --> A.MethodName.result`). orchestrator 는 A 의 반환값을 받아 C 에 전달한다.
-* **이 패턴은 최대한 피하는 것이 좋다.** A 가 B 를 직접 참조하기 때문이다. 워커끼리는 최대한 서로
-  모르게 해야 각 객체가 자신의 책임에만 집중할 수 있다. 직접 참조는 두 객체를 강하게 결합시키고,
-  협력 관계가 orchestrator 가 아닌 객체 내부에 숨어 다이어그램만으로 흐름을 추적할 수 없게 된다.
-* 대신 Case 2(이벤트) 또는 orchestrator 의 직접 chaining(§결과를 다음 단계로) 으로 표현한다.
-  이 표기는 기존 코드를 기록하는 등 직접 참조가 불가피한 경우에만 쓴다.
-
-A 클래스 코드 예시:
-```
-MethodName() {
-    data = B.MethodName()
-    ...
-    return data
-}
 ```
 
-orchestrator 코드 예시:
-```
-main() {
-    result = A.MethodName()
-    C.HandleResult(result)
-}
-```
+이때 A는 내부 B의 공개 계약에 의존한다. B가 A 책임 안의 하위 조각이나 포트인지, 독립된 형제 워커인지 책임 표로 구분한다. 형제 워커의 구현을 직접 참조하는 문제를 하위 다이어그램으로 감추지 않는다. 기존 의존성이 있다면 AS-IS에 사실과 근거를 남기고, 변경 필요성은 별도로 평가한다. 단순 함수나 조회를 표현하려고 불필요한 이벤트·Sub-Orchestrator를 추가하지 않는다.
 
 ### 결과를 다음 단계로 (orchestrator 관점의 기본 표기)
 
@@ -322,10 +325,7 @@ MethodName() {
 >
 > 단계 사이에 **진짜로** orchestrator 의 가공·분기·메서드 책임 전환이 들어갈 때만 `X.result --> Orchestrator.X`
 > 또는 `X.result --> Orchestrator.OtherMethod` 표기를 쓴다 (앞의 "반환값을 같은 객체의 다른 메서드로 위임" 패턴 참조).
-> 단, `X.result --> Orchestrator.X` 처럼 **같은 메서드명으로 되돌아오는 표기는 금지**한다 — A.MethodName 이
-> 두 번 호출되는 것처럼 오독되기 때문이다. 책임 전환이 필요하면 반드시 **다른 메서드명**으로 위임한다. 그 경우 같은 메서드명이 두 번 나타나더라도,
-> 두 등장 사이에 진짜 가공·분기 단계가 명시적으로 들어가 있으므로 "여러 번 호출되는 것처럼 보이는"
-> 오독이 발생하지 않는다.
+> `X.result --> Orchestrator.X`를 단순히 실행 중인 메서드로 돌아와 계속한다는 뜻으로 쓰지 않는다. 책임이 실제로 나뉘어 있으면 다른 메서드명을 쓰고, 같은 호출의 최종 반환이면 `.result`로 연결한다. 실제 재시도·재호출을 나타내는 경우에는 조건·횟수·중복 효과 처리와 실제 코드 근거를 본문에 밝힌다. 다이어그램을 맞추기 위해 코드에 의미 없는 메서드를 추가하지 않는다.
 >
 > 잘못된 예 — 단순 3 단계를 매 단계 round-trip 으로 표기:
 > ```jobflow
@@ -466,85 +466,48 @@ VideoDecoder.GetFrameBitmap.result --> VideoRenderer.DrawFrame
 * `FileStream.OnXxx` 같은 이벤트는 orchestrator 가 구독한 상위 흐름.
 * `VideoDecoder.GetFrameBitmap.result --> VideoRenderer.DrawFrame` 은 반환값을 다른 객체의 메서드로 전달하는 패턴.
 
-### 예제 2. 프로세스 기동 & 전체 조립 시나리오
+### 예제 2. 프로세스 조립과 실행 책임 분리
+
+이 예시는 Main이 설정을 읽고 조립된 Runtime을 명시적으로 시작한다. 조립과 장기 실행은 서로 다른 작업이며, `New` 이후 `Run`이 자동으로 실행된다고 추측하지 않는다.
 
 ```jobflow
-orchestrator: Orchestrator
-Object: Orchestrator, Main, Config, Container, MarketOrchestrator, PremarketOrchestrator
-Main.OnStart --> Config.Load
-Config.Load.result --> Container.BuildContainer
-Container.BuildContainer.result --> Main.InitializeOrchestrator
-Main.InitializeOrchestrator --> Orchestrator.NewOrchestrator
-Orchestrator.NewOrchestrator --> MarketOrchestrator.NewOrchestrator
-Orchestrator.NewOrchestrator --> PremarketOrchestrator.NewOrchestrator
-Orchestrator.NewOrchestrator --> Orchestrator.Run
-Orchestrator.Run --> MarketOrchestrator.Run
-Orchestrator.Run --> PremarketOrchestrator.Run
+orchestrator: Main
+Object: Main, ConfigLoader, CompositionRoot, Runtime
+Main.Start --> ConfigLoader.Load
+ConfigLoader.Load.result --> CompositionRoot.Build
+CompositionRoot.Build.result --> Main.RunRuntime
+Main.RunRuntime --> Runtime.Run
+Runtime.Run.result --> Main.Start.result
 ```
 
-**읽는 법**:
-- `Main.OnStart` 는 프로세스 진입점 이벤트 — orchestrator 가 아니어도 시작점이 될 수 있다.
-- `Config.Load.result --> Container.BuildContainer` 는 orchestrator 관점의 **직접 chaining**.
-  `Main.OnStart` 로 결과를 한 번 돌려보냈다 다시 내보내는 round-trip 표기는 “Main.OnStart 가
-  두 번 호출되는 것처럼” 오독을 낳으므로 쓰지 않는다 (§“주의 — 표기 함정”).
-- `Container.BuildContainer.result --> Main.InitializeOrchestrator` 는 **반환값을 같은 객체의 다른 메서드로 위임**하는 패턴. Main 은 `OnStart` 에서 설정·컨테이너 준비까지만 담당하고, 조립 요청은 `InitializeOrchestrator` 라는 별도 메서드가 받는다. 같은 `Main` 객체이지만 메서드 경계가 바뀌므로 round-trip 안티패턴이 아니다.
-- `Main.InitializeOrchestrator --> Orchestrator.NewOrchestrator` 는 조립 메서드가 최상위 객체의 생성자를 호출하는 흐름이다. `NewOrchestrator` 안에서 `MarketOrchestrator.NewOrchestrator`, `PremarketOrchestrator.NewOrchestrator` 조립 트리가 전개된다.
-- 중요한 전환: **`Orchestrator.NewOrchestrator --> Orchestrator.Run`** 은 "조립이 끝나면 Orchestrator 가 스스로 Run 루프로 진입한다" 는 **객체 내부 수명주기 전환**을 표현한다. Main 이 `Run` 을 직접 호출하지 않는다. 이 시점부터 제어권이 orchestrator(Orchestrator) 로 완전히 넘어간다.
-- `Orchestrator.Run` 이 하위 Sub-Orchestrator 들을 errgroup 으로 동시 기동한다.
+| 객체 | 책임 | 알아야 하는 계약 |
+|---|---|---|
+| `Main` | 시작·종료와 최상위 실패 처리 | 설정 로드, 조립, Runtime 실행 |
+| `ConfigLoader` | 설정을 읽고 검증해 값으로 반환 | 설정 소스 |
+| `CompositionRoot` | 의존성 생성·연결 | 생성자와 주입 계약 |
+| `Runtime` | 작업의 실행·취소·정리 | 소속 작업의 실행 계약 |
 
-**객체 설명**:
-| 객체 | 역할 |
-|---|---|
-| **Main** | 프로세스 진입점. `OnStart` 에서 설정 로드 → Container 빌드까지 지휘한 뒤, Container 결과를 `InitializeOrchestrator` 에 위임한다. `InitializeOrchestrator` 는 Orchestrator 의 생성 요청만 담당하고, 이후의 `Run` 진입은 Orchestrator 객체 스스로의 수명주기로 넘어간다. 이렇게 메서드를 분리함으로써 Main 은 "조립 요청" 과 "실행 지시" 를 모두 끌어안지 않고 조립 요청만 책임진다. Main 은 orchestrator 가 아니지만 조립 요청의 시작점이다. |
-| **Config** | 환경 변수 / 설정 파일을 읽어 실행 파라미터(모듈 on/off, KIS 키, 경로, 임계값 등)를 구조화해 반환하는 **값 객체**. 상태를 보유하지 않는다. |
-| **Container** | 싱글톤 공유 서비스(DB, Redis, Telegram, KIS 클라이언트, Watchlist, NameResolver 등)를 생성·주입하는 **의존성 컨테이너**. `BuildContainer` 가 한 번 호출되고 그 결과가 `Main.InitializeOrchestrator` 로 전달된다. |
-| **Orchestrator** *(orchestrator)* | 전체 시스템의 최상위 조율자. 생성 시점에 하위 `MarketOrchestrator`, `PremarketOrchestrator` 를 소유로 만들고, 조립이 끝나면 **자기 자신의 수명주기로서 `Run(ctx)` 에 진입**한다. Main 이 별도로 Run 을 호출하지 않아도 Orchestrator 가 `New → Run` 흐름을 자기 안에서 이어받는다. `Run` 은 두 Sub-Orchestrator 를 `errgroup` 으로 동시에 기동하며 어느 한 쪽 에러 발생 시 ctx 전파로 다른 쪽도 종료된다. |
-| **MarketOrchestrator** | 실시간 시장 데이터 수집(WebSocket 구독, 틱 저장, 신호 탐지, 알림)의 Sub-Orchestrator. 자신의 Worker 들(WS subscriber, tick storage, signal detector, health server 등)을 소유한다. |
-| **PremarketOrchestrator** | 매 영업일 08:00~09:00 KST 프리마켓 감시 세션을 수행하는 Sub-Orchestrator. 일일 스케줄러와 DipMonitor 상태 기계 Worker 를 소유한다. |
+```text
+Main.Start() {
+    config = ConfigLoader.Load()
+    runtime = CompositionRoot.Build(config)
+    return RunRuntime(runtime)
+}
+Main.RunRuntime(runtime) {
+    return runtime.Run()
+}
+```
 
-**주의 1 — Main 의 두 메서드 분리가 뜻하는 것**:
+Runtime 내부의 동시 실행이 중요할 때만 다음 블록을 추가한다. 이 예시에서는 두 Run을 함께 시작하고, 하나가 실패하면 다른 작업에 취소를 전달한 뒤 둘의 정리가 끝날 때까지 기다린다. 이 정책은 화살표 모양이나 줄 순서만으로 표현되지 않으므로 본문과 실행 계약에 명시한다.
 
-이 예제에서 `Main` 이라는 한 객체 안에 `OnStart` 와 `InitializeOrchestrator` 두 메서드가 존재하고, 둘 사이에 **`.result --> Caller.OtherMethod` 라는 위임 표기가 나타난다**. 이는 다이어그램이 "한 객체 내부에서도 메서드 경계별로 책임을 분리" 한다는 것을 드러낼 수 있음을 보여준다. jobflow 는 "객체 단위 + 메서드 단위" 두 레이어의 책임 분리를 모두 표현할 수 있다.
-
-**주의 2 — `NewXxx --> Xxx.Run` 패턴의 의미**:
-
-`Orchestrator.NewOrchestrator --> Orchestrator.Run` 은 **같은 객체 안에서 "생성자 단계" → "실행 단계" 로 수명주기가 이어진다**는 것을 나타낸다. 코드 상으로 NewOrchestrator 가 Run 을 직접 호출하지 않더라도, 개념적으로 "조립이 끝나면 곧바로 Run 으로 간다" 는 필연적 연결을 다이어그램에 명시할 때 사용한다. 이 표기는 **orchestrator 객체가 외부(Main) 의 지시 없이 스스로의 수명주기를 이어간다**는 점을 드러내는 역할을 하며, Main 은 `NewOrchestrator` 호출까지만 하고 그 뒤의 `Run` 진입은 주관하지 않는다는 뜻이다.
-
-잘못된 표현의 예:
 ```jobflow
-Container.BuildContainer.result --> Main.OnStart
-Main.OnStart --> Orchestrator.NewOrchestrator
-Main.OnStart --> Orchestrator.Run
+orchestrator: Runtime
+Object: Runtime, Collector, Scheduler
+Runtime.Run --> Collector.Run
+Runtime.Run --> Scheduler.Run
 ```
-이렇게 쓰면 "Main.OnStart 가 Container 결과를 직접 받아 Orchestrator 를 생성하고 Run 도 호출" 하는 구조가 되어, 조립·실행 책임이 `OnStart` 안에 섞여 버린다. 올바르게는 `Container.BuildContainer.result --> Main.InitializeOrchestrator` 로 위임하고, 조립 이후는 `Orchestrator.NewOrchestrator --> Orchestrator.Run` 으로 orchestrator 내부 수명주기에 맡겨야 한다.
 
-코드 예시:
-```
-// Main
-OnStart() {
-    config = Config.Load()
-    container = Container.BuildContainer(config)
-    InitializeOrchestrator(container)
-}
-
-InitializeOrchestrator(container) {
-    Orchestrator.NewOrchestrator(container)
-}
-
-// Orchestrator
-NewOrchestrator(container) {
-    market = MarketOrchestrator.NewOrchestrator(container)
-    premarket = PremarketOrchestrator.NewOrchestrator(container)
-    Run()
-}
-
-Run() {
-    errgroup {
-        market.Run()
-        premarket.Run()
-    }
-}
-```
+생성자에서 실행을 시작하는 실제 코드라면 해당 사실을 기록할 수 있다. 다만 다이어그램에 없는 자동 시작·동시성·오류 전파를 필연적인 동작으로 해석하지 않는다. AS-IS의 호출자를 바꿔 좋은 구조처럼 보이게 그리지 않는다.
 
 ### 예제 1 의 코드 구현 예시 (C#)
 
@@ -585,25 +548,38 @@ public class VideoPlayer
 
 ## 재귀적 세분화
 
-### 목적
+상위에서는 한 조각의 공개 입력·결과·실패만 보이고, 변경하거나 검토할 필요가 생긴 조각만 별도 다이어그램으로 연다. 단순 워커를 반드시 Sub-Orchestrator로 승격하지 않는다.
 
-* 시스템 전체 관점의 Job Flow Diagram을 먼저 작성한다.
-* 그 안에서 복잡성이 높은 구성 요소(모듈/객체)를 식별한다.
-* 해당 구성 요소를 중심으로 **별도의 Job Flow Diagram을 다시 작성**하여 설계를 세분화한다.
-* 이때 **세분화 다이어그램의 orchestrator는 “복잡 모듈 객체”**가 된다.
-
-### 예시 — 시스템 전체 관점의 Job Flow Diagram
+상위 시나리오:
 
 ```jobflow
 orchestrator: VideoPlayer
-Object: VideoPlayer, FileStream, VideoDecoder, AudioDecoder
-... 시스템 전체 관점의 예
+Object: VideoPlayer, VideoDecoder
+VideoPlayer.DecodeFrame --> VideoDecoder.Decode
+VideoDecoder.Decode.result --> VideoPlayer.DecodeFrame.result
 ```
 
-### 예시 — 복잡 모듈 중심으로 재귀적 세분화
+VideoDecoder의 분해가 필요한 경우:
 
 ```jobflow
 orchestrator: VideoDecoder
-Object: VideoDecoder, Worker, Decoder, Renderer
-... VideoDecoder 관점의 예
+Object: VideoDecoder, FrameParser, FrameConverter
+VideoDecoder.Decode --> FrameParser.Parse
+FrameParser.Parse.result --> FrameConverter.Convert
+FrameConverter.Convert.result --> VideoDecoder.Decode.result
 ```
+
+하위의 `VideoDecoder.Decode` 입력·출력·실패 의미는 상위 계약과 같아야 한다. 내부 워커 이름을 상위 호출자에게 공개하지 않는다. 담당 작업의 구현과 인접 계약만으로 수정·검증 가능하면 분해를 멈춘다.
+
+## 다이어그램 옆에 남기는 계약과 검증
+
+파라미터나 새 제어 토큰을 jobflow 문법에 추가하지 않고 다음 내용을 산문·표 또는 계약 문서 링크로 적는다.
+
+- 대상 시나리오, 트리거, 조율자/경계, AS-IS 근거 또는 제안 상태
+- 공개 입력·출력·오류, 데이터와 상태의 단일 소유자
+- 관련될 때만 순서·병렬 실행·취소·timeout·재시도·중복 처리·구독 해제 규칙
+- 상위 공개 계약과 필요한 하위 문서 링크
+
+검토자는 성공 흐름 하나와 해당 변경에서 중요한 실패 흐름 하나를 따라가며 실제 호출자, 상태 변경자, 응답 수신자가 명확한지 확인한다. 같은 메서드로 돌아가는 화살표는 재개인지 실제 재호출인지 확인한다. 재시도가 실제 동작이면 별도 시나리오와 조건·횟수·중복 효과 처리로 설명한다.
+
+`git diff --check`와 이름·헤더·계약 대조는 정적 검토다. 파서 실행·SVG/HTML 생성 확인과 브라우저에서 실제 블록을 표시한 확인을 나눠 기록한다. 렌더러가 없으면 미실행 사실과 확인 가능한 범위를 남긴다.
