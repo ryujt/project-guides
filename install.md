@@ -47,6 +47,7 @@ bash installer/install.sh
 | `/project-guides` | README 트리거 표 기준으로 상황에 맞는 가이드 선택·적용 |
 | `/project-guides state-diagram` | 이름이 일치하는 가이드(예: state-diagram-guide)를 읽고 적용 |
 | `/project-guides detailed-logging` | 상세 로깅 작성·분석 중 보강·7일 보존 가이드 적용 |
+| `/project-guides socket-server-stability` | 소켓 서버 안정성 계약·결함 주입·장시간 검증 가이드 적용 |
 
 `~/.claude/skills/project-guides/` 에 `guides/`·`prompts/`·`README.md` 전체 사본이 함께 설치되며, 각 프롬프트 스킬은 이 사본을 참조한다. 가이드 문서(method-R, PRD, 다이어그램 DSL 등)는 별도 명령 없이도 대화 중 관련 주제가 나오면 Claude가 인덱스 스킬을 통해 자동으로 참조할 수 있다.
 

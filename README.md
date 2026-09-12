@@ -55,6 +55,7 @@
 | [system-flow-document-guide](guides/system-flow-document-guide.md) | 최소 책임 조각부터 전체 시스템 흐름을 어떻게 설명할까? |
 | [wrtite-readme-guide](guides/wrtite-readme-guide.md) | 빠른 실행과 필요한 상세 문서 탐색을 어떻게 돕는 README를 쓸까? |
 | [detailed-logging-guide](guides/detailed-logging-guide.md) | 상세 로그를 작성·보강하고 7일 지난 기록을 어떻게 자동 삭제할까? |
+| [socket-server-stability-guide](guides/socket-server-stability-guide.md) | 소켓 서버의 연결 수명·전달·역압·복구를 어떤 계약과 검증으로 설계할까? |
 | [tools-camp-markdown-guide](guides/tools-camp-markdown-guide.md) | tools.camp용 Markdown·SmartMD·다이어그램 표기를 어떻게 사용할까? |
 
 `wrtite-readme-guide.md`는 기존 링크 호환성을 위해 현재 파일명을 유지한다.
