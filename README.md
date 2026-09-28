@@ -40,7 +40,7 @@
 | 문서 | 해결할 질문 |
 | --- | --- |
 | [module-boundary-guide](guides/module-boundary-guide.md) | 무엇을 한 모듈로 묶고, 어떤 계약·맥락·검증을 전달할까? |
-| [method-R](guides/method-R.md) | 매크로→시스템→모듈→상세로 어떤 경계를 언제까지 분할할까? |
+| [method-R](guides/method-R.md) | 어떤 깊이까지 분할하고, 상위의 이벤트·결과 연결 또는 메시지 협력과 REST API로 조각을 어떻게 연결할까? |
 | [orchestrator-worker-pattern-guide](guides/orchestrator-worker-pattern-guide.md) | 상위 조율자와 Worker·Gateway·공유 자원의 책임을 어떻게 나눌까? |
 | [architecture-pattern-diagram-guide](guides/architecture-pattern-diagram-guide.md) | 요구사항에 맞는 패턴과 정적·동적 관점은 무엇일까? |
 | [code-structure-guidelines](guides/code-structure-guidelines.md) | 가독성·응집도·탑다운 흐름을 어떻게 코드로 유지할까? |
