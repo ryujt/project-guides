@@ -16,6 +16,7 @@
 - [job-flow-diagram-guide.md](job-flow-diagram-guide.md): 객체/모듈 간 메서드 호출·이벤트 흐름
 - [navigation-diagram-guide.md](navigation-diagram-guide.md): 화면/API/프로세스 흐름
 - [orchestrator-worker-pattern-guide.md](orchestrator-worker-pattern-guide.md): orchestrator, worker, gateway 역할 분리
+- [method-R.md](method-R.md): 설계 수준별 협력·통신 방식과 확대할 깊이
 
 ## 언제 쓰는가
 
@@ -36,7 +37,7 @@
 
 - 사용자 또는 외부 actor
 - 시스템의 첫 진입점
-- 핵심 도메인 orchestrator
+- 핵심 도메인 서비스나 필요한 유스케이스 조율자
 - 중요한 저장소 또는 상태
 - 외부 시스템 gateway
 - 최종 산출물 또는 사용자에게 보이는 결과
@@ -119,12 +120,9 @@ SYSTEM_FLOW-problems.md
 ```markdown
 # System Flow — <시스템 요약>
 
-> 객체 협력은 [job-flow-diagram-guide.md](...) 를 따른다.
-> 화면/API 흐름은 [navigation-diagram-guide.md](...) 를 따른다.
-> jobflow 에서는 Object.Method / Object.OnEvent 를 기본으로 표기하고 HTTP 경로·파라미터는 쓰지 않는다.
-> jobflow 헤더의 의미와 기존 master: 표기 호환은 job-flow-diagram-guide.md를 따른다. 렌더러 지원은 별도로 확인한다.
+> 협력 흐름의 작성·해석은 [job-flow-diagram-guide.md](...) 를 따른다.
+> 화면 이동은 [navigation-diagram-guide.md](...) 를 따른다.
 > 실제 HTTP 경로와 queue/topic은 경계 계약 표에 적고, navigation은 사용자 화면 이동에 필요한 흐름에만 사용한다.
-> Client 입력은 Client.Send...Message, Client 내부 반응은 Client.On... 으로 표기한다.
 
 ## 0. 시스템을 이해하는 최소 조각
 
@@ -213,7 +211,7 @@ direction LR
 
 class Client {
   +SendCommand()
-  +OnResult()
+  +HandleResult()
 }
 class ApiBoundary {
   +receiveCommand()
@@ -262,15 +260,17 @@ private helper, DTO, config constant, 단순 formatter 는 넣지 않는다.
 - 사용자가 요청을 보내면 `ApiServer` 가 받는다.
 - `ApiServer` 는 작업 맥락을 만들고 `Worker` 에 위임한다.
 - `Worker` 는 외부 데이터를 조회하고 결과를 만든다.
-- `ApiServer` 는 결과를 저장한 뒤 `Client` 에 이벤트로 돌려준다.
+- `ApiServer` 는 결과를 저장한 뒤 `Client` 에 응답으로 돌려준다.
 ```
 
 이 요약은 이후 jobflow 를 읽는 색인 역할을 한다.
 
 ### 1. 동적 흐름
 
-동적 흐름은 "시간 순서"를 설명한다.
+동적 흐름은 요청·이벤트에 따라 작업과 결과가 연결되는 관계를 설명한다.
 대상 시나리오의 가장 높은 필요한 경계에서 시작하고, 복잡한 부분만 세분화한다.
+
+아래는 `ApiServer`가 한 유스케이스를 조율하는 예시다. 독립 서비스 간 요청·응답이나 메시지 협력을 설명할 때는 [Method-R](method-R.md#2-조각의-협력과-서비스-간-통신)에서 해당 방식을 선택한다. 기존 시스템은 실제 호출자와 공개 계약을 근거로 그린다.
 
 ```jobflow
 orchestrator: ApiServer
@@ -280,16 +280,16 @@ Client.SendCommand --> ApiServer.HandleCommand
 ApiServer.HandleCommand --> Worker.Run
 Worker.Run.result --> Storage.SaveResult
 Storage.SaveResult.result --> ApiServer.HandleCommand.result
-ApiServer.HandleCommand.result --> Client.OnResult
+ApiServer.HandleCommand.result --> Client.message.JobResult
 ```
 
-최상위 jobflow 규칙:
+이 예시의 범위와 계약:
 
 - 최소 조각만 사용한다.
-- HTTP path, payload, DB table, private method 를 넣지 않는다.
-- `A.result --> B` 는 orchestrator(ApiServer) 가 A 결과를 받아 B 로 넘긴다는 뜻이다.
 - 복잡한 내부 과정은 다음 섹션에서 새 jobflow로 연다. 이 예시의 외부 데이터 조회는 Worker의 내부 책임이므로 상위에는 `Worker.Run`만 보인다.
 - 응답과 저장 결과의 의미는 공개 계약에서 정한다. 예시의 `Storage.SaveResult`는 저장된 결과를 반환한다.
+
+호출·반환·이벤트의 표기와 해석은 [Job Flow 가이드](job-flow-diagram-guide.md)를 따른다.
 
 ### 1-2. 화면/API/navigation 흐름
 
@@ -315,18 +315,20 @@ Dashboard --> (/reports/render) : 렌더 요청
 
 SSE, WebSocket, queue, scheduler, timeout/cancel 은 별도 섹션으로 분리한다.
 
-브로커/큐 사용 여부와 중앙 조율자의 유무는 별개다. 중앙 조율자가 다음 단계를 지시하면 비동기라도 orchestration이다. 아래는 중앙 조율자 없이 발행·구독하는 예시이므로 `scope:`를 사용한다. 헤더 지원 여부는 대상 렌더러에서 별도로 확인한다.
+아래는 중앙 업무 조율 없이 발행·구독하는 예시다. 조율 방식과 통신 수단의 선택은 [Method-R](method-R.md#4-시스템-설계-책임상태-소유권과-협력), 헤더·메시지 해석과 렌더러 지원은 [Job Flow 가이드](job-flow-diagram-guide.md)를 따른다.
 
 ```jobflow
 scope: ReportSystem
 Object: Client, ApiServer, Worker, MessageBus
 Client.SendStartMessage --> ApiServer.HandleStart
-ApiServer.HandleStart --> MessageBus.JobRequested
-MessageBus.JobRequested --> Worker.HandleJob
-Worker.HandleJob --> MessageBus.JobCompleted
-MessageBus.JobCompleted --> ApiServer.HandleJobCompleted
-ApiServer.HandleJobCompleted --> Client.OnCompleted
+ApiServer.HandleStart --> MessageBus.message.JobRequested
+MessageBus.message.JobRequested --> Worker.HandleJob
+Worker.HandleJob --> MessageBus.message.JobCompleted
+MessageBus.message.JobCompleted --> ApiServer.HandleJobCompleted
+ApiServer.HandleJobCompleted --> Client.message.JobCompleted
 ```
+
+`ApiServer.HandleStart`는 `JobRequested`를 발행하고, Worker는 작업이 끝나면 `JobCompleted`를 발행한다. ApiServer는 이 완료 메시지를 구독해 Client로 전달한다.
 
 비동기 흐름에서는 다음을 명시한다.
 
@@ -363,7 +365,6 @@ SystemOrchestrator.HandleCommand --> Validator.Validate
 Validator.Validate.result --> ContextBuilder.Build
 ContextBuilder.Build.result --> DomainWorker.Run
 DomainWorker.Run.result --> StorageGateway.Save
-StorageGateway.Save.result --> SystemOrchestrator.HandleCommand.result
 ```
 
 내부 흐름을 쓸지 말지 판단하는 기준:
@@ -450,27 +451,7 @@ Gateway가 반드시 orchestrator인 것은 아니다. 업무 상태의 변경 �
 
 ### jobflow 규칙
 
-- 헤더의 의미는 [job-flow-diagram-guide.md](job-flow-diagram-guide.md)를 따른다. `orchestrator:`는 실제 조율자, `scope:`는 관찰 경계다. 기존 `master:`의 의미와 렌더러 지원을 확인하지 않고 일괄 치환하지 않는다.
-- `Object.Method` / `Object.OnEvent` 형식을 사용한다.
-- HTTP path, parameter, JSON payload 는 쓰지 않는다.
-- Client 입력은 `Client.Send...Message` 로 쓴다.
-- Client 반응은 `Client.On...` 으로 쓴다.
-- 반환값은 `.result` 로 쓴다.
-- 조건 분기는 `.true`, `.false`, `.value` 를 쓴다.
-
-잘못된 예:
-
-```jobflow
-Client.POST /orders/:id/pay --> PaymentAPI.charge(cardNo)
-```
-
-올바른 예:
-
-```jobflow
-Client.SendPaymentMessage --> OrderServer.HandlePayment
-OrderServer.HandlePayment --> PaymentGateway.Charge
-PaymentGateway.Charge.result --> Client.OnPaymentCompleted
-```
+헤더, 호출·이벤트·요청 이벤트의 반환, 표시할 결과와 배치, 렌더러 확인은 [Job Flow 가이드](job-flow-diagram-guide.md)를 따른다.
 
 ### 이름 규칙
 
@@ -498,7 +479,7 @@ PaymentGateway.Charge.result --> Client.OnPaymentCompleted
 - [ ] 해당 변경에 관련된 운영 경계와 실패/취소/중복 처리의 소유자를 설명했다.
 - [ ] 공개 계약과 데이터·상태의 단일 소유자를 표 또는 링크에서 찾을 수 있다.
 - [ ] 현재 구현과 TO-BE 설계를 섞어 쓰지 않았다.
-- [ ] jobflow 에 HTTP path, parameter, JSON payload 를 쓰지 않았다.
+- [ ] Job Flow의 헤더·호출·이벤트·결과 표기를 전용 가이드와 대조했다.
 
 ## 검증 방법
 
@@ -535,7 +516,7 @@ git diff --check -- SYSTEM_FLOW.md
 ### 4. route 를 객체처럼 쓰기
 
 `(/reports/render)`는 사용자 화면 이동을 설명하는 navigation 노드로 쓸 수 있다. 실제 HTTP 경로는 경계 계약 표에도 적는다.
-jobflow 에서는 `ReportDataApi.HandleRenderSavedReport` 처럼 객체와 메서드로 쓴다.
+내부 API 협력은 [Job Flow 가이드](job-flow-diagram-guide.md)의 경계·호출 표기를 따른다.
 
 ### 5. 구현 디테일을 이해 조각으로 착각하기
 

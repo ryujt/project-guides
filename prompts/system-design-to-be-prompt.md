@@ -28,7 +28,7 @@
 
 ## 2. 목표 경계와 계약
 
-[method-R](../guides/method-R.md)로 필요한 깊이만 분해하고 [O-W 가이드](../guides/orchestrator-worker-pattern-guide.md)의 적용 경계를 명시한다. 메시지·직접 호출·이벤트 선택은 실제 실패/배포/응답 계약에 따른다. 조율자 시나리오 안의 Worker 고립과 모든 코드의 직접 호출 금지를 혼동하지 않는다.
+[method-R](../guides/method-R.md)의 깊이별 협력 방식 선택 기준으로 필요한 경계만 설계한다. 오케스트레이터–워커를 선택한 범위에는 [O-W 가이드](../guides/orchestrator-worker-pattern-guide.md)를 적용한다. 메시지·직접 호출·이벤트 선택은 실제 실패/배포/응답 계약에 따른다. 조율자 시나리오 안의 Worker 고립과 모든 코드의 직접 호출 금지를 혼동하지 않는다.
 
 모듈별로 다음을 설계한다.
 

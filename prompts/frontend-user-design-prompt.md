@@ -41,7 +41,7 @@
 
 ## 2. 모듈 경계와 소유권
 
-[method-R](../guides/method-R.md)의 필요한 깊이까지만 분해하고 [O-W 가이드](../guides/orchestrator-worker-pattern-guide.md)를 적용할 유스케이스를 선택한다. 모든 화면에 별도 조율자·Worker·이벤트 버스를 만들지 않는다.
+[method-R](../guides/method-R.md)의 깊이별 협력 방식 선택 기준으로 필요한 경계만 설계한다. 오케스트레이터–워커를 선택한 유스케이스에는 [O-W 가이드](../guides/orchestrator-worker-pattern-guide.md)를 적용한다. 모든 화면에 별도 조율자·Worker·이벤트 버스를 만들지 않는다.
 
 | 책임 | 공개 계약 | 알 필요 없는 내부 |
 |---|---|---|

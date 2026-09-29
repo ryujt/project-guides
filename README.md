@@ -40,7 +40,7 @@
 | 문서 | 해결할 질문 |
 | --- | --- |
 | [module-boundary-guide](guides/module-boundary-guide.md) | 무엇을 한 모듈로 묶고, 어떤 계약·맥락·검증을 전달할까? |
-| [method-R](guides/method-R.md) | 어떤 깊이까지 분할하고, 상위의 이벤트·결과 연결 또는 메시지 협력과 REST API로 조각을 어떻게 연결할까? |
+| [method-R](guides/method-R.md) | 어떤 깊이까지 분할하고, 내부 조각의 협력과 독립 서비스의 REST·메시지 통신을 어떻게 선택할까? |
 | [orchestrator-worker-pattern-guide](guides/orchestrator-worker-pattern-guide.md) | 상위 조율자와 Worker·Gateway·공유 자원의 책임을 어떻게 나눌까? |
 | [architecture-pattern-diagram-guide](guides/architecture-pattern-diagram-guide.md) | 요구사항에 맞는 패턴과 정적·동적 관점은 무엇일까? |
 | [code-structure-guidelines](guides/code-structure-guidelines.md) | 가독성·응집도·탑다운 흐름을 어떻게 코드로 유지할까? |
@@ -74,7 +74,7 @@
 ## 함께 유지할 설계 원칙
 
 - 같은 이유로 바뀌는 규칙과 상태를 한 책임 범위에 둔다. 파일을 작게 만드는 것만으로 독립성이 생기지는 않는다.
-- 형제 조각의 결과 연결은 상위 조율자가 맡는다. 내부 순수 함수나 좁은 공개 계약의 직접 호출은 책임 경계를 지키는 범위에서 사용한다.
+- 설계 깊이별 협력 방식은 [Method-R](guides/method-R.md)을 따른다. 오케스트레이터–워커 패턴을 적용한 범위에서는 상위 조율자가 형제 Worker의 결과를 연결한다.
 - 공개 계약에 입력·결과뿐 아니라 실패·부작용·상태 소유권을 포함한다. 이벤트를 써도 스키마·순서·시간에 대한 결합은 남는다.
 - 상태와 데이터에는 쓰기를 통제하는 소유자를 둔다. 소비자는 소유자의 공개 경계를 사용한다.
 - 책임과 계약이 충분히 명확하면 분할을 멈춘다. 계층·이벤트·문서가 전달만 늘린다면 합치거나 단순화한다.

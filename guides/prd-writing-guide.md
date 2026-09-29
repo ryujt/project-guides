@@ -106,8 +106,8 @@ orchestrator: SaveOrder
 Object: SaveOrder, Validator, OrderStore
 
 SaveOrder.Run --> Validator.Check
-Validator.Check.valid --> OrderStore.Save
 Validator.Check.invalid --> SaveOrder.Reject
+Validator.Check.valid --> OrderStore.Save
 OrderStore.Save.result --> SaveOrder.Complete
 ```
 

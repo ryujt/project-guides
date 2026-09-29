@@ -12,7 +12,7 @@
 
 `jobflow`는 **객체/조각의 실행 흐름을 표현하는 독자 다이어그램**이다. 흐름을 검토하며 책임을 나눌 수 있지만, 단계마다 반드시 별도 모듈을 만들라는 뜻은 아니다.
 
-오케스트레이터가 흐름을 잡고 워커가 개별 작업을 수행한다. 복잡한 워커나 모듈은 다시 별도 `jobflow`로 세분화할 수 있으므로, jobflow는 재귀적 분해와 잘 맞는다.
+`jobflow`는 조율자가 워커를 연결하는 흐름뿐 아니라 독립 서비스의 요청·응답과 이벤트 전달도 표현한다. 관점과 화살표의 해석은 [Job Flow 가이드](job-flow-diagram-guide.md), 설계 수준별 협력·통신 방식은 [Method-R](method-R.md)을 따른다. 복잡한 조각의 내부만 별도 흐름으로 확대할 수 있어 재귀적 분해와도 잘 맞는다.
 
 반면 다른 아키텍처 패턴들은 시스템을 나누는 기준이 다르다.
 
@@ -69,8 +69,8 @@ flowchart TD
     A["시스템 분해 방식"]
 
     A --> B["jobflow"]
-    B --> B1["오케스트레이터가 흐름 제어"]
-    B --> B2["워커가 개별 작업 수행"]
+    B --> B1["조율자가 연결하는 내부 협력"]
+    B --> B2["독립 서비스의 요청·응답과 이벤트 전달"]
 
     A --> C["Layered"]
     C --> C1["UI / Application / Domain / Infra"]
@@ -218,7 +218,7 @@ flowchart TB
 
 ### 5. Pipeline / Filter Pattern
 
-처리 단계를 기준으로 시스템을 나눈다. 데이터가 단계별로 변환되는 구조이므로 `jobflow`의 `A.result --> B` 표현과 잘 맞다.
+처리 단계를 기준으로 시스템을 나눈다. 아래에서는 `PipelineRunner`가 각 단계의 결과를 다음 단계에 전달하고 마지막에 저장한다.
 
 ```jobflow
 master: PipelineRunner
@@ -228,14 +228,13 @@ PipelineRunner.Run --> Loader.Load
 Loader.Load.result --> Parser.Parse
 Parser.Parse.result --> Validator.Validate
 Validator.Validate.result --> Saver.Save
-Saver.Save.result --> PipelineRunner.Run.result
 ```
 
 작성 가이드:
 
 * 각 단계는 입력을 받아 출력으로 변환하는 단일 책임을 가진다.
-* 단계 사이의 결과 전달은 `A.result --> B`로 쓴다.
-* 특정 단계가 복잡하면 그 단계 자체를 다시 별도 `jobflow`의 master로 만든다.
+* 결과의 선택·연결·배치는 [Job Flow 가이드](job-flow-diagram-guide.md)를 따른다.
+* 특정 단계의 내부 협력이 복잡하면 그 단계만 별도 `jobflow`로 확대한다. 단순 단계에 하위 조율자를 의무적으로 만들지 않는다.
 
 ---
 
@@ -453,6 +452,7 @@ flowchart TB
 * Microservices는 배포 경계를 강조한다.
 * Modular Monolith는 같은 프로세스 안의 모듈 경계를 강조한다.
 * 두 경우 모두 DB 소유권과 API/Event 경계를 함께 표시해야 한다.
+* 설계 수준별 선택과 서비스 간 통신은 [Method-R](method-R.md)을 따른다. 이 구성도의 서비스 간 선은 공개 계약의 연결이며, 특정 통신 수단이나 조율자를 전제하지 않는다.
 
 ---
 
@@ -466,14 +466,13 @@ Object: OrderSaga, OrderService, PaymentService, InventoryService, DeliveryServi
 
 OrderSaga.Start --> OrderService.CreateOrder
 OrderService.CreateOrder.result --> PaymentService.Capture
-PaymentService.Capture.success --> InventoryService.Reserve
 PaymentService.Capture.failed --> CompensationService.CancelOrder
-InventoryService.Reserve.success --> DeliveryService.RequestDelivery
+PaymentService.Capture.success --> InventoryService.Reserve
 InventoryService.Reserve.failed --> CompensationService.RefundPayment
-DeliveryService.RequestDelivery.success --> OrderSaga.Start.result
+CompensationService.RefundPayment.success --> CompensationService.CancelOrder
+InventoryService.Reserve.success --> DeliveryService.RequestDelivery
 DeliveryService.RequestDelivery.failed --> CompensationService.ReleaseInventory
-CompensationService.ReleaseInventory.result --> CompensationService.RefundPayment
-CompensationService.RefundPayment.result --> CompensationService.CancelOrder
+CompensationService.ReleaseInventory.success --> CompensationService.RefundPayment
 ```
 
 작성 가이드:
@@ -481,6 +480,7 @@ CompensationService.RefundPayment.result --> CompensationService.CancelOrder
 * 성공 경로와 실패 보상 경로를 반드시 함께 그린다.
 * 재시도 가능한 단계는 멱등 키와 중복 효과 방지 책임을 정한다. 실패 응답이 부수 효과 없음과 같은지 확인한다.
 * 보상 작업은 `Cancel`, `Refund`, `Release`처럼 업무 의미를 드러내며 원래 동작을 완전히 되돌릴 수 있다고 가정하지 않는다.
+* 배송 요청 성공 뒤에는 추가 작업이 없어 해당 분기는 생략했다. 보상 단계의 `success`는 다음 보상을 진행할 조건이며, 사용하지 않는 반환값을 전달한다는 뜻은 아니다.
 * 위는 주문 생성 성공, 결제/예약 실패 시 해당 단계의 효과 없음, 배송 요청 실패 시 접수되지 않음을 가정한 축약 예시다. 실제 구현은 timeout처럼 결과를 모르는 경우 조회·대사 계약이 필요하다. 취소 완료/보상 실패의 최종 결과, 재시도·운영 인계 책임은 별도로 명시한다.
 
 ---
@@ -527,11 +527,7 @@ LoginForm --> (/signin)
 (/signin) --> LoginForm : error
 ```
 
-작성 가이드:
-
-* 화면은 `PascalCase`, API는 `(/snake_case)`로 쓴다.
-* API 응답 분기는 `: success`, `: error`, `: invalid`처럼 짧게 표기한다.
-* 화면 내부의 세부 배치는 `screen-layout-guide.md`의 `layout` 블록으로 분리한다.
+화면·API·분기 표기는 [Navigation 가이드](navigation-diagram-guide.md), 화면 내부 배치는 [Layout 가이드](screen-layout-guide.md)를 따른다.
 
 ---
 

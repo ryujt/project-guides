@@ -1,10 +1,15 @@
 # 계층별 시스템 설계 방법론 Method-R
 
-Method-R은 시스템을 **책임과 계약이 분명한 조각으로 재귀적으로 나누고, 조각들이 서로의 구현과 협력 상대를 몰라도 일하게 연결하는 설계 방법론**이다. 각 조각은 자신의 규칙과 상태에 집중한다. 다른 조각의 도움이 필요하면 상위 객체에 요청을 알리거나, 수신자를 지정하지 않는 메시지를 발행한다.
+Method-R은 시스템을 **책임과 계약이 분명한 조각으로 재귀적으로 나누고, 조각들이 서로의 내부 구현을 몰라도 공개 계약으로 협력하게 연결하는 설계 방법론**이다. 각 조각은 자신의 규칙과 상태에 집중한다.
 
-선호하는 협력 방식은 **상위 오케스트레이터가 이벤트·요청과 결과를 연결하는 방식**, **메시지를 발행하고 각 수신자가 필요한 메시지에 반응하는 방식**이다. REST API는 이 협력을 프로세스 밖으로 전달할 때 사용할 수 있다. 이렇게 나눈 한 조각과 인접 계약만으로 변경을 판단하여 AI가 읽어야 할 구현 맥락을 줄이는 것이 목적이다.
+설계 수준에 따라 다음 방식을 선호한다.
 
-분할·계약의 공통 기준은 [모듈 경계와 최소 맥락 가이드](./module-boundary-guide.md), 조율자의 구현 책임은 [Orchestrator-Worker 가이드](./orchestrator-worker-pattern-guide.md), 다이어그램 문법은 [Job Flow 가이드](./job-flow-diagram-guide.md)를 따른다. 이 문서는 **어떤 경계를 어느 깊이까지 나누고, 나눈 조각을 두 방식으로 어떻게 협력시킬지**를 다룬다.
+* **시스템 수준**: 마이크로서비스 아키텍처(MSA)로 독립적인 서비스를 구성한다. 서비스 간에는 **이벤트·메시지 기반 통신**과 **REST API의 요청·응답**을 활용한다. 메시지 큐에는 **Amazon SQS**, 발행·구독에는 **Amazon SNS**, 이벤트 스트리밍에는 **Apache Kafka**나 **Amazon Kinesis Data Streams**를 사용할 수 있다.
+* **모듈·상세 수준**: **오케스트레이터–워커 패턴**을 기본으로 한다. 오케스트레이터는 작업 흐름과 결과를 연결하고, 각 워커는 자기 역할을 수행한다. 모듈의 메시지 처리가 필요하면 **이벤트 버스의 발행·구독**을 함께 사용한다.
+
+이 선호를 바탕으로 시스템 규모와 요구사항에 맞는 구조를 선택한다. 목적은 한 조각과 인접 계약만으로 변경을 판단하여 AI가 읽어야 할 구현 맥락을 줄이는 것이다.
+
+분할·계약·검증의 공통 기준은 [모듈 경계와 최소 맥락 가이드](./module-boundary-guide.md), 조율자의 구현 책임은 [Orchestrator-Worker 가이드](./orchestrator-worker-pattern-guide.md), 다이어그램의 작성·해석·결과 배치는 [Job Flow 가이드](./job-flow-diagram-guide.md)를 따른다. 이 문서는 **어떤 경계를 어느 깊이까지 나누고, 각 경계에 맞는 협력과 통신 방식을 어떻게 선택할지**를 다룬다.
 
 ## 1. 네 가지 설계 깊이
 
@@ -32,81 +37,123 @@ flowchart TB
 
 새 시스템은 바깥 경계부터 확인하되, 기존 시스템의 작은 변경에 모든 깊이의 문서를 다시 만들지 않는다. 이미 확인된 상위 경계는 링크하고 대상 조각부터 시작할 수 있다. 부분마다 멈추는 깊이는 달라도 된다.
 
-## 2. 조각을 연결하는 두 가지 방식
+## 2. 조각의 협력과 서비스 간 통신
 
-여기서 “서로를 의식하지 않는다”는 것은 **형제 조각의 이름·구체 구현·위치·다음 실행 순서를 각 조각 안에 넣지 않는다**는 뜻이다. 입력·결과·오류나 메시지 의미에 대한 계약은 공유한다. 연결 대상과 경로는 상위 조율자 또는 메시지 구독 구성에서 정한다.
+2.1·2.2에서는 형제 조각의 연결을 상위 조율자나 메시지 구독 구성에 맡긴다. 각 조각은 협력 상대 대신 자신의 요청·결과나 메시지 계약을 안다. 2.3에서는 별도 프로세스로 실행되는 독립 서비스가 상대의 공개 API를 호출하는 경우를 다룬다. 서비스의 공개 API에 의존하는 것과 상대의 내부 구현에 의존하는 것은 구분한다.
 
 | 방식 | 요청·발행 객체가 아는 것 | 연결을 책임지는 곳 | 결과가 필요할 때 |
 |---|---|---|---|
-| 상위 객체가 연결 | 자신의 도움 요청과 응답 계약 | 유스케이스의 오케스트레이터 | 상위가 수신 객체의 결과를 받아 요청 객체에 반환 |
+| 상위 객체가 연결 | 자신의 도움 요청과 응답 계약 | 유스케이스의 오케스트레이터 | 상위가 수신 객체의 결과를 요청 콜백의 반환값으로 돌려줌 |
 | 메시지로 연결 | 메시지 종류·데이터와 발행/요청 계약 | 버스·구독 구성; 처리는 각 수신자 | 요청 식별자로 응답을 대응시켜 요청 객체에 반환 |
 
-두 방식은 독립된 형제 모듈의 협력을 설계할 때 우선 검토한다. 한 모듈 안의 순수 함수 호출이나 응집된 계산까지 이벤트로 바꾸지 않는다. 조율자가 Worker를 호출하고 반환값을 받는 것도 이 원칙에 맞는다. 분할과 직접 호출의 적용 범위는 공통 가이드를 따른다.
+위 두 방식의 적용 범위와 직접 호출의 기준은 [Orchestrator-Worker 가이드](./orchestrator-worker-pattern-guide.md#1-적용-범위)를 따른다.
 
 ### 2.1 상위 오케스트레이터가 도움 요청과 결과를 연결한다
 
-1. A는 자기 일을 하다가 다른 능력이 필요하면 `OnNeedHelp`로 요청을 알린다. A는 B를 참조하거나 찾아서 호출하지 않는다.
-2. 상위 오케스트레이터는 A의 요청을 받아 B의 공개 메서드에 전달하도록 연결한다. B는 누가 요청했는지와 결과를 어디에 쓸지 알 필요가 없다.
-3. 결과가 필요하면 상위가 B의 비동기 결과를 받아 A에 돌려준다. A는 기다리던 위치에서 자기 처리를 이어간다.
+복잡한 시스템이나 처리를 책임이 다른 조각으로 나누고, 그 조각들이 분업하도록 연결한다. 여기서는 **WorkerA와 WorkerB를 내부 필드로 가진 Orchestrator가 하나의 독립된 컴포넌트**다. 외부는 Orchestrator에 요청하고, 내부 워커의 구성이나 협력 순서는 알 필요가 없다.
 
-아래 JavaScript의 `OnNeedHelp`는 이름에 `On`이 있지만 **응답자 하나인 비동기 요청 콜백**이다. 일반적인 다중 구독 이벤트의 반환값을 모으는 기능을 가정하지 않는다. 예제의 계산과 데이터는 연결 구조를 보여 주기 위한 것이다.
+1. Orchestrator가 외부 요청을 받으면 WorkerA의 `ProcessRequest`를 호출한다.
+2. WorkerA는 자기 몫을 처리하다가 다른 능력이 필요하면 `OnNeedHelp`로 필요한 데이터를 전달한다. WorkerB를 참조하거나 찾아서 호출하지 않는다.
+3. Orchestrator는 생성자에서 연결해 둔 이벤트 구독 또는 요청 콜백을 통해 WorkerB의 `ProvideHelp`를 호출한다. WorkerB는 누가 요청했는지와 결과를 어디에 쓸지 알 필요가 없다.
+4. WorkerA에게 결과가 필요하면 Orchestrator가 WorkerB의 반환값을 `OnNeedHelp`의 반환값으로 돌려준다. WorkerA는 그 값을 받아 자기 처리 흐름을 이어간다.
 
-```javascript
-class A {
-    OnNeedHelp;
+아래는 한 요청의 분업 흐름을 보여 주는 의사코드다. 두 예제는 독립된 경우이며, `OnNeedHelp`의 계약은 각각 결과를 받지 않는 이벤트와 결과를 받는 요청 콜백이다. 두 경우 모두 Orchestrator가 워커를 내부에서 생성하고 생성자에서 와이어링한다. 오류 처리와 구독 해제는 생략한다. 외부 요청 진입점은 다이어그램의 `Orchestrator.ProcessRequest`로만 표시하고, 그 메서드의 구현과 외부 호출 코드는 생략한다.
 
-    async Ask(input) {
-        const requestHelp = this.OnNeedHelp;
-        if (!requestHelp) throw new Error("OnNeedHelp is not connected");
-        const result = await requestHelp(input);
-        return { value: result.value + 1 };
+#### 도움을 요청하고 자기 몫을 끝내는 경우
+
+예를 들어 WorkerA가 본 처리를 마친 뒤 알림 발송을 요청하고, WorkerB가 알림을 보낼 수 있다. WorkerA는 알림 발송 결과로 할 일이 없으므로 요청을 알리는 것으로 자기 몫을 끝낸다.
+
+이 예제의 `event`는 이벤트 선언, `emit`은 발생, `subscribe`는 구독 연결을 뜻하며 이벤트의 반환값은 사용하지 않는다.
+
+```text
+class WorkerA {
+    event OnNeedHelp
+
+    ProcessRequest(request) {
+        data = ... // 자신의 규칙에 따라 본 처리 수행
+        OnNeedHelp.emit(data)
     }
 }
 
-class B {
-    async Help(input) {
-        return { value: input.value * 2 };
+class WorkerB {
+    ProvideHelp(data) {
+        ... // 전달받은 데이터로 알림 발송 등 후속 작업 수행
     }
 }
 
 class Orchestrator {
-    connect(a, b) {
-        if (a.OnNeedHelp) throw new Error("OnNeedHelp is already connected");
-        const handleNeedHelp = async (request) => {
-            const result = await b.Help(request);
-            return result;
-        };
-        a.OnNeedHelp = handleNeedHelp;
-        return () => {
-            if (a.OnNeedHelp === handleNeedHelp) a.OnNeedHelp = undefined;
-        };
+    private workerA = new WorkerA()
+    private workerB = new WorkerB()
+
+    constructor() {
+        workerA.OnNeedHelp.subscribe((data) => {
+            workerB.ProvideHelp(data)
+        })
     }
 }
-
-const a = new A();
-const disconnect = new Orchestrator().connect(a, new B());
-try {
-    console.log(await a.Ask({ value: 3 })); // { value: 7 }
-} finally {
-    disconnect();
-}
 ```
-
-연결을 담당하는 `Orchestrator`의 관점에서 같은 계약을 다음처럼 표현한다.
 
 ```jobflow
 orchestrator: Orchestrator
-Object: Orchestrator, A, B
+Object: Orchestrator, WorkerA, WorkerB
 
-A.OnNeedHelp --> B.Help
-B.Help.result --> A.OnNeedHelp.result
+Orchestrator.ProcessRequest --> WorkerA.ProcessRequest
+
+WorkerA.OnNeedHelp --> WorkerB.ProvideHelp
 ```
 
-`A.Ask` 내부에서 발생한 요청이 시작점이다. `A.OnNeedHelp.result`는 위에서 정의한 단일 응답 콜백의 반환값이며 일반 이벤트에 반환값을 추가하는 표기가 아니다. A는 `await` 다음부터 계속하므로 결과 화살표를 `A.Ask`로 되돌려 재호출처럼 그리지 않는다.
+WorkerA로 돌아오는 결과 화살표가 없다. **WorkerA의 몫은 요청을 알린 뒤 끝나고, WorkerB의 몫은 맡은 후속 작업을 수행하면 끝난다.** WorkerA가 끝났다는 사실만으로 WorkerB의 작업까지 완료됐다는 뜻은 아니다. 여기서 “요청만 하고 끝낸다”는 것은 결과에 따른 후처리가 없다는 뜻이며, 이벤트라는 이유만으로 비동기 실행을 보장하지는 않는다.
 
-필수 도움이 연결되지 않으면 명시적으로 실패시킨다. 선택적인 도움이라면 미연결 시 대체 동작을 A의 계약에 둔다. B의 실패는 콜백을 거쳐 A의 실패로 전달하며, 상위가 오류를 변환할 때도 계약의 의미를 보존한다. 연결·해제는 상위의 수명과 함께 관리한다. 예제의 `disconnect`는 새 요청의 연결만 끊으며 이미 시작된 작업을 취소하지는 않는다.
+#### 도움의 결과를 받아 후처리하는 경우
 
-결과가 필요 없는 상태 변화·진행 알림은 일반 이벤트로 발행하고 상위가 구독하여 필요한 객체에 전달할 수 있다. 이때 요청 하나에 결과 하나인 위 콜백 계약과 구분하고, 수신자 실패를 처리할 소유자를 정한다. 콜백 반환을 지원하지 않는 이벤트 도구를 쓴다면 요청 식별자와 응답 전달 경로를 별도로 둔다.
+예를 들어 WorkerA가 보고서에 필요한 데이터를 준비하고, WorkerB가 통계를 계산한 뒤, WorkerA가 그 통계로 보고서를 완성할 수 있다. WorkerA는 `ProcessRequest` 안에서 `OnNeedHelp`의 결과를 기다린 뒤 나머지 처리를 이어간다. 후처리는 WorkerA 내부에 있으므로 Orchestrator가 별도의 후처리 메서드를 알거나 호출할 필요가 없다.
+
+이 예제의 `OnNeedHelp`는 **응답자 하나인 비동기 요청 콜백**이며 `Promise<Result>`를 반환한다. Orchestrator가 생성자에서 콜백을 지정하고, WorkerA가 호출하면 WorkerB의 결과를 돌려준다. 일반 다중 구독 이벤트에서 반환값을 모으는 기능을 가정하지 않는다.
+
+```text
+class WorkerA {
+    OnNeedHelp: (data) -> Promise<Result>
+
+    async ProcessRequest(request) {
+        data = ... // 자신의 규칙에 따라 통계 계산에 필요한 데이터 준비
+        result = await OnNeedHelp(data)
+        report = ... // 전달받은 통계를 반영해 보고서 완성
+        return report
+    }
+}
+
+class WorkerB {
+    async ProvideHelp(data) {
+        result = ... // 맡은 통계 계산 수행
+        return result
+    }
+}
+
+class Orchestrator {
+    private workerA = new WorkerA()
+    private workerB = new WorkerB()
+
+    constructor() {
+        workerA.OnNeedHelp = async (data) => {
+            return await workerB.ProvideHelp(data)
+        }
+    }
+}
+```
+
+```jobflow
+orchestrator: Orchestrator
+Object: Orchestrator, WorkerA, WorkerB
+
+Orchestrator.ProcessRequest --> WorkerA.ProcessRequest
+
+WorkerA.OnNeedHelp --> WorkerB.ProvideHelp
+WorkerB.ProvideHelp.result --> WorkerA.OnNeedHelp.result
+```
+
+마지막 화살표는 **Orchestrator가 WorkerB의 결과를 WorkerA의 `OnNeedHelp` 호출에 반환한다**는 뜻이다. `WorkerA.OnNeedHelp.result`는 위에서 정의한 단일 응답 콜백의 반환값이다. WorkerA는 `ProcessRequest` 안의 `await` 다음부터 후처리를 이어가고, 보고서를 완성해 반환하면 자기 몫이 끝난다. 결과를 받아도 `ProcessRequest`를 다시 호출하지 않으며, Orchestrator는 WorkerA 내부의 후처리에 관여하지 않는다.
+
+두 경우 모두 **워커는 서로를 모르고, Orchestrator만 어느 워커의 요청을 누구에게 전달하고 결과를 어디로 보낼지 안다.** 워커는 자신의 처리와 데이터 계약에 집중하고, Orchestrator는 그 공개 계약들을 연결해 외부 요청 하나를 분업으로 처리한다.
 
 ### 2.2 메시지를 알리고 각 수신자가 필요한 메시지에 반응한다
 
@@ -120,7 +167,7 @@ B.Help.result --> A.OnNeedHelp.result
 
 마지막 행의 “동기식”은 **호출자 흐름이 결과에 의존한다**는 뜻이다. 내부 메시지 전달과 대기는 `await` 등으로 비동기 구현할 수 있으며 스레드 차단을 요구하지 않는다. 반대로 결과를 기다리지 않는 발행도 전송 오류·재처리 책임이 사라진다는 뜻은 아니다.
 
-다음은 네 가지 독립 시나리오다. `scope`는 메시지 교환을 관찰하는 범위이며, MessageBus는 라우팅과 응답 대응을 맡는다. 버스가 업무의 전체 순서를 정하는 오케스트레이터라는 뜻은 아니다. 메서드 인자를 넣지 않는 기존 jobflow 문법에 맞춰 메시지 종류는 동작명으로 구별하고 데이터 계약은 블록 아래에 적는다.
+다음은 네 가지 독립 시나리오다. MessageBus는 메시지 라우팅과 요청·응답 대응을 맡고, 업무 처리는 각 서비스와 Worker가 수행한다.
 
 ```jobflow
 scope: WorkflowMessageExchange
@@ -150,34 +197,39 @@ MessageBus.requestAndWait.result --> WorkflowService.continueWithData
 ```
 
 * `publishEventA`, `publishEventB`, `publishSharedEvent`는 각각 `publish(EventA)`, `publish(EventB)`, `publish(SharedEvent)`를 그림에서 구별하는 동작명이다. 구현에 세 메서드를 강제하지 않는다.
-* `onEventA`·`onSharedEvent`·`onDataRequest`는 수신 핸들러다. 각 Worker 안의 핸들러에서 처리로 가는 화살표는 그 Worker의 호출을 나타낸다. `scope`에 오케스트레이터의 생략 규칙을 적용하지 않는다.
+* `onEventA`·`onSharedEvent`·`onDataRequest`는 각 Worker의 수신 핸들러다.
 * `requestAndWait`의 입력은 `DataRequest`와 `requestId`, `reply`의 입력은 같은 `requestId`와 결과다. `WorkflowService.loadData`가 응답을 받아 자신의 `continueWithData`를 호출한다. 버스가 WorkflowService의 업무 메서드를 직접 호출하거나 `loadData`를 다시 실행하는 흐름이 아니다.
 
-알림용 이벤트는 발생한 사실을, `DataRequest`는 결과가 필요한 요청을 나타낸다. **발행/구독과 요청/응답은 같은 메시지 수단을 사용해도 완료 계약이 다르다.** 이 예제의 DataRequest 응답자는 WorkerA 하나다. 여러 응답이 필요한 경우에는 기대 응답 수·집계·부분 실패·종료 기한을 별도로 정한다.
+알림용 이벤트는 발생한 사실을, `DataRequest`는 결과가 필요한 요청을 나타낸다. 이 예제의 DataRequest 응답자는 WorkerA 하나다. 완료·응답 대응·실패 처리는 [메시지 계약 기준](./module-boundary-guide.md#메시지-발행과-요청응답)을 따른다.
 
-버스의 요청/응답 기능은 응답을 기다리는 항목을 전송 전에 등록하고, 요청별 식별자로 동시 요청을 구분해야 한다. 응답자 없음·실패·타임아웃·취소 시 대기를 끝내고 자원을 정리하며, 중복·늦은 응답이 다른 요청을 완료시키지 않게 한다. 사용하는 버스가 이 기능을 제공하는지 확인하고, 없다면 이를 맡는 adapter를 둔다. 전달 보장과 재처리의 공통 기준은 [모듈 경계 가이드](./module-boundary-guide.md)를 따른다.
+### 2.3 독립 서비스가 REST API로 요청과 응답을 주고받는다
 
-### 2.3 REST API로 이벤트 메시지와 요청을 전달한다
+MSA처럼 독립적으로 실행·배포되는 서비스 사이에서는 **호출 서비스가 제공 서비스의 공개 REST API에 요청하고 응답을 받는 구조**를 기본 예제로 삼는다. 각 서비스는 자신의 데이터와 업무 규칙을 소유하고, 호출자는 필요한 API 계약을 안다. 서비스를 다른 서비스의 내부 Worker로 생성하거나 상위 Orchestrator에 모두 모을 필요는 없다.
 
-두 방식의 상대가 다른 프로세스에 있으면 REST API로 전달할 수도 있다. HTTP 호출·주소·직렬화는 Gateway/Adapter가 맡고, A는 기존 도움 요청이나 메시지 계약만 사용한다. 예를 들어 상위가 `OnNeedHelp`를 로컬 B 대신 HelpGateway에 연결하면 A 내부를 바꾸지 않고 원격 도움을 받을 수 있다. 다만 원격 호출의 지연·실패가 기존 계약 안에서 처리 가능한지는 확인해야 한다.
+이 예제에서는 주문서비스가 주문서 미리보기를 만들기 위해 상품서비스에서 상품 정보를 조회한다. 상품서비스는 상품 정보를 반환하고, 주문서비스는 그 응답을 자기 처리 안에서 사용한다.
 
 ```jobflow
-orchestrator: HelpOrchestrator
-Object: HelpOrchestrator, A, HelpGateway
+scope: 서비스간상품조회
+Object: 주문서비스, 상품서비스
 
-A.OnNeedHelp --> HelpGateway.requestHelp
-HelpGateway.requestHelp.result --> A.OnNeedHelp.result
+주문서비스.상품조회요청 --> 상품서비스.상품조회
+상품서비스.상품조회.result --> 주문서비스.상품조회요청.result
 ```
 
-상위는 HelpGateway의 비동기 결과를 받아 A의 요청 콜백에 반환한다. Gateway가 서버 API에 요청을 보내고 응답을 해석하는 내부 구현은 별도 경계에 둔다.
+`상품조회요청`은 `GET /products/{productId}` 호출을 뜻한다. `상품조회`의 성공 응답에는 상품 ID·이름·가격이 담긴다. 이 응답은 상품 조회의 결과이며, 주문 생성이나 결제 완료를 뜻하지 않는다. HTTP 클라이언트와 주소·직렬화 등 서비스 내부 구현의 배치는 [모듈 경계 가이드](./module-boundary-guide.md#4-의존과-제어-흐름)를 따른다.
 
-| 목적 | REST API를 이용하는 흐름 | 구분할 결과 |
+서비스 간 통신은 결과가 필요한 시점과 수신자 관계에 따라 선택한다. 공개 API 요청·응답과 비동기 메시징의 구분은 [Microsoft의 서비스 간 통신 가이드](https://learn.microsoft.com/en-us/azure/architecture/microservices/design/interservice-communication)를 참고한다.
+
+| 필요한 협력 | 선택할 흐름 | 완료를 판단하는 지점 |
 |---|---|---|
-| 이벤트 알림 | 발행 adapter가 이벤트를 POST하고 수신 endpoint가 내부 버스·핸들러로 전달 | HTTP 접수 확인과 수신자의 처리 완료 |
-| 응답 안에 결과 제공 | Gateway가 요청을 보내고 서버의 업무 결과를 받아 상위로 반환 | 업무 성공·거절과 전송 실패 |
-| 접수 후 나중에 결과 제공 | 서버가 작업 식별자를 반환하고, Gateway가 상태 조회 또는 콜백 수신으로 최종 결과를 전달 | 접수·처리 중·완료·실패와 대기 기한 |
+| 조회나 짧은 처리를 요청하고 결과가 필요함 | REST 요청·응답 | 응답에 담긴 조회 결과 또는 처리 결과 |
+| 오래 걸리는 작업을 요청함 | 접수 응답 뒤 상태 API 조회 또는 완료 콜백 | 접수 이후 확인한 최종 작업 결과 |
+| 지정된 서비스에 발생 사실을 알림 | 합의된 HTTP endpoint로 webhook 전달 | endpoint 계약에 따른 접수 또는 처리 완료 |
+| 여러 서비스가 같은 사실에 독립적으로 반응함 | 2.2의 메시지 발행·구독 | 각 소비자가 맡은 처리의 완료 |
 
-REST API 자체가 구독자들에게 메시지를 방송하지는 않는다. 다수에게 알려야 하면 수신 경계의 버스나 명시적인 구독 전달 구성이 맡는다. 접수 응답을 최종 업무 결과로 반환하지 않고, HTTP 타임아웃을 상대 작업의 미실행으로 단정하지 않는다. 재전송에 따른 중복 효과와 결과 확인은 요청 식별자·멱등성 계약으로 다룬다.
+오래 걸리는 작업은 `202 Accepted`와 상태 조회 URL을 반환하는 [비동기 요청·응답 패턴](https://learn.microsoft.com/en-us/azure/architecture/patterns/asynchronous-request-reply)을 사용할 수 있다. `202`는 접수이며 업무 완료는 아니다. HTTP로 이벤트를 전달하는 webhook도 수신 endpoint를 지정하는 요청이므로, REST 자체가 여러 구독자에게 이벤트를 방송하는 것은 아니다.
+
+**오케스트레이션은 여러 서비스에 걸친 업무의 순서·분기·완료·복구를 한곳에서 관리해야 할 때 검토한다.** 예를 들어 주문·결제·배송의 여러 단계를 조율하는 업무라면 [Saga의 오케스트레이션 방식](https://learn.microsoft.com/en-us/azure/architecture/patterns/saga)이 적합할 수 있다. 이때도 참여 서비스는 독립된 서비스이며, 2.1의 내부 Worker 구성과 같은 배포 구조를 요구하지 않는다.
 
 ### 2.4 조율 방식과 전송 방식은 별도로 정한다
 
@@ -185,18 +237,9 @@ REST API 자체가 구독자들에게 메시지를 방송하지는 않는다. �
 * **Choreography**: 각 소비자가 메시지에 따라 자기 처리를 수행하고 전체 순서를 책임지는 단일 조율자는 없다. 메시지 버스를 쓴다는 사실만으로 이 방식이 되는 것은 아니다.
 * **경계 메시지**: 사용자·외부 시스템과의 논리적 입출력이다. HTTP·파일·UI 이벤트·큐 등을 포함하며 반드시 브로커 메시지를 뜻하지 않는다.
 
-분할 깊이, 조율 방식, 같은 프로세스인지 여부, 결과를 기다리는지 여부, 실제 전송 수단을 각각 기록한다. 내부는 반드시 이벤트이고 시스템 단계에서만 통신 방식을 고르는 식으로 고정하지 않는다.
+분할 깊이, 조율 방식, 같은 프로세스인지 여부, 결과를 기다리는지 여부, 실제 전송 수단을 각각 기록한다. 서비스가 다른 서비스의 REST API를 호출한다는 사실만으로 Orchestration이나 Choreography를 판정하지 않는다.
 
-중앙 조율이 있다고 하나의 DB 트랜잭션이 보장되지는 않는다. 이벤트로 나눴다고 결합이나 장애 전파가 사라지지도 않는다. 필요한 원자성, 실패 후 남는 상태, 재시도와 복구 책임은 계약에서 별도로 정한다.
-
-### 2.5 Job Flow를 읽는 기준
-
-* `scope: X`는 보는 범위이며 그 자체로 Choreography를 의미하지 않는다.
-* `orchestrator: X`는 실제로 해당 시나리오를 조율하는 객체다.
-* 조율자 뷰의 `A.method.result --> B.method`는 **조율자가 A의 결과를 받아 B를 호출**하는 축약이다. A가 B를 직접 호출하는 코드로 옮기지 않는다.
-* 일반 이벤트, 요청 콜백, 수신 핸들러는 이름만으로 혼동하지 않고 계약으로 구분한다. `A.OnNeedHelp`는 위에서 정의한 단일 응답 콜백이므로 `.result`를 사용한다. 일반 다중 구독 이벤트에 같은 반환 의미를 가정하지 않는다.
-* 내부의 A가 B Port를 호출하는 세부 구현은 A의 하위 뷰에서 표현한다. 상위 조율자가 그 호출을 수행한다고 꾸며 그리지 않는다.
-* 문법·분기·반환·렌더러 지원에 관한 세부 기준은 [Job Flow 가이드](./job-flow-diagram-guide.md)를 따른다.
+선택한 경계의 상태·실패 책임은 [모듈 경계 가이드](./module-boundary-guide.md#5-상태데이터와-실패의-소유권)에 따라 계약에 연결한다.
 
 ## 3. 매크로 설계: 시스템을 하나의 경계로 보기
 
@@ -209,16 +252,16 @@ Object: 사용자, 쇼핑몰시스템, 결제사
 사용자.On취소요청 --> 쇼핑몰시스템.주문취소
 쇼핑몰시스템.주문취소.result --> 사용자.message.취소처리결과
 쇼핑몰시스템.On환불요청 --> 결제사.message.환불요청
-결제사.On환불상태변경 --> 쇼핑몰시스템.환불결과수신
+결제사.On환불상태변경 --> 쇼핑몰시스템.message.환불결과수신
 ```
 
-여기서 `scope`는 내부 조율자 유무를 판정하지 않는다. 외부 환불 결과가 지연될 수 있다면 사용자에게 반환할 결과는 “취소 완료”와 “처리 중”을 구분해야 한다. 응답 완료를 업무 완료로 가정하지 않는다.
+외부 환불 결과가 지연될 수 있다면 사용자에게 반환할 결과는 “취소 완료”와 “처리 중”을 구분해야 한다.
 
 산출물은 외부 계약, 성공·실패·대기 결과, 주요 제약이다. UI가 없는 CLI나 작은 변환 도구라면 이 경계와 함수 계약만으로 충분할 수 있다.
 
 ## 4. 시스템 설계: 책임·상태 소유권과 협력
 
-“서비스”는 논리적 책임을 뜻하며 독립 배포나 Singleton을 강제하지 않는다. 예를 들어 Orders는 주문 상태, Payments는 환불 요청과 결과, Delivery는 출고 상태를 소유한다. 다른 책임의 테이블을 직접 수정하지 않는다.
+이 단계의 “서비스”는 논리적 책임을 뜻하며 독립 배포나 Singleton을 강제하지 않는다. 예를 들어 Orders는 주문 상태, Payments는 환불 요청과 결과, Delivery는 출고 상태를 소유한다. 데이터 접근은 [소유권 기준](./module-boundary-guide.md#5-상태데이터와-실패의-소유권)을 따른다.
 
 ### 4.1 Orchestration 예제: 주문 취소
 
@@ -234,17 +277,12 @@ Object: 취소조율자, 주문관리, 결제관리
 결제관리.환불요청.완료 --> 주문관리.취소완료
 결제관리.환불요청.확정실패 --> 주문관리.취소실패기록
 결제관리.환불요청.결과불명 --> 취소조율자.복구예약
-주문관리.취소완료.result --> 취소조율자.취소.result
-주문관리.취소실패기록.result --> 취소조율자.취소.result
-취소조율자.거절응답.result --> 취소조율자.취소.result
-취소조율자.복구예약.result --> 취소조율자.취소.result
 ```
 
 * Orders의 `취소시작`은 취소 가능 판정과 진행 상태 반영을 원자적으로 수행하거나 버전 조건으로 경쟁 변경을 거절한다. 취소 진행 중 출고 같은 경쟁 명령의 허용 여부도 Orders 계약에 둔다.
 * Payments는 같은 취소 작업의 중복 환불을 막고 결과 조회를 제공한다. `결과불명`은 “환불되지 않음”과 다르며 같은 식별자로 확인할 수 있어야 한다.
 * `복구예약`은 후속 조회가 보장되는 상태를 남긴 뒤 처리 중을 반환한다. 예약 자체의 실패를 성공으로 숨기지 않는다.
 * 주문 상태 저장 실패와 프로세스 재시작도 복구 계약으로 다룬다. 위 그림은 주요 업무 분기이며 모든 기술 예외를 나열한 완성 명세는 아니다.
-* 조율자의 워크플로 상태와 모듈의 도메인 상태는 구분한다. 조율자에 주문 취소 가능 규칙을 복제하지 않는다.
 
 ### 4.2 Choreography 예제: 확정된 사실의 독립 소비
 
@@ -254,16 +292,16 @@ Object: 취소조율자, 주문관리, 결제관리
 scope: 취소후속처리
 Object: 주문관리, MessageBus, 알림관리, 통계관리, 운영알림
 
-주문관리.OrderCancelled --> MessageBus.OrderCancelled
-MessageBus.OrderCancelled --> 알림관리.HandleOrderCancelled
-MessageBus.OrderCancelled --> 통계관리.HandleOrderCancelled
-알림관리.NotificationFailed --> MessageBus.NotificationFailed
-MessageBus.NotificationFailed --> 운영알림.HandleNotificationFailed
+주문관리.OnOrderCancelled --> MessageBus.message.OrderCancelled
+MessageBus.message.OrderCancelled --> 알림관리.HandleOrderCancelled
+MessageBus.message.OrderCancelled --> 통계관리.HandleOrderCancelled
+알림관리.OnNotificationFailed --> MessageBus.message.NotificationFailed
+MessageBus.message.NotificationFailed --> 운영알림.HandleNotificationFailed
 ```
 
 알림 실패가 확정된 주문 취소를 되돌리는 것은 아니다. 그런 업무 요구가 있다면 완료 조건과 복구 흐름을 다시 설계한다. 이벤트 이름을 안다는 것은 스키마·의미·발행 시점에 의존한다는 뜻이며 “서로 전혀 모른다”는 뜻은 아니다.
 
-`OrderCancelled`는 취소 저장이 확정된 뒤 발행한다. 저장과 발행 사이 장애로 유실될 수 있다면 outbox 또는 재발행 등 요구에 맞는 복구 방법과 소유자를 정한다. 버스 수신 확인만으로 소비자 처리가 완료되었다고 보지 않는다.
+`OrderCancelled`는 취소 저장이 확정된 뒤 발행한다. 저장·발행의 연결과 소비자별 완료·재처리는 [메시지 계약 기준](./module-boundary-guide.md#메시지-발행과-요청응답)을 따른다.
 
 ### 4.3 선택 결과 기록
 
@@ -291,16 +329,13 @@ Object: 취소시작유스케이스, 주문저장소, 취소규칙
 취소규칙.판정.가능 --> 주문저장소.버전조건부취소시작
 주문저장소.버전조건부취소시작.충돌 --> 취소시작유스케이스.충돌응답
 주문저장소.버전조건부취소시작.저장됨 --> 취소시작유스케이스.진행응답
-취소시작유스케이스.거절응답.result --> 취소시작유스케이스.실행.result
-취소시작유스케이스.충돌응답.result --> 취소시작유스케이스.실행.result
-취소시작유스케이스.진행응답.result --> 취소시작유스케이스.실행.result
 ```
 
 이 하위 그림도 최초 요청을 다룬다. 조회 결과에는 주문 버전이 있고, 조건부 저장은 그 버전이 여전히 같은 경우에만 반영한다. 도메인 규칙은 `취소규칙`이 소유하고, 원자적 비교·쓰기 구현은 저장소가 제공한다. 다른 작업과의 충돌은 상위의 `거절` 결과로 변환하되 재조회가 필요하다는 오류 의미를 보존한다. 같은 취소 ID 재요청은 기존 진행·완료 결과를 반환해야 한다. 중복 처리를 구현할 때는 단순 충돌 거절 대신 기존 결과 조회 경로를 별도로 설계·검증한다.
 
-이 그림의 조건부 저장은 Port이며 SQL 구현을 뜻하지 않는다. Worker를 조회·변환·검사 같은 한 줄 동작마다 나누지 않는다. 실제 코드가 충분히 단순하면 `취소규칙`은 같은 모듈의 순수 함수로 구현해도 된다.
+이 그림의 조건부 저장은 Port이며 SQL 구현을 뜻하지 않는다. `취소규칙`을 별도 조각으로 둘지는 [분할·병합 기준](./orchestrator-worker-pattern-guide.md#5-분할과-병합)에 따라 판단한다.
 
-산출물은 모듈 공개 진입점, 내부 책임, 데이터·오류 계약, 필요한 의존, 해당 경계의 검증이다. 하위의 독립된 조각도 필요하면 같은 두 방식으로 연결한다. 같은 프로세스의 일회성 결과는 호출·요청 콜백의 반환이나 `await`로 받을 수 있고, 진행률·독립 구독은 이벤트로 알린다. 단순한 내부 계산까지 메시지 왕복으로 만들지는 않는다.
+산출물은 모듈 공개 진입점, 내부 책임, 데이터·오류 계약, 필요한 의존, 해당 경계의 검증이다. 하위의 독립된 조각도 필요하면 2.1·2.2의 방식으로 연결한다. 구현 수단은 [호출·반환·이벤트 선택 기준](./orchestrator-worker-pattern-guide.md#3-호출반환이벤트-선택)을 따른다.
 
 ## 6. 상세 설계: 불확실한 부분만 더 확대하기
 
@@ -309,8 +344,8 @@ Object: 취소시작유스케이스, 주문저장소, 취소규칙
 | 내부 상황 | 적절한 산출물 |
 |---|---|
 | 단순 조건식 몇 개 | 함수 시그니처와 경계값 테스트 |
-| 상태와 허용 전이가 핵심 | `state` 다이어그램과 전이 불변식 |
-| 독립 정책의 순서·결합이 복잡 | 하위 `jobflow`와 정책별 계약 |
+| 상태와 허용 전이가 핵심 | [State 가이드](./state-diagram-guide.md)에 따른 다이어그램과 전이 불변식 |
+| 독립 정책의 순서·결합이 복잡 | [Job Flow 가이드](./job-flow-diagram-guide.md)에 따른 하위 흐름과 정책별 계약 |
 | 외부 I/O의 반복·취소가 핵심 | 실행 수명·실패·재시도 계약 |
 
 상세 Job Flow의 노드를 코드 한 줄에 대응시키는 것은 목표가 아니다. 내부 구현을 다 그리면 코드를 중복 관리하게 된다. 상위에 없던 책임·불변식·실패 경계가 드러날 때만 상세를 추가한다.
@@ -319,48 +354,8 @@ Sub-Orchestrator를 도입하더라도 상위가 보는 입력·결과·오류 �
 
 ## 7. 흐름 밖에 필요한 계약
 
-공통 [모듈 계약 양식](./module-boundary-guide.md)을 사용한다. 데이터 소유권, 입력·결과, 상태 변경, 오류·취소·부분 성공, 수명·동시성, 호환성, 검증을 그림에 연결한다. 작은 기능은 기존 타입·테스트 링크로 충분하다.
-
-협력 계약에는 다음 질문의 답을 연결한다. 본문을 복제하기보다 실제 콜백 타입·메시지 스키마·Gateway 계약을 원본으로 삼는다.
-
-| 경계 | 확인할 계약 |
-|---|---|
-| 상위가 받는 도움 요청 | 필수/선택, 응답자 수, 결과·오류, 연결·해제 소유자, 실행 중 취소 |
-| 메시지 발행/구독 | 사실의 의미와 발행 시점, 구독 구성, 발행 확인 범위, 소비자별 실패·재처리 |
-| 메시지 요청/응답 | 요청 식별자, 응답자·집계 조건, 응답 없음·오류·타임아웃, 중복·늦은 응답 정리 |
-| REST 전송 | endpoint의 입력·응답 의미, 접수와 업무 완료, 결과 조회·콜백 경로, 중복 요청·결과 불명 처리 |
-
-메시지를 쓸 때에는 다음처럼 전달 보장과 재시도 정책을 구분한다. 아래 값은 설명용 예시이며 시스템 요구에 맞게 결정한다.
-
-```text
-name: OrderCancelled
-schemaVersion: 1
-producer: Orders
-consumers: Notifications, Analytics
-payload: eventId, orderId, orderVersion, cancelledAt
-publishCondition: 취소 저장 확정; 저장 후 발행 실패는 재발행 가능
-delivery: at-least-once
-deduplication: consumer별 eventId 처리 기록; 효과와 처리 기록의 원자성 확인
-retry: 일시적 오류만; 최대 3회; 전체 30초 이내
-failure: 재시도 소진 메시지 격리; 소유자 조사 후 재처리
-ordering: 순서 보장 없음; orderVersion으로 오래된 갱신 구분
-```
-
-이벤트 중복 방지 기록의 보존 기간은 실제 재전달·수동 재처리 기간과 맞춘다. `orderId`만 멱등 키로 쓰면 같은 주문의 서로 다른 정상 작업까지 합쳐 버릴 수 있으므로 업무 명령 ID와 이벤트 ID를 구분한다.
+각 깊이의 산출물에는 해당 경계의 계약 원본을 연결한다. 계약 항목은 [모듈 계약 양식](./module-boundary-guide.md#모듈-계약-양식), 상태·실패·메시지 전달은 [소유권 기준](./module-boundary-guide.md#5-상태데이터와-실패의-소유권), 조율자와 Worker의 책임은 [Orchestrator-Worker 가이드](./orchestrator-worker-pattern-guide.md)를 참조한다.
 
 ## 8. 검증과 분할 종료
 
-설계자는 대표 변경 하나로 “어떤 구현을 읽고, 어떤 계약을 바꾸고, 어디를 검증하는가”를 시뮬레이션한다. 독립 검토자는 성공 흐름보다 다음 반례를 확인한다.
-
-1. 한 규칙 변경이 관련 없는 형제 구현까지 읽거나 고치게 하는가?
-2. 한 불변식을 여러 모듈이 나눠 쓰거나 조율자에 복제했는가?
-3. 반환·이벤트·상태 이름이 상하위 계약에서 같은 의미인가?
-4. 타임아웃, 중복, 지연 이벤트, 저장 성공 후 발행 실패를 처리할 소유자가 있는가?
-5. 동기·비동기 또는 프로세스 경계를 조율 방식과 혼동했는가?
-6. 새 조각의 계약·테스트·탐색 비용이 줄어든 구현 맥락보다 큰가?
-7. 도움 요청이 미연결이거나 수신자가 실패해도 A가 정상 결과를 받은 것처럼 계속하지 않는가? 상위가 결과를 빠뜨리지 않고 반환하는가?
-8. 동시 요청·중복 응답·타임아웃 뒤 늦은 응답이 다른 실행을 완료시키지 않는가? REST 접수와 최종 결과를 구분하는가?
-
-**책임·불변식·입출력·실패·검증을 외부 구현 없이 이해할 수 있으면 분할을 멈춘다.** 항상 함께 변경되는 조각은 병합을 검토한다. 모든 조각에 같은 깊이를 강제하지 않으며, 위험한 기능 하나를 먼저 구체화한 뒤 얻은 근거로 나머지를 판단한다.
-
-실제 구현 검증에서는 순수 규칙의 반례, 조율의 결과 연결, Gateway의 실제 계약, 경계를 통과하는 핵심 시나리오 중 필요한 계층을 선택한다. 모든 도식마다 E2E를 만들거나 모든 함수를 mock하지 않는다. 문서 리뷰만 수행했다면 실행·성능·토큰 절감까지 검증했다고 보고하지 않는다.
+각 깊이에서 대표 변경 하나를 따라가며 다음 깊이까지 확대할 필요가 있는지 판단한다. 분할 종료는 [모듈 경계 기준](./module-boundary-guide.md#2-무엇을-한-조각으로-묶는가), 변경 검증과 독립 검토는 [변경과 검증](./module-boundary-guide.md#7-변경과-검증), 평가와 보고는 [품질 평가](./module-boundary-guide.md#8-품질-평가)를 따른다. 각 부분이 멈추는 깊이는 달라도 된다.
