@@ -183,8 +183,8 @@ WorkerB.onEventB --> WorkerB.executeTask
 
 WorkflowService.publishSharedEvent --> MessageBus.publishSharedEvent
 MessageBus.publishSharedEvent --> WorkerA.onSharedEvent
-MessageBus.publishSharedEvent --> WorkerB.onSharedEvent
 WorkerA.onSharedEvent --> WorkerA.executeTask
+MessageBus.publishSharedEvent --> WorkerB.onSharedEvent
 WorkerB.onSharedEvent --> WorkerB.executeTask
 
 WorkflowService.loadData --> MessageBus.requestAndWait
@@ -198,6 +198,7 @@ MessageBus.requestAndWait.result --> WorkflowService.continueWithData
 
 * `publishEventA`, `publishEventB`, `publishSharedEvent`는 각각 `publish(EventA)`, `publish(EventB)`, `publish(SharedEvent)`를 그림에서 구별하는 동작명이다. 구현에 세 메서드를 강제하지 않는다.
 * `onEventA`·`onSharedEvent`·`onDataRequest`는 각 Worker의 수신 핸들러다.
+* `SharedEvent`의 두 전달은 서로를 기다리지 않는다. 그림에서 WorkerA의 처리가 WorkerB의 수신보다 위에 있는 것은 수신자마다 처리까지 이어 썼기 때문이며 실행 순서가 아니다.
 * `requestAndWait`의 입력은 `DataRequest`와 `requestId`, `reply`의 입력은 같은 `requestId`와 결과다. `WorkflowService.loadData`가 응답을 받아 자신의 `continueWithData`를 호출한다. 버스가 WorkflowService의 업무 메서드를 직접 호출하거나 `loadData`를 다시 실행하는 흐름이 아니다.
 
 알림용 이벤트는 발생한 사실을, `DataRequest`는 결과가 필요한 요청을 나타낸다. 이 예제의 DataRequest 응답자는 WorkerA 하나다. 완료·응답 대응·실패 처리는 [메시지 계약 기준](./module-boundary-guide.md#메시지-발행과-요청응답)을 따른다.

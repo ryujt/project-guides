@@ -138,6 +138,79 @@ Payments.refund --> Bank.credit
 
 잘못된 예는 `Object:` 순서 여섯 가지에서 모두 똑같이 끊겼다. 끊김은 열 순서가 아니라 줄 순서로 고친다. 위 조건은 `generateSVG`의 출발점 선택 코드에서 읽었다. 다시 그릴 때마다 기록을 남기게 한 사본으로 여러 문서의 jobflow 블록 197개를 그렸을 때, 실제로 다시 그린 63곳과 렌더러 없이 이 조건만으로 찾은 줄이 모두 같았다.
 
+#### 선 교차 줄이기
+
+줄 순서 규칙이 노드가 끊겨 다시 그려지는 일을 막는다면, 이 규칙은 선끼리 가로지르는 일을 막는다. 둘 다 줄 순서와 `Object:` 순서로 고친다.
+
+**교차 조건**: 이 사본은 새 가로선을 놓을 때 이미 그린 세로선이 지나는 행을 피하지만, 세로선을 아래로 늘릴 때는 이미 그린 가로선을 보지 않는다. 그래서 화살표끼리의 교차는 언제나 앞 줄이 그린 가로선과, 뒤 줄이 그 아래로 늘린 세로선 사이에서 생긴다. 세로선이 생기는 곳은 넷이다.
+
+- 한 칸에서 두 번째 이후로 나가는 화살표(가지) — 출발 칸 아래로 줄기가 내려간다.
+- 출발 행이 막혀 아래 행으로 꺾인 첫 화살표.
+- 같은 객체 안 화살표 — 그 열의 맨 아래 행까지 곧게 내려간다.
+- 메서드 칸과 결과·분기 칸을 잇는 점선 — 배치할 때 보지 않는 선이라, 줄 순서와 상관없이 두 칸 사이 행을 지나는 가로선과 교차한다.
+
+이 조건을 피하는 순서는 다음과 같다.
+
+1. **가지는 그 열을 가로지르는 줄보다 먼저 쓴다** — 한 노드의 가지를 모두 쓴 다음에 그 노드의 열을 가로지르는 다른 줄을 쓴다. `A`가 `B`를 부르고 `B`가 가지를 내면 `B`의 가지를 `A`의 다음 가지보다 먼저 쓴다. 줄 순서 규칙 1(깊이 우선)과 같은 순서다. 흐름(트리거)이 여럿이면 한 흐름의 줄을 다 쓴 뒤 다음 흐름으로 넘어간다.
+2. **고치는 법은 셋이다** — 교차가 보이면 ① 세로선을 만든 줄을 가로선 줄 앞으로 옮기거나, ② 가로선 줄을 그 노드의 마지막 가지 뒤로 옮기거나, ③ 그 노드의 가지 묶음을 통째로 가로선 줄 앞으로 옮긴다. 옮긴 뒤 다시 그리기가 늘지 않았는지도 본다.
+3. **좌우로 갈라지는 가지는 한쪽으로 모은다** — 가지의 타깃은 왼쪽과 오른쪽이 따로 빈 행을 찾는다. 그래서 양쪽 타깃이 같은 행에 놓이면 줄기와 「+」·「┴」 모양으로 만나 두 타깃을 잇는 한 줄처럼 보인다(접합). 첫 화살표만은 출발 칸과 같은 행에 곧게 나가 줄기를 쓰지 않지만, 출발 칸으로 들어온 화살표가 그 행의 한쪽을 차지한다.
+   - 들어온 화살표의 반대쪽 타깃이 하나뿐이면 그 줄을 첫 가지로 쓴다. 나머지 가지는 모두 들어온 쪽으로 꺾여 내려가 만나지 않는다. 들어온 화살표가 없으면 어느 한쪽이 하나뿐일 때 그 줄을 첫 가지로 쓴다.
+   - 그 밖의 경우는 줄 순서로 피할 수 없다. `Object:`에서 출발 노드를 타깃들의 한쪽 끝으로 옮긴다. 요청을 많이 내보내는 노드끼리 왼쪽에 모으면 대개 이렇게 된다(위 `Object:` 순서 규칙 1).
+4. **줄 순서가 뜻인 그림은 열 순서로 푼다** — 기동 순서처럼 줄 순서 자체가 사실이면 줄을 옮기지 않는다. 지나는 선이 그 열을 피하도록 `Object:` 순서를 바꾸고, 바꾼 이유를 그림 아래에 적는다. 결과 점선을 가로지르는 선도 같은 방법으로 그 열을 피하게 한다.
+5. **확인** — 렌더 결과에서 선이 「+」 모양으로 만나는 곳을 모두 찾는다. 서로 다른 출발점의 선이 가로지르면 교차이고, 한 줄기에서 좌우로 갈라져 만나면 접합이다. 둘 다 0으로 만들고, 남기면 그 줄과 이유를 그림 아래에 적는다. 렌더러가 없으면 줄 순서와 열 순서만 보고 정적으로 확인했다고 적는다.
+
+교차의 예 — `Billing.closeMonth`가 `Orders.collect`를 부르고, `collect`가 다시 둘을 부른다.
+
+> 잘못된 예 — 요청자의 가지를 먼저 다 쓰고 호출받은 노드의 가지를 뒤에 써서, `collect`의 줄기가 `closeMonth`의 가로선 둘을 가로지른다:
+> ```jobflow
+> scope: 월말 청구 1건
+> Object: Billing, Orders, Payments, Mailer, OrderDB, Ledger
+> Billing.closeMonth --> Orders.collect
+> Billing.closeMonth --> Payments.charge
+> Billing.closeMonth --> Mailer.sendInvoice
+> Orders.collect --> OrderDB.select
+> Orders.collect --> Ledger.post
+> ```
+
+올바른 예 — 호출받은 노드의 가지를 먼저 쓴다:
+
+```jobflow
+scope: 월말 청구 1건
+Object: Billing, Orders, Payments, Mailer, OrderDB, Ledger
+Billing.closeMonth --> Orders.collect
+Orders.collect --> OrderDB.select
+Orders.collect --> Ledger.post
+Billing.closeMonth --> Payments.charge
+Billing.closeMonth --> Mailer.sendInvoice
+```
+
+접합의 예 — 오른쪽 끝의 `Clock`이 `Billing`을 깨우고, `Billing`이 왼쪽 하나와 오른쪽 둘로 가지를 낸다.
+
+> 잘못된 예 — 오른쪽 타깃을 먼저 써서, 왼쪽 `listUnbilled`와 오른쪽 `charge`가 같은 행에서 줄기와 만난다:
+> ```jobflow
+> scope: 월말 청구 1건
+> Object: Orders, Billing, Payments, Mailer, Clock
+> Clock.OnMonthEnd --> Billing.closeMonth
+> Billing.closeMonth --> Payments.charge
+> Billing.closeMonth --> Orders.listUnbilled
+> Billing.closeMonth --> Mailer.sendInvoice
+> ```
+
+올바른 예 — 들어온 화살표(오른쪽)의 반대쪽 타깃 하나를 첫 가지로 쓴다:
+
+```jobflow
+scope: 월말 청구 1건
+Object: Orders, Billing, Payments, Mailer, Clock
+Clock.OnMonthEnd --> Billing.closeMonth
+Billing.closeMonth --> Orders.listUnbilled
+Billing.closeMonth --> Payments.charge
+Billing.closeMonth --> Mailer.sendInvoice
+```
+
+이 사본과, 「처음·다시」를 칸 단위로 세는 구현 모두에서 결과가 같았다. 교차의 잘못된 예는 `collect`의 줄기가 가로선과 두 번 교차했고, 올바른 예는 0이었다. 접합의 잘못된 예는 `listUnbilled`와 `charge`가 한 행에서 이어져 보였다. 올바른 예는 `listUnbilled`가 출발 행에 곧게 놓이고 `charge`·`sendInvoice`가 그 아래로 내려갔다.
+
+교차 조건은 여러 문서의 jobflow 블록 900개와 무작위 블록 2만 개에서 교차한 화살표 쌍마다 확인했다. 가로선은 언제나 앞 줄이었다. 좌우 가지 규칙은 들어오는 방향 셋(왼쪽·오른쪽·없음)과 양쪽 타깃 수 0~3을 조합한 39가지 경우에서 모든 줄 순서를 그려 확인했다. 고치는 법 셋을 함께 쓰면, 교차가 있던 블록 17개 가운데 15개가 다시 그리기를 늘리지 않고 줄 이동만으로 0이 됐다.
+
 ## 기본 규칙
 
 ### 기본 구조
