@@ -324,6 +324,105 @@ test('JF-RETURN — orchestrator로 돌아오는 같은 타깃 2회는 WARN, sco
   assert.match(r.issues[0].msg, /2번/);
 });
 
+/* ------------------------------------------------- jobflow 다시 그리기 */
+
+// 렌더러는 출발 노드 칸 아래 같은 열에 다른 칸이 먼저 생기면 그 노드를 이어 쓰지 못하고 새 칸에 다시 그린다.
+// 아래 사례의 끊김·이어짐은 렌더러 사본으로 그린 PNG에서 눈으로 확인했다.
+
+test('JF-REDRAW — 팬아웃 형제가 같은 열을 먼저 차지하면 하류 출발 노드를 다시 그리고, 깊이 우선이면 이어진다', async () => {
+  const head = ['scope: 주문 결제', 'Object: Browser, Shop, Payment, Bank', 'Browser.checkout --> Shop.placeOrder', 'Shop.placeOrder --> Payment.card'];
+  const ls = [
+    ...jf(...head, 'Shop.placeOrder --> Payment.point', 'Payment.card --> Bank.approve'), // 끊김
+    ...jf(...head, 'Payment.card --> Bank.approve', 'Shop.placeOrder --> Payment.point'), // 깊이 우선 — 이어짐
+  ];
+  const r = await checkDoc(ls);
+  const made = lineOf(ls, 'Shop.placeOrder --> Payment.card');
+  assert.deepEqual(brief(r), [`WARN JF-REDRAW ${lineOf(ls, 'Payment.card --> Bank.approve')}`]);
+  assert.equal(r.issues[0].msg,
+    `출발 노드 'Payment.card' — 줄 ${made}에서 그린 칸 아래 같은 열에 'Payment.point'(줄 ${lineOf(ls, 'Shop.placeOrder --> Payment.point')}) 칸이 먼저 생겨 `
+    + `렌더러가 이 노드를 새 칸에 다시 그린다(흐름이 끊긴다). 이 노드에서 나가는 줄을 줄 ${made} 바로 뒤로 옮긴다(깊이 우선)`);
+  assert.equal(r.code, 0); // WARN이다
+});
+
+test('JF-REDRAW — 팬아웃 중 콜백이 출발점 열에 칸을 만들면 출발점을 다시 그리고, 팬아웃을 먼저 끝내면 이어진다', async () => {
+  const ls = [
+    ...jf('scope: 주문 확정', 'Object: Shop, Payment, Stock',
+      'Shop.confirm --> Payment.charge', 'Payment.OnCharged --> Shop.markPaid', 'Shop.confirm --> Stock.reserve'),
+    ...jf('scope: 주문 확정', 'Object: Shop, Payment, Stock',
+      'Shop.confirm --> Payment.charge', 'Shop.confirm --> Stock.reserve', 'Payment.OnCharged --> Shop.markPaid'),
+  ];
+  const r = await checkDoc(ls);
+  assert.deepEqual(brief(r), [`WARN JF-REDRAW ${lineOf(ls, 'Shop.confirm --> Stock.reserve')}`]);
+  assert.match(r.issues[0].msg, /^출발 노드 'Shop\.confirm' — 줄 \d+에서 그린 칸 아래 같은 열에 'Shop\.markPaid'\(줄 \d+\) 칸이 먼저 생겨/);
+  assert.match(r.issues[0].msg, new RegExp(`줄 ${lineOf(ls, 'Shop.confirm --> Payment.charge')} 바로 뒤로 옮긴다\\(깊이 우선\\)$`));
+});
+
+test('JF-REDRAW — 값 분기 칸·단독 줄이 같은 열을 먼저 차지하면 앞 노드를 다시 그리고, 하류 줄을 먼저 쓰면 이어진다', async () => {
+  const head = ['scope: 결제 승인', 'Object: Shop, Payment, Ledger', 'Shop.pay --> Payment.charge'];
+  const ls = [
+    ...jf(...head, 'Payment.charge.ok --> Shop.markPaid', 'Payment.charge --> Ledger.record'), // 값 분기 칸 뒤
+    ...jf(...head, 'Payment.charge.declined', 'Payment.charge --> Ledger.record'), // 단독 줄 뒤
+    ...jf(...head, 'Payment.charge --> Ledger.record', 'Payment.charge.ok --> Shop.markPaid', 'Payment.charge.declined'),
+  ];
+  const r = await checkDoc(ls);
+  assert.deepEqual(brief(r), [
+    `WARN JF-REDRAW ${lineOf(ls, 'Payment.charge --> Ledger.record', 1)}`,
+    `WARN JF-REDRAW ${lineOf(ls, 'Payment.charge --> Ledger.record', 2)}`,
+  ]);
+  assert.match(r.issues[0].msg, /같은 열에 'Payment\.charge\.ok'\(줄 \d+\) 칸이/);
+  assert.match(r.issues[1].msg, /같은 열에 'Payment\.charge\.declined'\(줄 \d+\) 칸이/);
+});
+
+test('JF-REDRAW — 막은 칸이 생긴 때에 따라 고치는 법이 다르다(같은 객체 안 화살표·먼저 생긴 칸), 넷째 칸부터는 개수만', async () => {
+  const ls = [
+    ...jf('scope: 주문 접수', 'Object: Shop, Stock', 'Shop.placeOrder --> Shop.validate', 'Shop.placeOrder --> Stock.reserve'),
+    ...jf('scope: 주문 접수', 'Object: Shop', 'Shop.placeOrder --> Shop.check', 'Shop.placeOrder --> Shop.price'),
+    ...jf('scope: 주문 접수', 'Object: Shop, Stock', 'Shop.placeOrder --> Stock.hold', 'Shop.placeOrder --> Shop.audit'), // 통과
+    ...jf('scope: 주문 처리', 'Object: Browser, Shop, Stock, Ledger',
+      'Browser.order --> Shop.place', 'Ledger.close --> Stock.count', 'Shop.place --> Stock.reserve',
+      'Browser.cancel --> Shop.undo', 'Stock.reserve --> Ledger.post'),
+    ...jf('scope: 주문 결제', 'Object: Shop, Payment, Bank',
+      'Shop.placeOrder --> Payment.card', 'Shop.placeOrder --> Payment.point', 'Shop.placeOrder --> Payment.coupon',
+      'Shop.placeOrder --> Payment.gift', 'Shop.placeOrder --> Payment.voucher', 'Payment.card --> Bank.approve'),
+  ];
+  const r = await checkDoc(ls);
+  assert.deepEqual(brief(r), [
+    `WARN JF-REDRAW ${lineOf(ls, 'Shop.placeOrder --> Stock.reserve')}`,
+    `WARN JF-REDRAW ${lineOf(ls, 'Shop.placeOrder --> Shop.price')}`,
+    `WARN JF-REDRAW ${lineOf(ls, 'Stock.reserve --> Ledger.post')}`,
+    `WARN JF-REDRAW ${lineOf(ls, 'Payment.card --> Bank.approve')}`,
+  ]);
+  const [cross, self, early, many] = r.issues.map((i) => i.msg);
+  const validate = lineOf(ls, 'Shop.placeOrder --> Shop.validate');
+  assert.match(cross, new RegExp(`줄 ${validate}의 같은 객체 안 화살표가 그 칸을 만들었다 — 이 줄을 줄 ${validate} 앞으로 옮긴다`));
+  assert.match(self, new RegExp(`같은 객체 안 화살표는 한 노드에서 마지막 줄 하나만 이어진다\\(먼저 이은 줄 ${lineOf(ls, 'Shop.placeOrder --> Shop.check')}\\)`));
+  assert.match(early, new RegExp(`막은 칸이 이 노드 칸보다 먼저\\(줄 ${lineOf(ls, 'Ledger.close --> Stock.count')}\\) 생겼다 — 그 줄을 이 줄 뒤로`));
+  assert.match(many, /'Payment\.point'\(줄 \d+\)·'Payment\.coupon'\(줄 \d+\)·'Payment\.gift'\(줄 \d+\) 외 1칸이 먼저 생겨/);
+});
+
+test('JF-REDRAW — 앞 줄 대상에서 같은 행으로 이어지면 그 칸 아래에 칸이 있어도 새 칸이 아니라 통과', async () => {
+  // Stock.reserve는 0행에 놓이고 그 아래 1행에 Stock.count가 먼저 있다. 렌더러는 바로 앞 줄의 대상인 Stock.reserve 칸에서
+  // 같은 행으로 가는 길이 비어 있으면 그 칸을 그대로 쓴다 — 새 칸이 생기지 않으므로 끊기지 않는다.
+  const ls = jf('scope: 주문 처리', 'Object: Browser, Shop, Stock, Ledger',
+    'Browser.order --> Shop.place', 'Ledger.close --> Stock.count', 'Shop.place --> Stock.reserve', 'Stock.reserve --> Ledger.post');
+  const r = await checkDoc(ls);
+  assert.deepEqual(brief(r), []);
+});
+
+test('JF-REDRAW — 헤더 없는 조각도 렌더러가 그리므로 보고, Object:에 없는 객체가 있는 블록은 보지 않는다', async () => {
+  const body = ['Shop.pay --> Payment.card', 'Shop.pay --> Payment.point', 'Payment.card --> Bank.approve'];
+  const ls = [
+    ...jf('Object: Shop, Payment, Bank', ...body),
+    ...jf('scope: 결제', 'Object: Shop, Payment', ...body),
+  ];
+  const r = await checkDoc(ls);
+  assert.deepEqual(brief(r), [
+    `FAIL JF-HEADER ${lineOf(ls, 'Object: Shop, Payment, Bank')}`,
+    `WARN JF-REDRAW ${lineOf(ls, 'Payment.card --> Bank.approve', 1)}`,
+    `FAIL JF-OBJECT ${lineOf(ls, 'Payment.card --> Bank.approve', 2)}`,
+  ]);
+});
+
 /* ------------------------------------------------------------ 링크·앵커 */
 
 test('LINK·ANCHOR — 대상 없음·앵커 없음은 FAIL, 코드·주석·외부·비 .md 조각은 건너뛴다', async () => {
@@ -701,6 +800,8 @@ test('--help — 수준별 코드·JF-LABEL 판정·JF-HEADER WARN·같은 basen
   const warn = part('WARN', '합격');
   assert.match(fail, /JF-LABEL = 화살표 줄과 단독\(분기\) 줄의 ':' 라벨\('::'만 예외\) — ' : ' 꼴과 'A\.b --> C\.d:x' 꼴 모두/);
   assert.match(warn, /^WARN .*LINK-OUTSIDE/m);
+  assert.match(warn, /^WARN .*JF-REDRAW/m);
+  assert.match(warn, /JF-REDRAW = 렌더러가 출발 노드를 새 칸에 다시 그려 흐름이 끊기는 줄/);
   assert.match(warn, /master: 헤더와 Object:에 없는 orchestrator 이름의 JF-HEADER/);
   assert.match(help, /basename이 같은 문서가 여럿이면 공통 상위 폴더부터의 경로를 __로 잇는다\(as-is__details__x-01\.svg\)/);
   assert.match(help, /--out <dir> +SVG 폴더\(기본 \.\/\.design-doc-check — 기본 폴더가 git 저장소 안이면 stderr에 알린다\)/);
