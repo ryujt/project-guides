@@ -37,6 +37,10 @@
  *   JF-ONNAME    WARN  액션 마지막 조각이 /^on/i인데 이벤트 꼴(on·On 뒤에 대문자·숫자·밑줄이나 한글처럼 대소문자 없는
  *                      글자)이 아님 → 렌더러가 이벤트로 그리고 앞 두 글자를 지운다(oneShotSession → eShotSession)
  *   JF-RETURN    WARN  orchestrator: X 그림에서 qualifier 없는 '--> X.method' 타깃이 2회 이상 → round-trip 의심
+ *   JF-REDRAW    WARN  렌더러가 출발 노드를 새 칸에 다시 그려 흐름이 끊기는 화살표 줄. 그 노드 칸 아래 같은 열에 다른 칸(그 열
+ *                      객체가 대상인 줄·새로 그린 출발 노드·단독 줄·같은 객체 안 화살표의 대상)이 먼저 생기면 이어 그리지
+ *                      못한다. 확인한 렌더러 사본의 행 배치를 그리지 않고 따라간다 — 화살표 끝 객체가 Object:에 없거나 액션이
+ *                      없는 블록은 보지 않는다. 메시지 = 다시 그리는 노드·막은 칸·고치는 법(깊이 우선 줄 순서)
  *   LINK         FAIL  상대 링크 대상이 없음, 대소문자만 다른 이름(링크에 적은 조각만 본다 — 명령줄로 준 경로의
  *                      대소문자 차이는 보지 않는다)
  *   LINK-OUTSIDE WARN  상대 링크(파일 부분이 있는 것)가 문서가 속한 git 저장소 루트를 넘는다 — 해석한 대상이 루트 밖이거나,
@@ -56,13 +60,14 @@
  *   github-slugger처럼 지운다.
  *   인용(>) 안 펜스는 내용을 검사·수집하지 않는다. 펜스·인라인 코드·HTML 주석 안 링크, 스킴(http·mailto 등) 링크,
  *   '/'로 시작하는 링크는 건너뛴다.
- * 한계    정적 검사다. 통과해도 의미(상위 노드↔하위 진입점, 요청자 오독, 코드와의 일치)와 그림 배치는 보장하지 않는다 —
- *         렌더 결과는 PNG로 바꿔 눈으로, 의미는 검토자가 따로 확인한다. 4칸 이상 들여 쓴 펜스(목록 안 펜스 포함)·
- *         밑줄식(Setext) 제목·참조식 링크·여러 줄에 걸친 링크·HTML <a href>는 보지 않는다. 목록 항목 안 ATX 제목
- *         (목록 표지와 같은 줄의 '- ## 제목', 4칸 이상 들여 쓴 제목)은 제목으로 모으지 않는다 — 그 앵커로 가는 링크는
- *         ANCHOR FAIL이 된다. LINK-OUTSIDE는 경로 조각의 이름만 디스크에 맞추고(대소문자·유니코드 정규화) 심볼릭 링크를
- *         따라가지 않는다. jobflow 판정은 확인한 렌더러 사본의 파싱 규칙(첫 점에서 객체/액션을 가름, 'Object:'로 시작하는
- *         줄만 객체 목록)에 맞췄다 — 다른 버전은 다를 수 있다.
+ * 한계    정적 검사다. 통과해도 의미(상위 노드↔하위 진입점, 요청자 오독, 코드와의 일치)는 보장하지 않고, 그림 배치는
+ *         다시 그리기(JF-REDRAW)만 본다 — 결과·분기 칸 위치와 앞 행 끼어듦은 PNG로 바꿔 눈으로, 의미는 검토자가 따로
+ *         확인한다. 4칸 이상 들여 쓴 펜스(목록 안 펜스 포함)·밑줄식(Setext) 제목·참조식 링크·여러 줄에 걸친 링크·
+ *         HTML <a href>는 보지 않는다. 목록 항목 안 ATX 제목(목록 표지와 같은 줄의 '- ## 제목', 4칸 이상 들여 쓴 제목)은
+ *         제목으로 모으지 않는다 — 그 앵커로 가는 링크는 ANCHOR FAIL이 된다. LINK-OUTSIDE는 경로 조각의 이름만 디스크에
+ *         맞추고(대소문자·유니코드 정규화) 심볼릭 링크를 따라가지 않는다. jobflow 판정은 확인한 렌더러 사본의 파싱
+ *         규칙(첫 점에서 객체/액션을 가름, 'Object:'로 시작하는 줄만 객체 목록)에, JF-REDRAW는 같은 사본의 행 배치
+ *         코드에 맞췄다 — 다른 버전은 다를 수 있다.
  */
 import fs from 'node:fs';
 import os from 'node:os';
@@ -82,13 +87,14 @@ const HELP = `${USAGE}
 출력  'LEVEL CODE file:line 메시지' 줄들, 마지막 줄 'files=… blocks=… fail=… warn=…'
 FAIL  FENCE·JF-HEADER·JF-OBJECT·JF-LABEL·LINK·ANCHOR·RENDER
       JF-LABEL = 화살표 줄과 단독(분기) 줄의 ':' 라벨('::'만 예외) — ' : ' 꼴과 'A.b --> C.d:x' 꼴 모두
-WARN  JF-UNUSED·JF-NAME·JF-ONNAME·JF-RETURN·MERMAID·LINK-OUTSIDE,
+WARN  JF-UNUSED·JF-NAME·JF-ONNAME·JF-RETURN·JF-REDRAW·MERMAID·LINK-OUTSIDE,
       master: 헤더와 Object:에 없는 orchestrator 이름의 JF-HEADER
       LINK-OUTSIDE = 상대 링크가 문서가 속한 git 저장소 루트를 넘는다(.git을 못 찾으면 보지 않는다)
+      JF-REDRAW = 렌더러가 출발 노드를 새 칸에 다시 그려 흐름이 끊기는 줄(렌더러 행 배치를 따라간 판정 — 고치는 법은 메시지에)
 합격  FAIL 0이고 남은 WARN마다 문서 본문에 이유가 있다. --strict는 WARN을 모두 없애기로 한 문서에만 쓴다
 exit  0 = 실패 없음, 1 = 실패 있음, 2 = 사용법 오류
 코드마다의 판정 조건 전체는 이 파일의 머리 주석에 있다.
-정적 검사다 — 통과해도 그림 배치와 의미(요청자·상하위 노드 일치)는 따로 확인한다.`;
+정적 검사다 — 그림 배치는 다시 그리기(JF-REDRAW)만 본다. 칸 위치와 의미(요청자·상하위 노드 일치)는 따로 확인한다.`;
 
 class UsageError extends Error {}
 
@@ -506,7 +512,190 @@ export function checkJobflow(block) {
       }
     }
   }
+  for (const r of findRedraws(block.body) || []) add('WARN', 'JF-REDRAW', r.no, redrawMessage(r));
   return found;
+}
+
+/* ---------------------------------------------------- jobflow 행 배치 */
+
+// JF-REDRAW는 확인한 렌더러 사본의 generateSVG 행 배치를 그리지 않고 옮겨 따라간다. 줄 해석도 그 사본과 같다: 라벨을
+// 자르지 않고 첫 '.'에서 객체와 액션을 가르며, 키는 '.result.'를 '.data.'로 바꾸고 끝의 '*'를 뗀 'Object.action'이다.
+// 'master:'·'object:'(대소문자 무관)로 시작하는 줄은 화살표가 아니고, 단독 줄은 그 줄까지 선언한 객체만 칸이 된다.
+function layoutItems(body) {
+  const objects = [];
+  const items = [];
+  const end = (s, shown) => {
+    const i = s.indexOf('.');
+    const action = i < 0 ? '' : s.slice(i + 1);
+    const obj = i < 0 ? s : s.slice(0, i);
+    return { obj, ok: action !== '', key: `${obj}.${action.replace(/\*+$/, '')}`, shown };
+  };
+  for (const { no, text } of body) {
+    const arrow = text.includes('-->');
+    const shown = arrow ? text.split('-->').slice(0, 2).map((s) => s.trim()) : [text.trim()];
+    const line = (arrow ? shown.join(' --> ') : text).replaceAll('.result.', '.data.');
+    const lower = line.toLowerCase();
+    if (lower.startsWith('master:')) continue;
+    if (lower.startsWith('object:')) {
+      objects.push(...line.split(':')[1].split(',').map((s) => s.trim()));
+      continue;
+    }
+    if (arrow) {
+      const [l, r] = line.split('-->').map((s) => s.trim());
+      items.push({ no, from: end(l, shown[0]), to: end(r, shown[1]) });
+    } else if (line.trim().includes('.')) {
+      const at = end(line.trim(), shown[0]);
+      if (objects.includes(at.obj)) items.push({ no, at });
+    }
+  }
+  return { objects, items };
+}
+
+/**
+ * 렌더러 사본의 행 배치를 따라가며 출발 노드를 새 칸에 다시 그리는 화살표 줄을 모은다.
+ * 결과 항목 = { no, shown, made, self, blockers } — made는 이어 쓰지 못한 앞 칸을 그린 줄, blockers는 그 칸 아래 같은 열의
+ * 칸들(행 순서, 각 { shown, no }), self는 이 줄이 같은 객체 안 화살표인지. 화살표 끝 객체가 Object:에 없거나 액션이
+ * 없으면 렌더러 배치가 정해지지 않으므로 null(JF-OBJECT FAIL이 먼저다).
+ */
+function findRedraws(body) {
+  const { objects, items } = layoutItems(body);
+  const colOf = new Map(objects.map((o, i) => [o, i])); // 같은 이름을 두 번 선언하면 뒤 열(렌더러와 같다)
+  if (items.some((it) => it.from && ![it.from, it.to].every((e) => e.ok && colOf.has(e.obj)))) return null;
+  const width = objects.length;
+  const grid = []; // grid[행][열] = 칸 { key, shown, no, row }
+  const rowEdges = []; // rowEdges[행][c] = 그 행에서 c열과 c+1열 사이를 지나는 가로선
+  const colEdges = objects.map(() => []); // colEdges[열][r] = 그 열에서 r행과 r+1행 사이를 지나는 세로선
+  const shapeOf = new Map(); // 키 → 마지막으로 그린 칸(단독 줄 칸은 넣지 않는다 — 렌더러와 같다)
+  const lastAt = new Map(); // 키 → 마지막으로 대상이나 단독 줄로 놓인 자리
+  const sources = new Set(); // 출발점으로 쓴 키
+  let prev = null; // 바로 앞 줄의 대상(단독 줄이면 그 칸) 자리
+  const found = [];
+
+  const ensureRow = (r) => {
+    while (grid.length <= r) {
+      grid.push(Array(width).fill(null));
+      rowEdges.push(Array(Math.max(0, width - 1)).fill(false));
+    }
+  };
+  const place = (ep, col, row, no) => {
+    ensureRow(row);
+    if (!grid[row][col]) grid[row][col] = { key: ep.key, shown: ep.shown, no, row };
+    return grid[row][col]; // 칸이 차 있으면 있던 칸을 쓴다(렌더러와 같다)
+  };
+  const cellsBelow = (col, row) => {
+    const out = [];
+    for (let r = row + 1; r < grid.length; r += 1) if (grid[r][col]) out.push(grid[r][col]);
+    return out;
+  };
+  const vLine = (col, r) => r >= 0 && !!colEdges[col][r];
+  // 가지·이어 그리기에서 대상을 둘 행이 비었는가: 대상 칸, 사이 열의 칸, 위에서 내려오는 세로선, 그 행의 가로선.
+  const pathClear = (row, fc, tc) => {
+    if (grid[row][tc] || (row > 0 && vLine(tc, row - 1))) return false;
+    const a = Math.min(fc, tc);
+    const b = Math.max(fc, tc);
+    for (let c = a + 1; c < b; c += 1) if (grid[row][c] || (row > 0 && vLine(c, row - 1))) return false;
+    for (let c = a; c < b; c += 1) if (rowEdges[row][c]) return false;
+    return true;
+  };
+  // 새 칸 자리의 가로 화살표가 칸·선을 가로지르는가(양 끝 칸은 보지 않는다 — 렌더러와 같다).
+  const crossesRow = (row, c1, c2) => {
+    const a = Math.min(c1, c2);
+    const b = Math.max(c1, c2);
+    for (let c = a + 1; c < b; c += 1) if (grid[row][c] || (row > 0 && vLine(c, row - 1))) return true;
+    for (let e = a; e < b; e += 1) if (rowEdges[row][e]) return true;
+    return false;
+  };
+  const crossesCol = (col, r1, r2) => {
+    for (let r = r1 + 1; r < r2; r += 1) if (grid[r][col]) return true;
+    for (let e = r1; e < r2; e += 1) if (colEdges[col][e]) return true;
+    return false;
+  };
+  const markRow = (row, c1, c2) => {
+    for (let e = Math.min(c1, c2); e < Math.max(c1, c2); e += 1) rowEdges[row][e] = true;
+  };
+  const markCol = (col, r1, r2) => {
+    for (let e = Math.min(r1, r2); e < Math.max(r1, r2); e += 1) colEdges[col][e] = true;
+  };
+
+  for (const it of items) {
+    if (it.at) { // 단독 줄: 늘 맨 아래 새 행
+      const col = colOf.get(it.at.obj);
+      const row = grid.length;
+      place(it.at, col, row, it.no);
+      lastAt.set(it.at.key, { row, col });
+      prev = { key: it.at.key, row };
+      continue;
+    }
+    const { from, to } = it;
+    const fc = colOf.get(from.obj);
+    const tc = colOf.get(to.obj);
+    const same = from.obj === to.obj; // 같은 객체 안 화살표(같은 열)
+    const before = shapeOf.get(from.key);
+    const blockers = before ? cellsBelow(fc, before.row) : [];
+    let toRow;
+    if (before && blockers.length === 0 && sources.has(from.key) && !same) {
+      // 가지: 이미 출발점으로 쓴 노드에서 아래로 꺾어 다음 빈 행으로
+      toRow = before.row + 1;
+      ensureRow(toRow);
+      while (!pathClear(toRow, fc, tc)) { toRow += 1; ensureRow(toRow); }
+      markRow(toRow, fc, tc);
+      markCol(fc, before.row, toRow);
+    } else if (before && blockers.length === 0) {
+      // 이어 그리기: 같은 행(같은 객체면 그 열 맨 아래)
+      if (same) {
+        toRow = Math.max(grid.length, before.row + 1);
+        ensureRow(toRow);
+        while (grid[toRow][tc]) { toRow += 1; ensureRow(toRow); }
+        markCol(fc, before.row, toRow);
+      } else {
+        toRow = before.row;
+        while (!pathClear(toRow, fc, tc)) { toRow += 1; ensureRow(toRow); }
+        markRow(toRow, fc, tc);
+        markCol(fc, before.row, toRow);
+      }
+    } else {
+      // 새 칸: 앞 줄 대상이 이 노드면 그 행, 이 노드가 맨 아래 행에 대상으로 있으면 그 행, 아니면 새 행
+      let row = grid.length;
+      const last = lastAt.get(from.key);
+      if (prev && prev.key === from.key) row = prev.row;
+      else if (last && last.row === grid.length - 1 && last.col === fc) row = last.row;
+      let reuse = row < grid.length;
+      for (;;) {
+        toRow = same ? row + 1 : row;
+        ensureRow(toRow);
+        if (!(same ? crossesCol(fc, row, toRow) : crossesRow(row, fc, tc))) break;
+        row = reuse ? grid.length : row + 1;
+        reuse = false;
+      }
+      if (before && !grid[row][fc]) {
+        found.push({ no: it.no, shown: from.shown, made: before.no, self: same, blockers: blockers.map((c) => ({ shown: c.shown, no: c.no })) });
+      }
+      shapeOf.set(from.key, place(from, fc, row, it.no));
+      if (same) markCol(fc, row, toRow);
+      else markRow(row, fc, tc);
+    }
+    shapeOf.set(to.key, place(to, tc, toRow, it.no));
+    sources.add(from.key);
+    lastAt.set(to.key, { row: toRow, col: tc });
+    prev = { key: to.key, row: toRow };
+  }
+  return found;
+}
+
+const REDRAW_SHOWN = 3; // 메시지에 이름을 적는 막은 칸 수
+
+// 고치는 법은 막은 칸이 언제 생겼는지로 고른다: 이 노드 칸보다 뒤면 깊이 우선 줄 순서, 같은 줄이면 그 줄의 같은 객체 안
+// 화살표(대상이 바로 아래 칸), 앞이면 그 칸을 만든 줄의 자리. 숫자 뒤에는 조사를 붙이지 않는다(받침을 알 수 없다).
+function redrawMessage(r) {
+  const names = r.blockers.slice(0, REDRAW_SHOWN).map((c) => `'${c.shown}'(줄 ${c.no})`).join('·');
+  const cells = r.blockers.length > REDRAW_SHOWN ? `${names} 외 ${r.blockers.length - REDRAW_SHOWN}칸` : `${names} 칸`;
+  const first = Math.min(...r.blockers.map((c) => c.no));
+  let fix;
+  if (first > r.made) fix = `이 노드에서 나가는 줄을 줄 ${r.made} 바로 뒤로 옮긴다(깊이 우선)`;
+  else if (first < r.made) fix = `막은 칸이 이 노드 칸보다 먼저(줄 ${first}) 생겼다 — 그 줄을 이 줄 뒤로 옮기거나 블록을 나눈다`;
+  else if (r.self) fix = `같은 객체 안 화살표는 한 노드에서 마지막 줄 하나만 이어진다(먼저 이은 줄 ${r.made}) — 블록을 나누거나 남긴 이유를 적는다`;
+  else fix = `줄 ${r.made}의 같은 객체 안 화살표가 그 칸을 만들었다 — 이 줄을 줄 ${r.made} 앞으로 옮긴다(같은 객체 안 화살표는 그 노드에서 나가는 마지막 줄로)`;
+  return `출발 노드 '${r.shown}' — 줄 ${r.made}에서 그린 칸 아래 같은 열에 ${cells}이 먼저 생겨 렌더러가 이 노드를 새 칸에 다시 그린다(흐름이 끊긴다). ${fix}`;
 }
 
 /* ------------------------------------------------------------- mermaid */

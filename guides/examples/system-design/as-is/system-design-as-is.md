@@ -161,7 +161,7 @@ flowchart TB
 - **종결 입구 노드** `Clock.finishRun` — 회신, 생존 확인, 마감 정리가 실행을 끝낼 때 모두 이 메서드를 부른다. 같은 경계 안의 화살표 `Clock.acceptReply --> Clock.finishRun`은 종결 입구로 들어가는 길을 보일 때만 썼다.
 - **프록시를 지나는 응답** — 요청은 관통 프록시(`Console.proxyBilling`·`Console.proxyInvoices`)를 실제 홉으로 그렸다. 응답도 같은 프록시를 지나 돌아가지만, 응답 화살표는 프록시 칸을 빼고 원래 요청자의 다음 동작 노드(`Browser.showList` 등 — 공개 계약 아님)로 바로 이었다.
 - **묶음 노드**(5.1에만) — `Browser.call`·`Console.route`·`Clock.operate`·`Archive.browse`·`FormDir.edit`는 같은 요청자와 제공자 사이의 여러 계약을 한 칸에 묶은 이름이다. 무엇을 묶었는지는 5.1 불릿에 적었고, 시나리오 그림(5.2·5.3·5.6)에서는 실제 계약으로 나눠 그렸다.
-- FormDir은 두 경계가 직접 읽고 쓰는 디렉터리라 객체로 두었다. 줄 순서가 시간 순서이고, 렌더러가 같은 노드를 뒤에서 새 칸에 다시 그려도 이름이 같으면 같은 계약이다([렌더러 배치 특성](../../../job-flow-diagram-guide.md#렌더러-배치-특성)). 한 노드로 모이는 화살표는 합류인지 재호출인지 불릿에 적었다([합류와 재호출 구분](../../../job-flow-diagram-guide.md#합류와-재호출-구분)).
+- FormDir은 두 경계가 직접 읽고 쓰는 디렉터리라 객체로 두었다. 줄 순서가 시간 순서이고, 하류 요청은 그 호출 바로 다음 줄에 썼다(깊이 우선 — [줄 순서 규칙](../../../job-flow-diagram-guide.md#줄-순서-규칙)). 렌더러가 타깃으로 다시 나온 노드를 새 칸에 그려도 이름이 같으면 같은 계약이다([렌더러 배치 특성](../../../job-flow-diagram-guide.md#렌더러-배치-특성)). 한 노드로 모이는 화살표는 합류인지 재호출인지 불릿에 적었다([합류와 재호출 구분](../../../job-flow-diagram-guide.md#합류와-재호출-구분)).
 
 | 객체 | 경계 | 객체 | 경계 |
 |---|---|---|---|
@@ -213,22 +213,23 @@ Console.route --> Archive.browse
 scope: 서식 열기와 저장
 Object: Browser, Console, FormDir
 
-Browser.openForm --> Console.forms
-Console.forms --> FormDir.read
-Console.forms.result --> Browser.showForm
-Browser.saveForm --> Console.forms
-Console.forms --> FormDir.write
-Console.forms.result --> Browser.keepTag
+Browser.openForm --> Console.getForm
+Console.getForm --> FormDir.read
+Console.getForm.result --> Browser.showForm
+Browser.saveForm --> Console.putForm
+Console.putForm --> FormDir.write
+Console.putForm.result --> Browser.keepTag
 ```
 
 | 노드 | 실제 계약 |
 |---|---|
-| `Console.forms` | admin-console 자체 API — `GET /forms/:formId` → 본문 + `ETag`(내용 해시), `PUT /forms/:formId`(`If-Match` 필수, 다르면 412, 1MB 상한) → 200 + 새 `ETag` |
+| `Console.getForm`·`.putForm` | admin-console 자체 API — `GET /forms/:formId` → 본문 + `ETag`(내용 해시), `PUT /forms/:formId`(`If-Match` 필수, 다르면 412, 1MB 상한) → 200 + 새 `ETag` |
 | `FormDir.read`·`.write` | `<FORM_ROOT>/<formId>.md`. 쓰기는 같은 디렉터리의 임시 파일에 쓴 뒤 rename |
 | `Browser.showForm`·`.keepTag` | 응답을 받은 화면의 다음 동작(공개 계약 아님) — 편집기 표시, 새 ETag를 다음 저장의 `If-Match`로 보관 |
 
 - 두 `.result`는 열 때와 저장 뒤의 ETag를 화면에 돌려준다. 412가 오면 화면은 「다른 사람이 먼저 저장했다」를 띄우고 편집 내용을 버린다. 두 판을 견줘 합치는 기능은 없다(§7).
 - **저장할 때 서식 내용을 검사하지 않는다** — 자리 표시 `{{lines}}`가 빠진 서식도 저장되고, 생성기 1단계에서야 실패해 그 주기 실행이 재시도로 넘어간다(§5.4).
+- 열기와 저장은 계약이 달라 노드도 `getForm`·`putForm` 둘로 썼다. 한 이름으로 묶으면 두 응답이 한 노드의 `.result`로 읽히고, 렌더러는 저장 응답을 그 이름의 새 칸에 다시 그린다([줄 순서 규칙](../../../job-flow-diagram-guide.md#줄-순서-규칙)).
 
 ### 5.3 청구 계획 등록·즉시 발행·중지
 
