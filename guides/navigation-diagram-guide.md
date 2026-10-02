@@ -144,7 +144,7 @@ PageA(ImageList) --> PageA(FileList) : 파일 목록 선택
   * 잘못된 예:
     ```
     PeerManager --> DataChannelManager : open_data_channels
-    SevenPanSDK --> AudioManager : get_user_media
+    ClassroomSDK --> AudioManager : get_user_media
     ```
   * 이유: `PeerManager`, `DataChannelManager`, `AudioManager` 는 사용자가 보는 화면이 아니라 내부 구현 모듈이다. 화면 이동과 무관하다.
 

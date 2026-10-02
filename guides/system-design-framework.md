@@ -21,6 +21,8 @@
 
 공개 계약·상태 소유권·실패 정책은 관련 모듈의 기준 문서 한 곳에 정의하고, 위 항목에서 참조한다. AI 작업에 넘길 때는 이 전체 프레임워크를 매번 복사하지 않고 공통 가이드의 작업 맥락 묶음을 구성한다.
 
+AS-IS·TO-BE 시스템 설계 문서에서 위 8관점이 들어갈 절은 [설계 문서 양식 §1](./system-design-document-guide.md#1-적용-범위와-원본-관계), 파일 배치와 절 번호는 [§2](./system-design-document-guide.md#2-산출물-배치)·[§3](./system-design-document-guide.md#3-핵심-문서-골격)이 정한다.
+
 ## 다이어그램의 문법 기준
 
 독자 DSL을 원본으로 유지한다. `jobflow`를 Mermaid sequence/flowchart로 대체하거나 각 문서에서 문법을 재정의하지 않는다. Mermaid 보조 그림은 추가할 수 있으나 원본 DSL과 의미가 같아야 한다. 렌더러 지원 여부는 해당 가이드의 확인 절차를 따른다.
@@ -65,13 +67,13 @@
 
 ```mermaid
 flowchart TB
-    System[주문 시스템] --> Orders[주문]
-    System --> Delivery[배송]
-    Orders --> Create[생성]
-    Orders --> Read[조회]
-    Orders --> Cancel[취소]
-    Delivery --> Accept[접수]
-    Delivery --> Status[상태 조회]
+    System["주문 시스템"] --> Orders["주문"]
+    System --> Delivery["배송"]
+    Orders --> Create["생성"]
+    Orders --> Read["조회"]
+    Orders --> Cancel["취소"]
+    Delivery --> Accept["접수"]
+    Delivery --> Status["상태 조회"]
 ```
 
 기능마다 요구사항과 소유 모듈을 연결한다. PBS의 가지 하나를 파일·Worker·배포 서비스 하나로 기계적으로 변환하지 않는다. 서로 다른 기능도 같은 불변식을 지키면 하나의 모듈에 응집될 수 있다.
@@ -81,6 +83,8 @@ flowchart TB
 진입부터 사용자나 호출자에게 필요한 결과가 전달될 때까지의 대표 시나리오를 그린다. 헤더 선택, 서비스 간 요청·응답, 이벤트 반환, 표시할 결과와 배치는 [Job Flow 가이드](./job-flow-diagram-guide.md)를 따른다.
 
 성공 경로와 함께 설계 판단이 필요한 거절·타임아웃·부분 실패를 표현한다. 파라미터·데이터 스키마는 DSL에 덧붙이지 않고 계약 문서에서 연결한다. 상세 흐름은 상위에 없는 책임·분기·실패 경계를 드러낼 때만 추가한다.
+
+AS-IS·TO-BE 시스템 설계 문서에서는 경계끼리의 전체 한 장과 시나리오 그림을 핵심 문서의 흐름 절에 두고([양식 §4](./system-design-document-guide.md#4-흐름-절--경계-수준-jobflow)), 경계 내부는 상세 문서에서 재귀적으로 드릴다운한다([양식 §6](./system-design-document-guide.md#6-경계-내부-job-flow-드릴다운)).
 
 ## 6. Navigation Diagram
 
