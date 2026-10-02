@@ -20,13 +20,13 @@
 | 하려는 일 | 시작 문서 | 추가로 읽을 기준 |
 | --- | --- | --- |
 | 기존 시스템의 현재 구조 분석 | [system-design-as-is-prompt](prompts/system-design-as-is-prompt.md) | 확인한 코드와 계약, 필요한 설계 관점; 문서 골격은 [설계 문서 양식](guides/system-design-document-guide.md) |
-| 시스템 신규·개선 설계 | [system-design-to-be-prompt](prompts/system-design-to-be-prompt.md) | 요구·제약으로 시작; 기존 시스템은 현재 계약·소비자와 분석 유효성도 확인; 문서 골격은 AS-IS와 같은 [설계 문서 양식](guides/system-design-document-guide.md) |
+| 시스템 신규·개선 설계 | [system-design-to-be-prompt](prompts/system-design-to-be-prompt.md) | 요구·제약으로 시작; 시나리오별 연결 검증·책임 조정·대안 비교; 기존 시스템은 현재 계약·소비자와 분석 유효성도 확인; 문서 골격은 AS-IS와 같은 [설계 문서 양식](guides/system-design-document-guide.md) |
 | 기능 하나 추가·변경 설계 | [feature-design-prompt](prompts/feature-design-prompt.md) | 대상 책임 모듈과 직접 관련된 계약 |
 | 사이트 전체 설계 | [site-design-prompt](prompts/site-design-prompt.md) | 채택한 기능·화면에 해당하는 DSL |
 | 회원·인증·세션·탈퇴 설계 | [frontend-user-design-prompt](prompts/frontend-user-design-prompt.md) | 채택할 회원 흐름, 보안·데이터 경계 |
 | 화면과 API 이동 흐름 작성 | [frontend-navigation-diagram-prompt](prompts/frontend-navigation-diagram-prompt.md) | navigation, 필요한 화면 구조 |
 | 화면·객체의 상태 전이 작성 | [frontend-state-diagram-prompt](prompts/frontend-state-diagram-prompt.md) | state, 해당 상태의 소유자·전이 조건 |
-| jobflow를 실제 시나리오로 해설 | [jobflow-walkthrough-prompt](prompts/jobflow-walkthrough-prompt.md) | jobflow, 등장 객체·계약의 실제 근거 |
+| jobflow를 실제 시나리오로 해설·검토 | [jobflow-walkthrough-prompt](prompts/jobflow-walkthrough-prompt.md) | jobflow, 등장 객체·계약의 실제 근거; 원문을 보존한 연결·책임 검토와 개선안 |
 | UX/UI 분석과 개선 | [ux-ui-improvement-prompt](prompts/ux-ui-improvement-prompt.md) | 대상 사용자 흐름, 필요한 비교 조사 |
 | 테스트와 결함 수정 | [comprehensive-test-prompt](prompts/comprehensive-test-prompt.md) | 변경 위험과 실제 실행 가능한 검증 |
 | 여러 에이전트의 설계·비판·구현·평가 | [multi-agent-task-prompt](prompts/multi-agent-task-prompt.md) | 독립 작업 범위, 공유 계약, 역할별 모델·비용 |
@@ -84,6 +84,7 @@ AS-IS·TO-BE 설계 문서를 쓸 때 함께 보는 자료:
 - 공개 계약에 입력·결과뿐 아니라 실패·부작용·상태 소유권을 포함한다. 이벤트를 써도 스키마·순서·시간에 대한 결합은 남는다.
 - 상태와 데이터에는 쓰기를 통제하는 소유자를 둔다. 소비자는 소유자의 공개 경계를 사용한다.
 - 책임과 계약이 충분히 명확하면 분할을 멈춘다. 계층·이벤트·문서가 전달만 늘린다면 합치거나 단순화한다.
+- 신규 설계와 개선안은 [연결 최소화와 시나리오 검증](guides/module-boundary-guide.md#연결-최소화와-시나리오-검증)에 따라 빠진 요구를 발견하고, 처리 가능성·책임 분리·트레이드오프를 검토하여 간결하고 유연하게 만든다. 필요한 객체·연결의 증가는 허용한다.
 - 다이어그램과 문서는 실제 작업에 필요한 부분만 만든다. 같은 사실은 한 원본에서 관리하고 나머지는 링크한다.
 - 검증 결과는 실행한 범위와 근거를 보고한다. 미실행 항목이나 필수 결함을 점수·리뷰 횟수로 덮지 않는다.
 
