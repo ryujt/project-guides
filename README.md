@@ -2,7 +2,7 @@
 
 프로젝트를 설계·구현할 때 AI에게 전달하는 프롬프트와 개발 가이드 모음이다. **각 조각이 상대의 구현을 몰라도 공개 계약으로 협력하고, 한 작업에 필요한 맥락을 작게 유지하는 것**을 목표로 한다.
 
-- [`guides/`](guides/): 설계 원칙·문서 양식·독자 다이어그램 DSL. 필요한 주제만 참조한다.
+- [`guides/`](guides/): 설계 원칙·문서 양식·독자 다이어그램 DSL, 설계 문서 예시(`examples/`)와 검사 도구(`tools/`). 필요한 주제만 참조한다.
 - [`prompts/`](prompts/): 현재 작업의 목표와 함께 AI에게 전달하는 실행 프롬프트.
 - 설치와 슬래시 명령은 저장소 루트의 `install.md`를 참조한다. 설치된 문서 사본에서는 이 단계가 필요 없다.
 
@@ -19,8 +19,8 @@
 
 | 하려는 일 | 시작 문서 | 추가로 읽을 기준 |
 | --- | --- | --- |
-| 기존 시스템의 현재 구조 분석 | [system-design-as-is-prompt](prompts/system-design-as-is-prompt.md) | 확인한 코드와 계약, 필요한 설계 관점 |
-| 시스템 신규·개선 설계 | [system-design-to-be-prompt](prompts/system-design-to-be-prompt.md) | 요구·제약으로 시작; 기존 시스템은 현재 계약·소비자와 분석 유효성도 확인 |
+| 기존 시스템의 현재 구조 분석 | [system-design-as-is-prompt](prompts/system-design-as-is-prompt.md) | 확인한 코드와 계약, 필요한 설계 관점; 문서 골격은 [설계 문서 양식](guides/system-design-document-guide.md) |
+| 시스템 신규·개선 설계 | [system-design-to-be-prompt](prompts/system-design-to-be-prompt.md) | 요구·제약으로 시작; 기존 시스템은 현재 계약·소비자와 분석 유효성도 확인; 문서 골격은 AS-IS와 같은 [설계 문서 양식](guides/system-design-document-guide.md) |
 | 기능 하나 추가·변경 설계 | [feature-design-prompt](prompts/feature-design-prompt.md) | 대상 책임 모듈과 직접 관련된 계약 |
 | 사이트 전체 설계 | [site-design-prompt](prompts/site-design-prompt.md) | 채택한 기능·화면에 해당하는 DSL |
 | 회원·인증·세션·탈퇴 설계 | [frontend-user-design-prompt](prompts/frontend-user-design-prompt.md) | 채택할 회원 흐름, 보안·데이터 경계 |
@@ -51,6 +51,7 @@
 | 문서 | 해결할 질문 |
 | --- | --- |
 | [system-design-framework](guides/system-design-framework.md) | Input Datas·Key Events·Services List·PBS와 다이어그램 중 어떤 관점이 필요할까? |
+| [system-design-document-guide](guides/system-design-document-guide.md) | AS-IS·TO-BE 설계 문서를 어떤 절 번호·표·그림 단위로 일관되게 쓰고, 경계 수준 흐름과 경계 내부 드릴다운을 어떻게 나눌까? |
 | [prd-writing-guide](guides/prd-writing-guide.md) | 요구사항→책임·계약→시나리오→검증을 7개 Part로 어떻게 연결할까? |
 | [system-flow-document-guide](guides/system-flow-document-guide.md) | 최소 책임 조각부터 전체 시스템 흐름을 어떻게 설명할까? |
 | [wrtite-readme-guide](guides/wrtite-readme-guide.md) | 빠른 실행과 필요한 상세 문서 탐색을 어떻게 돕는 README를 쓸까? |
@@ -59,6 +60,11 @@
 | [tools-camp-markdown-guide](guides/tools-camp-markdown-guide.md) | tools.camp용 Markdown·SmartMD·다이어그램 표기를 어떻게 사용할까? |
 
 `wrtite-readme-guide.md`는 기존 링크 호환성을 위해 현재 파일명을 유지한다.
+
+AS-IS·TO-BE 설계 문서를 쓸 때 함께 보는 자료:
+
+- 예시: [`guides/examples/system-design/`](guides/examples/system-design/) — 가상의 「월별 청구서 발행 시스템」을 양식대로 쓴 한 벌이다. 근거 브리프 1편, AS-IS 핵심 1편·상세 2편(사용자가 분석 범위를 두 경계로 좁힌 경우), TO-BE 핵심 1편·상세 2편(바뀌는 두 경계)으로 이뤄진다. 경로·줄 번호·수치는 형식 예시이고, 파일별로 보여 주는 것은 [양식 §11](guides/system-design-document-guide.md#11-예시-산출물)에 있다.
+- 검사: [`design-doc-check.mjs`](guides/tools/design-doc-check.mjs) — 펜스·jobflow·링크·앵커·Mermaid 라벨을 정적으로 검사한다. 스크립트는 가이드 사본의 경로로 부르고, 문서 폴더는 검사할 프로젝트 기준으로 준다. 예: 그 프로젝트 루트에서 `node <가이드 사본>/guides/tools/design-doc-check.mjs docs/design/<DATE>`. `<가이드 사본>`은 이 README가 있는 폴더이고, 위치는 사용자마다 다르다. `--renderer`로 그릴 때의 출력 위치(`--out`)와 렌더링 확인·의미 검토는 [양식 §10](guides/system-design-document-guide.md#10-검증)을 따른다.
 
 ### 독자 다이어그램 DSL
 

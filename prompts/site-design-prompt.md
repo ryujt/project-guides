@@ -22,6 +22,7 @@
 - 대상 범위 전체의 간략한 화면 이동을 먼저 그리고 사용자 목적별로 필요한 상세를 추가한다.
 - Page는 라우트 페이지, Component는 Page에 포함되는 단위로 구분한다. 사용자에게 의미 있는 주요 하위 모드/오버레이만 가이드 허용 범위에서 표시한다.
 - 이동을 가르는 API·판단만 넣고 내부 store·queue·Worker 흐름을 섞지 않는다. 내부 협력은 필요할 때 [jobflow](../guides/job-flow-diagram-guide.md)로 분리한다.
+- jobflow로 분리할 때 경계끼리의 협력은 `scope:`로 실제 요청자부터 그리고([출발점 규칙](../guides/job-flow-diagram-guide.md#scope-그림의-출발점은-실제-요청자다)), 경계 내부를 열 때는 [설계 문서 양식 §6](../guides/system-design-document-guide.md#6-경계-내부-job-flow-드릴다운)의 드릴다운 규칙을 따른다.
 - 시나리오마다 진입 방법, 트리거, 정상·실패/취소 분기, 실제/제안 API 계약을 짧게 설명한다.
 - 예제 `HomePage`를 강제하지 않는다. 실제 진입점을 사용하고 존재하지 않는 이동 화살표를 만들지 않는다.
 

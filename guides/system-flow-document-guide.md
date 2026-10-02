@@ -26,6 +26,8 @@
 - 여러 컴포넌트가 협력하는 시나리오를 최소 단위부터 재귀적으로 펼쳐야 할 때
 - PRD 보다 구현에 가깝고, README 보다 흐름 설명이 깊은 문서가 필요할 때
 
+AS-IS·TO-BE 시스템 설계 문서는 이 가이드의 문서 이름·표준 목차 대신 [설계 문서 양식](system-design-document-guide.md)의 산출물 배치와 절 번호를 쓴다. 이 가이드는 설명용 SYSTEM_FLOW 문서를 다루며, 최소 조각에서 시작해 필요한 조각만 재귀적으로 펼치는 원칙은 설계 문서에도 공통이다.
+
 ## 핵심 관점
 
 ### 1. 최소 조각에서 시작한다
@@ -45,10 +47,10 @@
 예:
 
 ```text
-Client, ChatServer, ReportDataApi, ReportGenerator, ReportRenderer
+Client, ApiServer, Worker, Storage, ExternalGateway
 ```
 
-이 정도만으로 최상위 흐름이 설명되면, 처음 그림에는 DB, private method, 상세 worker 를 넣지 않는다.
+이 정도만으로 최상위 흐름이 설명되면, 처음 그림에는 DB 테이블, private method, 상세 worker 를 넣지 않는다.
 세부사항은 다음 섹션에서 필요한 만큼만 펼친다.
 
 ### 2. 동적 흐름과 정적 구성을 함께 쓴다
@@ -116,6 +118,8 @@ SYSTEM_FLOW-problems.md
 ## 표준 목차
 
 아래 목차는 전체 설명이 필요할 때의 선택 가능한 구성이다. 대상·독자·현재 변경을 먼저 밝히고 이미 있는 정보는 링크한다. 해당하지 않는 상태/운영/화면 절을 형식 때문에 만들지 않는다.
+
+AS-IS·TO-BE 시스템 설계 문서는 이 목차를 쓰지 않고 [양식의 절 번호표](system-design-document-guide.md#31-절-번호표)를 따른다.
 
 ```markdown
 # System Flow — <시스템 요약>
@@ -457,7 +461,7 @@ Gateway가 반드시 orchestrator인 것은 아니다. 업무 상태의 변경 �
 
 - Actor/UI: `Client`, `AdminPage`, `Dashboard`
 - Boundary: `ApiRoutes`, `QueueConsumer`, `Scheduler`
-- Orchestrator: `SystemOrchestrator`, `ReportSubOrch`
+- Orchestrator: `SystemOrchestrator`, `PipelineSubOrchestrator`
 - Worker: `PipelineWorker`, `RendererWorker`
 - Gateway: `PaymentGateway`, `StorageGateway`, `ExternalGateway`
 - State/Store: `Mysql`, `Redis`, `ObjectStorage`, `SessionStore`

@@ -5,11 +5,11 @@
 - **텍스트 레벨 SmartMD 확장** — 콜아웃·Figure·표 사양·정렬·변수·이미지 속성·프런트매터. 전처리기(`smartmd.js`)가 원본 텍스트를 변환한다.
 - **코드펜스 기반 확장** — 코드 문법 강조, Mermaid, 자체 미니 문법 다이어그램(`state`/`navigation`/`jobflow`/`layout`), 페이지 분할.
 
-이 문서는 기존 tools.camp 구현(`src/lib`)을 설명해 온 문법 레퍼런스다. **이 가이드 저장소에는 해당 파서/렌더러 소스와 실행 환경이 포함되어 있지 않다.** 아래 함수명·옵션·변환 규칙은 대상 제품의 현재 버전에서 검증된 사실로 자동 간주하지 않는다. 실제 적용 시 대상 버전과 소스를 확인하고, 확인할 수 없으면 문서 정적 검토와 렌더링 미검증을 구분해 기록한다.
+이 문서는 기존 tools.camp 구현(`src/lib`)을 설명해 온 문법 레퍼런스다. **이 가이드 모음에는 해당 파서/렌더러 소스와 실행 환경이 포함되어 있지 않다.** 아래 함수명·옵션·변환 규칙은 대상 제품의 현재 버전에서 검증된 사실로 자동 간주하지 않는다. 실제 적용 시 대상 버전과 소스를 확인하고, 확인할 수 없으면 문서 정적 검토와 렌더링 미검증을 구분해 기록한다.
 
 AI 작업에는 이 레퍼런스 전체를 기본 첨부하지 않는다. 필요한 다이어그램 가이드와 해당 문법 절만 읽고, 기존 토큰을 조합한다. 설명에 필요한 책임·계약·검증 메타데이터는 코드펜스 밖 산문/표에 쓰며 지원 확인 없이 새 DSL 문법을 만들지 않는다.
 
-> 다이어그램(JobFlow / Navigation / State / Layout)의 **작성 방법론**은 이 저장소의 개별 가이드를 함께 참고한다.
+> 다이어그램(JobFlow / Navigation / State / Layout)의 **작성 방법론**은 같은 가이드 모음의 개별 가이드를 함께 참고한다.
 > - [`job-flow-diagram-guide.md`](job-flow-diagram-guide.md)
 > - [`navigation-diagram-guide.md`](navigation-diagram-guide.md)
 > - [`state-diagram-guide.md`](state-diagram-guide.md)
@@ -19,7 +19,7 @@ AI 작업에는 이 레퍼런스 전체를 기본 첨부하지 않는다. 필요
 
 ## 확인한 구현 스냅샷
 
-2026-09-05에 별도 로컬 `tools.camp` 저장소의 clean commit `d12f23014e6fed86db8012f007637a0709d61eaf`에서 `src/lib/jobflow.js`, `navigation.js`, `state.js`, `layout.js`를 읽고 Node `v22.19.0`으로 임시 복사본을 실행했다. 아래 결과는 이 스냅샷에 한정하며 운영 배포본이나 다른 버전의 지원을 보장하지 않는다.
+2026-09-05에 `tools.camp` 구현의 clean commit `d12f23014e6fed86db8012f007637a0709d61eaf`에서 `src/lib/jobflow.js`, `navigation.js`, `state.js`, `layout.js`를 읽고 Node `v22.19.0`으로 임시 복사본을 실행했다. 아래 결과는 이 스냅샷에 한정하며 운영 배포본이나 다른 버전의 지원을 보장하지 않는다.
 
 | 항목 | 확인한 동작 | 작성 시 의미 |
 |---|---|---|
@@ -189,6 +189,7 @@ ClassB.GetList.result --> ClassC.AddList
 - `master: 이름` — 기존 주(主) 객체 선언(선택). 확인한 스냅샷에서는 파싱 결과에만 저장되며 SVG에 반영되지 않는다.
 - `Object: 이름1, 이름2, ...` — 객체(컬럼) 선언. 콤마로 구분하며 여러 줄이 필요하면 각 줄에 `Object:`를 반복한다. 확인한 스냅샷은 `master:`/`object:`의 대소문자를 구분하지 않지만 헤더 앞 들여쓰기는 제거하지 않으므로 줄 시작에 쓴다.
 - 관계식에 등장한 객체는 자동으로 컬럼에 추가되므로, `Object:` 선언은 **컬럼 순서를 고정**하는 용도다.
+- 다른 `JobFlowToSVG` 사본은 `Object:`의 객체만 열로 만든다 — 객체를 모두 선언한다([렌더러 배치 특성](job-flow-diagram-guide.md#렌더러-배치-특성)).
 
 **호출/액션 문법**
 - `객체.액션` — 점 표기로 객체의 메서드/속성을 가리킨다. (`객체.속성.하위`처럼 중첩 가능)
@@ -255,11 +256,11 @@ Footer > Status, Version
 
 ```markdown
 :::success title="결론"
-SLO(99.5%) 충족, 위반 0건.
+주문 처리 목표 충족, 실패 0건.
 :::
 
 :::warning
-SLO 위반이 임박합니다.
+결제 대기열이 한도에 가까워지고 있습니다.
 :::
 ```
 
@@ -316,17 +317,17 @@ SLO 위반이 임박합니다.
 ### 예시
 
 ```markdown
-{table caption="표 {n}. 호스트별 가용률"
+{table caption="표 {n}. 서비스별 처리 결과"
  columns=[
-   {name=host,      title="호스트",  align=left,   width=40%},
-   {name=uptime,    title="가용률",  align=right,  width=30%},
-   {name=incidents, title="장애",    align=center, width=30%}
+   {name=service,  title="서비스",  align=left,   width=40%},
+   {name=success,  title="성공률",  align=right,  width=30%},
+   {name=failures, title="실패",    align=center, width=30%}
  ]}
 
-| host       | uptime  | incidents |
-|------------|---------|-----------|
-| db-01      | 99.923% | 0         |
-| was-prod-1 | 99.812% | 2         |
+| service  | success | failures |
+|----------|---------|----------|
+| orders   | 99.9%   | 1        |
+| payments | 99.7%   | 3        |
 ```
 
 ### 규칙
