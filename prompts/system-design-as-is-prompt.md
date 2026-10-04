@@ -5,7 +5,7 @@
 ## 입력과 실행 규칙
 
 - 입력: 대상 저장소/첨부 자료, 분석 범위, 중점 질문, 출력 위치. 전체 분석이면 전체 경계 목록을 만들되 모든 내부 파일을 같은 깊이로 읽지 않는다.
-- [모듈 경계 가이드](../guides/module-boundary-guide.md)의 최소 맥락과 탐색 확대 기준을 적용한다. README·실행/조립 지점·공개 계약부터 읽고 호출자·소비자를 검색한다. 질문에 답하기 위해 필요한 구현·테스트만 단계적으로 연다.
+- [최소 맥락·산출물 경로 기준](../guides/module-boundary-guide.md#6-ai에-전달할-작업-맥락)을 따른다. README·실행/조립 지점·공개 계약부터 읽고 호출자·소비자를 검색한다. 질문에 필요한 구현·테스트만 단계적으로 연다.
 - 분석 범위에 소켓 통신(TCP·WebSocket 등)이 포함되면 [소켓 서버 안정성 가이드](../guides/socket-server-stability-guide.md)의 해당 항목을 참고해 실제 연결·전달·복구 계약과 검증 근거를 확인한다.
 - 이미 허용된 조사/문서 작성은 자율 진행한다. 원본 코드와 기존 사용자 변경을 보존하고 가정·미확인·관찰 사실을 구분한다.
 - 독립된 조사는 병렬화하되 공유 계약과 원본 근거를 먼저 정한다. 상세 파일이 서로 다른 파일이라는 이유만으로 독립됐다고 가정하지 않는다.
@@ -16,7 +16,7 @@
 
 날짜 `DATE`(분석 기준일, `YYYY.MM.DD`)를 한 번 확정해 폴더·머리 블록·브리프에 같이 쓰고, 기준 커밋/작업 트리 변경 여부·관찰 시점을 적는다. 문서와 실제 코드가 다르면 각각의 근거와 불일치를 기록한다.
 
-`관찰 항목 | 경로·심볼 | 확인한 동작 | 사실·추론·미확인`을 수집한다. 큰 분석이면 `docs/design/{DATE}/_evidence-brief.md`에 [양식 §8](../guides/system-design-document-guide.md#8-근거-브리프)의 골격대로 기준선·경계 목록·이슈 색인·검증 기록을 모으고 TO-BE의 입력으로 공유한다. 경계마다 조사 ID 한 글자(A, B, C…)를 정하고 그 글자를 이슈 ID 접두로 그대로 쓴다(`B-01`·[양식 §7](../guides/system-design-document-guide.md#7-id와-교차-참조)). 큰 분석과 작은 분석의 기준, 작은 분석의 근거 표·이슈 표·조사 ID 자리는 [양식 §2](../guides/system-design-document-guide.md#큰-분석과-작은-분석)를 따른다.
+`관찰 항목 | 경로·심볼 | 확인한 동작 | 사실·추론·미확인`을 수집한다. 큰 분석은 [양식 §8](../guides/system-design-document-guide.md#8-근거-브리프)의 브리프에 근거·검증 기록을 모아 TO-BE로 인계한다. 분석 규모와 작은 분석의 기록 위치는 [양식 §2](../guides/system-design-document-guide.md#큰-분석과-작은-분석), 조사·이슈 ID는 [양식 §7](../guides/system-design-document-guide.md#7-id와-교차-참조)을 따른다.
 
 브리프는 원본을 찾는 색인이다. 이후 판단의 근거가 부족하면 원본을 다시 확인한다. 요약으로 원본 검증을 대신하지 않는다. 외부 런타임·배포 환경을 확인하지 못한 부분은 코드상 예상과 실제 관측을 구분한다.
 
@@ -39,13 +39,12 @@
 
 ## 3. 핵심 문서
 
-작성 전에 양식 §3~§7과 예시 핵심 1편·상세 1편([AS-IS 핵심 예시](../guides/examples/system-design/as-is/system-design-as-is.md)·[양식 §11](../guides/system-design-document-guide.md#11-예시-산출물))을 읽는다. 둘이 다르면 양식이 먼저다. 예시의 이름·수치는 가상 시스템의 값이다. 기본 경로는 `docs/design/{DATE}/as-is/system-design-as-is.md`이며 기존 문서 위치/사용자 지정을 우선한다([양식 §2](../guides/system-design-document-guide.md#2-산출물-배치)). 절 번호·제목·표 열은 [양식 §3.1](../guides/system-design-document-guide.md#31-절-번호표)의 **AS-IS 열**을, 머리 블록과 절별 작성 규칙은 [양식 §3.2](../guides/system-design-document-guide.md#32-머리-블록)·[§3.3](../guides/system-design-document-guide.md#33-절별-작성-규칙)을 그대로 따른다. 번호를 고정하고 해당 없는 절도 제목을 남기며, 분량 목표는 두지 않는다. AS-IS에서 더 지킬 것:
+기본 경로는 `docs/design/{DATE}/as-is/system-design-as-is.md`이며 기존 문서 위치/사용자 지정을 우선한다([양식 §2](../guides/system-design-document-guide.md#2-산출물-배치)). 작성할 핵심·상세에 해당하는 양식 §3~§7을 먼저 읽는다. 처음 적용하거나 구조가 불명확하면 [양식 §11의 AS-IS 예시](../guides/system-design-document-guide.md#11-예시-산출물) 중 해당 핵심·상세를 확인한다. 예시는 가상 값이며 양식이 우선한다.
+
+핵심의 절 번호·제목·표 열·머리 블록은 [양식 §3](../guides/system-design-document-guide.md#3-핵심-문서-골격)의 **AS-IS 기준**을 그대로 따른다. 해당 없는 절도 제목을 남기고 분량 목표는 두지 않는다. AS-IS에서 더 지킬 것:
 
 - **§4 경계별 기능 목록**: §3의 경계마다 코드에서 확인한 기능과 실제 진입점을 적는다. 문서에만 있는 기능이나 아무도 부르지 않는 코드는 목록에 넣지 않고 이슈로 남긴다. 계약 세부는 상세 §2에 둔다.
-- **§5 흐름**: 경계끼리 주고받는 요청·응답·이벤트만 `scope:` jobflow로 그린다([양식 §4](../guides/system-design-document-guide.md#4-흐름-절--경계-수준-jobflow)).
-  - 전체 한 장을 먼저 그리고, 시나리오 그림으로 나눌지는 [양식 §4.2](../guides/system-design-document-guide.md#42-전체-한-장과-시나리오-분할)의 분할 기준으로 정한다.
-  - 경계 내부 구조(클래스·내부 함수·내부 단계)는 그리지 않는다. 내부 협력은 상세 §3 드릴다운으로 보내고 §5 마지막 소절의 색인으로 잇는다.
-  - 노드는 코드에서 확인한 공개 계약으로 짓고(예외 노드는 [양식 §4.1](../guides/system-design-document-guide.md#41-표기-약속)), 화살표는 코드에서 확인한 실제 요청자에서 출발시킨다. 응답이 접수 확인인지 업무 완료인지도 코드로 확인해 적는다.
+- **§5 흐름**: [양식 §4](../guides/system-design-document-guide.md#4-흐름-절--경계-수준-jobflow)의 전체 한 장·시나리오 분할·드릴다운 색인을 따른다. `scope:`에 코드에서 확인한 경계 간 계약만 두고 실제 요청자에서 화살표를 시작한다. 내부 협력은 상세 §3으로 보내며 접수 확인과 업무 완료를 구분한다.
 - **§9 이슈 교차 뷰**: 상세마다 이슈 표를 채운 뒤, 경계를 넘어 영향이 겹치는 이슈만 주제로 묶는다. 이슈의 내용·근거·영향은 상세 이슈 표 한 곳에 두고 §9는 ID로 인용한다(작은 분석은 §9가 원본 — [양식 §3.3](../guides/system-design-document-guide.md#33-절별-작성-규칙)).
 
 비유·과장을 피하고, 중요한 사실을 읽는 속도와 계약을 이해하는 데 필요한 깊이를 함께 유지한다.
@@ -55,10 +54,9 @@
 [시스템 설계 프레임워크](../guides/system-design-framework.md)의 8섹션은 빠진 관점을 확인하는 목록이다. 섹션별로 파일을 나누지 않는다. 상세는 `details/<boundary>.md`에 **경계(독립 프로세스·모듈·패키지 묶음) 단위**로 두고 [양식 §5](../guides/system-design-document-guide.md#5-상세-문서-골격)의 AS-IS 절 번호·제목을 따른다. 어느 경계에 상세를 둘지는 [양식 §2](../guides/system-design-document-guide.md#큰-분석과-작은-분석)를 따른다. 하나의 계약·상태 기계는 소유 경계의 상세 한 곳에만 두고 다른 문서는 링크한다.
 
 - 각 상세는 상위 문서를 전량 읽지 않아도 이해되게 쓰고, 공개 계약·의존·이슈마다 근거 경로를 단다.
-- `## 3. 내부 Job Flow — 드릴다운`은 상세마다 필수다([양식 §6](../guides/system-design-document-guide.md#6-경계-내부-job-flow-드릴다운)). 다른 문서가 링크하는 기존 상세에 덧붙일 때는 번호를 다시 매기지 않고 양식 §5의 레트로핏 제목을 쓴다. 핵심 §5에 나온 이 경계의 노드를 진입점으로 삼아 경계 안의 실제 협력을 코드 심볼로 단계별로 연다(JF-1 → JF-1.1 → JF-1.1.1). 진입점의 입력·출력·실패 의미는 상위 노드와 같아야 한다. 확인하지 못한 심볼은 그리지 않고 미확인으로 적는다. 내부 협력이 없는 경계는 `해당 없음 — <이유>` 한 줄로 둔다.
+- 상세 §3의 드릴다운은 [양식 §6](../guides/system-design-document-guide.md#6-경계-내부-job-flow-드릴다운)을 따른다. 상위 §5의 진입점·입력·출력·실패 의미를 유지하며 확인한 코드 심볼만 단계별로 연다. 미확인 심볼은 그리지 않고, 내부 협력이 없으면 이유를 남긴다. 기존 상세의 번호를 보존해야 할 때는 [레트로핏 예외](../guides/system-design-document-guide.md#5-상세-문서-골격)를 적용한다.
 - 같은 흐름을 여러 계층에 복제하지 않는다. 새 분기·계약·실패 책임이 드러날 때만 하위 그림을 추가한다.
-- 구조·의존은 Mermaid `flowchart`(라벨 규칙은 [양식 §3.3](../guides/system-design-document-guide.md#33-절별-작성-규칙)), 필요한 데이터 관계는 `erDiagram`, 객체 협력은 [jobflow](../guides/job-flow-diagram-guide.md), 사용자 이동은 [navigation](../guides/navigation-diagram-guide.md), 한 소유자의 상태 전이는 [state](../guides/state-diagram-guide.md), 필요한 화면 배치는 [layout](../guides/screen-layout-guide.md)을 쓴다. 외부 시스템의 시간순 통신은 필요할 때 `sequenceDiagram`을 따로 쓴다.
-- 사용자 DSL을 다른 형식으로 치환하지 않는다. 헤더·화살표·컨테이너 문법은 각 가이드가 원본이다. 첫 등장에 해당 가이드 링크와 범례·핵심 설명을 두고, 새 DSL 설명서 파일을 매 분석에 만들지 않는다. 가이드 링크는 산출 문서와 같은 저장소 안일 때만 걸고, 밖이면 파일 이름과 절 제목을 쓴다([양식 §3.2](../guides/system-design-document-guide.md#32-머리-블록)).
+- 표기 선택은 [공통 문법 기준](../guides/system-design-framework.md#다이어그램의-문법-기준), 라벨·범례·가이드 표시는 [양식 §3](../guides/system-design-document-guide.md#3-핵심-문서-골격)을 따른다. 사용자 DSL을 치환하거나 매 분석마다 새 DSL 설명서를 만들지 않는다.
 
 ## 5. 비판·검증·종료
 
@@ -66,8 +64,7 @@
 
 **구조 확인**([양식 §10](../guides/system-design-document-guide.md#10-검증)):
 
-- [design-doc-check](../guides/tools/design-doc-check.mjs)를 산출 문서 폴더에 실행해 FAIL을 없애고, WARN은 고치거나 본문에 이유를 둔다.
-- jobflow 렌더러가 있으면 도구의 `--renderer`로 SVG를 만들고 PNG로 바꿔 **눈으로** 본다(점검 항목은 양식 §10). 없으면 정적 검토라고 적는다.
+- [양식 §10](../guides/system-design-document-guide.md#10-검증)의 정적 검사·렌더링 절차를 적용한다. FAIL은 해결하고 WARN은 수정하거나 이유를 남긴다. 렌더러가 있으면 그린 결과를 눈으로 확인하고, 없으면 정적 검토라고 적는다.
 - 근거 경로가 실존하는지, 본문·도표의 이름·계약이 서로 맞는지, 상세가 있는 경계의 §5 노드가 모두 그 상세의 드릴다운 지도에 진입점으로 나오는지 대조한다.
 - 실제로 돌린 검사만 정적·렌더링·의미로 나눠 브리프의 검증 기록(작은 분석은 최종 보고)에 남긴다.
 

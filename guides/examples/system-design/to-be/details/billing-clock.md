@@ -43,7 +43,7 @@
 
 상위 바깥 노드 ↔ 이 경계의 클라이언트: `Maker.make`·`.peek`·`.stop` = `MakerClient.make`·`.peek`·`.stop`(`stop`만 제안), `Archive.open` = `ArchiveClient.fetchMeta`(유지), `Mailer.send` = `MailChannel.send`(유지).
 
-**표기** 유지 노드는 AS-IS 상세의 심볼 이름을 그대로 쓰고 새 노드에는 표에 `(제안)`을 단다. `Ticker.OnTick`은 AS-IS처럼 타이머 발화 이벤트이고, 틱 단계 번호 ①·②·③은 [AS-IS 3.1](../../as-is/details/billing-clock.md#31-틱-단계와-마감-정리) 표의 번호다. JF 번호는 지도 순서를 따르므로 AS-IS와 다르다 — 진입 심볼이 같은 것은 `JF-1`(`startDueRuns`)이고, `JF-2`는 AS-IS `JF-2`·`JF-3`에서 바뀐 부분을, `JF-3`은 AS-IS `JF-4`의 `stopRun`을 다시 연다. 세 그림의 `Object:` 순서는 [순서 규칙](../../../../job-flow-diagram-guide.md#렌더러-배치-특성)대로다 — 호출받지 않는 트리거(`Ticker`·`ApiRoutes`)가 맨 왼쪽, 요청을 가장 많이 보내는 `BillingClock`이 그다음이다. 세 그림은 jobflow 렌더러 사본으로 SVG → PNG를 만들어 눈으로 확인했다([상위 §9.2](../system-design-to-be.md#92-검증)). 열지 않은 것: `MakerClient`의 HTTP 호출(단순 워커), `planRetry`·`DeliveryNotifier.deliver`(유지 — 위 링크).
+**표기** 유지 노드는 AS-IS 상세의 심볼 이름을 그대로 쓰고 새 노드에는 표에 `(제안)`을 단다. `Ticker.OnTick`은 AS-IS처럼 타이머 발화 이벤트이고, 틱 단계 번호 ①·②·③은 [AS-IS 3.1](../../as-is/details/billing-clock.md#31-틱-단계와-마감-정리) 표의 번호다. JF 번호는 지도 순서를 따르므로 AS-IS와 다르다 — 진입 심볼이 같은 것은 `JF-1`(`startDueRuns`)이고, `JF-2`는 AS-IS `JF-2`·`JF-3`에서 바뀐 부분을, `JF-3`은 AS-IS `JF-4`의 `stopRun`을 다시 연다. 세 그림의 `Object:` 순서는 [순서 규칙](../../../../job-flow-diagram-guide.md#렌더러-배치-특성)대로다 — 호출받지 않는 트리거(`Ticker`·`ApiRoutes`)가 맨 왼쪽, 요청을 가장 많이 보내는 `BillingClock`이 그다음이다. 세 그림의 이전 렌더 확인 기록은 [상위 §9.2](../system-design-to-be.md#92-검증)에 있다. 열지 않은 것: `MakerClient`의 HTTP 호출(단순 워커), `planRetry`·`DeliveryNotifier.deliver`(유지 — 위 링크).
 
 ### JF-1 맡김 멱등 — BillingClock.startDueRuns
 
@@ -67,7 +67,7 @@ MakerClient.make.error --> BillingClock.planRetry
 | 노드 | 근거 | 비고 |
 |---|---|---|
 | `Ticker.OnTick` → `startDueRuns` → `PlanStore.listDue` | 유지 — [AS-IS `JF-1`](../../as-is/details/billing-clock.md#jf-1-틱-1단계-도래맡김--billingclockstartdueruns) | 상위 `Clock.OnTick` 틱 ① |
-| `RunStore.createOnce`(제안) | `C-02`·`R-02` | AS-IS `RunStore.create` 자리. `INSERT … ON CONFLICT (plan_id, cycle) DO NOTHING` — 같은 주기 행이 있으면 새 행 없이 지나간다. 행 생성과 `advance` 사이에서 멈췄다 다시 떠도 행은 하나다 |
+| `RunStore.createOnce`(제안) | `C-02`·`R-02` | AS-IS `RunStore.create` 자리. 유니크 제약 아래 원자적으로 삽입하고, 같은 주기 행이 있으면 기존 행을 선택한다. 구체 SQL은 사용하는 DB에서 검증한다. 행 생성과 `advance` 사이에서 멈췄다 다시 떠도 행은 하나다 |
 | `PlanStore.advance`·`RunStore.listReady` → `handOff` | 유지 — [AS-IS `JF-1`](../../as-is/details/billing-clock.md#jf-1-틱-1단계-도래맡김--billingclockstartdueruns) | 즉시 발행도 같은 `handOff`를 쓴다 |
 | `RunStore.claim`(제안)·`.lost`·`.claimed` | `C-01`·`C-02` | 조건부 `pending → active` + `handed_at` + `due_by`를 **맡기기 전에** 쓴다(AS-IS `markActive`는 202 뒤). 바뀐 행이 없으면 `.lost` — 중지가 먼저 닫았으니 맡기지 않는다 |
 | `MakerClient.make`·`.stopped` | 유지 — [AS-IS `JF-1`](../../as-is/details/billing-clock.md#jf-1-틱-1단계-도래맡김--billingclockstartdueruns), `.stopped`는 `C-01` | 상위 `Maker.make` — 202 `{runId, alreadyRunning}`(8s). 409 `STOPPED`(제안)면 아무것도 하지 않는다 — 행은 `JF-3`이 닫는다 |
@@ -108,7 +108,7 @@ RunStore.markClosed --> DeliveryNotifier.deliver
 | `finishRun.held` → `RunStore.closeHeld`(제안) | `C-04`·`R-04` | 상위 `Clock.finishRun.held`. `issued`에 `heldLines`가 있다. 행 `closed`(+`invoice_id`)와 수신자마다 `deliveries` 행(`result='held'`, `error`에 보류 고객 수)을 한 트랜잭션으로 쓴다 — AS-IS는 문장마다 자동 커밋. 메일은 보내지 않는다 |
 | `finishRun.issued` → `RunStore.markClosed` → `DeliveryNotifier.deliver` | 유지 — [AS-IS `JF-3.1`](../../as-is/details/billing-clock.md#jf-31-수신자청구서-정보발송--deliverynotifierdeliver), 조건 추가는 `C-01` | 상위 `Clock.finishRun.issued` → `Archive.open`·`Mailer.send` — 수신자마다 1회, 재시도 없음(`B-03` 보류). `markClosed`·`closeHeld`는 `dropped(stopped)`가 아닌 행만 바꾼다(제안) — 가드와 갱신 사이에 잠금 밖의 중지가 끼어도 되살리지 않는다 |
 
-- `finishRun`으로 들어오는 화살표 둘은 서로 다른 트리거(회신·생존 확인)의 **합류**다. 같은 실행이 두 경로로 함께 와도 `@Synchronized`와 가드 때문에 한 번만 종결된다. 이 그림의 `JF-RETURN` 경고는 이 합류 때문이고 round-trip이 아니다([합류와 재호출 구분](../../../../job-flow-diagram-guide.md#합류와-재호출-구분)). `RunStore.get`으로 가는 화살표는 두 경로에 공통이고, 렌더러는 그것을 마지막 `finishRun` 칸에 잇는다.
+- `finishRun`으로 들어오는 화살표 둘은 서로 다른 트리거(회신·생존 확인)의 **합류**다. `issued`·`stopped`가 두 경로로 와도 `@Synchronized`와 가드가 중복 종결을 막는다. `failed`의 중복 판정은 아직 막지 못한다(§8). 이 그림의 `JF-RETURN` 경고는 이 합류 때문이고 round-trip이 아니다([합류와 재호출 구분](../../../../job-flow-diagram-guide.md#합류와-재호출-구분)). `RunStore.get`으로 가는 화살표는 두 경로에 공통이고, 렌더러는 그것을 마지막 `finishRun` 칸에 잇는다.
 - `failed`·`stopped`·`held`·`issued` 칸은 `finishRun`이 가드를 지난 뒤 가르는 값이다(AS-IS `JF-3`과 같은 표기). 메일은 값 분기 `issued` 뒤에만 이어진다 — 이 뜻은 줄 순서가 아니라 분기 값이 정하므로, 어느 분기를 마지막 줄에 두어도 같다.
 - 생존 확인의 다른 분기(`working`·`unreachable`·`failed`·`missing`·`issued`)는 AS-IS 그대로라 그리지 않았다.
 - **완료 사실** 행 `closed`(+메일 또는 `held` 기록), `dropped(stopped)`, 재시도 대기 `pending`. 보류는 메일을 보내지 않기로 한 결정이라 경계 사이 화살표가 없다(`C-04`).
@@ -212,7 +212,7 @@ MakerClient.stop.stopped --> RunStore.markDropped
 | 관련 ID | 분류 | 내용 | 근거 | 영향·대응 |
 |---|---|---|---|---|
 | `C-01`·`D-01` | 위험 | 생성기가 불통이면 맡긴 실행을 멈출 수 없다 | §2의 503 | 운영자가 다시 누른다. 불통인 동안 생성기가 살아 있으면 실행은 보관까지 갈 수 있다 — 확인받지 못한 중지는 멈췄다고 보지 않는다 |
-| `C-03`·`D-02` | 위험 | 시계는 회신 키를 저장해 대조하지 않는다. 처리된 `failed` 회신의 응답이 유실돼 같은 키로 다시 오면 행이 이미 `pending`이라 재시도 판정이 한 번 더 돈다 | `planRetry`는 `pending`을 열린 행으로 본다(AS-IS `JF-1.1`) | 잃는 것은 재시도 1회다. 다시 맡긴 실행과 겹치지는 않는다 — 회신 재시도 창(최악 27초)이 재시도 첫 대기(30초)보다 짧다. 키 저장은 보류 |
+| `C-03`·`D-02` | 위험 | 시계는 회신 키를 저장해 대조하지 않는다. 처리된 `failed` 회신의 응답이 유실돼 같은 키로 다시 오면 행이 이미 `pending`이라 재시도 판정이 한 번 더 돈다 | `planRetry`는 `pending`을 열린 행으로 본다(AS-IS `JF-1.1`) | 중복 도착 횟수만큼 재시도 예산을 더 소비할 수 있다. 클라이언트의 27초 시도·대기 예산은 상대의 늦은 처리를 끝내지 않으므로 다음 실행과 겹치지 않는다는 보장도 없다. 수신 멱등·세대 판정이 정해질 때까지 `C-03`은 부분 반영([상위 §9.5](../system-design-to-be.md#95-미확정필요-입력)) |
 | `C-02` | 미확정 | 끝난 주기의 다시 발행 | [상위 §9.5](../system-design-to-be.md#95-미확정필요-입력) | 잠정 409 `CYCLE_DONE`. 요구가 생기면 실행 세대를 두는 재발행 계약 |
 | `C-04` | 미확정 | 보류한 메일의 해제 | 상위 §9.5 | 해제 계약 없음 — `held` 행으로 알아보기만 한다 |
 

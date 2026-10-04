@@ -1,6 +1,6 @@
 # 시스템 설계 문서 양식 — AS-IS·TO-BE 공통
 
-시스템 수준의 AS-IS 분석 문서와 TO-BE 설계 문서가 쓰는 **파일 배치·절 번호·제목·표 열·그림 규칙·ID·검증**의 원본이다. 무엇을 조사하고 어떻게 판단하는지는 [AS-IS 프롬프트](../prompts/system-design-as-is-prompt.md)와 [TO-BE 프롬프트](../prompts/system-design-to-be-prompt.md)가 정하고, 이 가이드는 그 결과를 남기는 모양을 정한다. 두 문서가 같은 번호·표 열·그림 규칙을 쓰므로 AS-IS의 한 절을 TO-BE의 같은 절과 바로 대조할 수 있다.
+시스템 수준 AS-IS·TO-BE 문서의 **파일 배치·절 번호·제목·표 열·그림 규칙·ID·검증** 원본이다. 조사·판단은 [AS-IS 프롬프트](../prompts/system-design-as-is-prompt.md)와 [TO-BE 프롬프트](../prompts/system-design-to-be-prompt.md)를 따른다. 같은 절 번호와 표 열로 현재와 목표를 대조한다.
 
 **읽기 지도** — 할 일에 맞는 절만 읽는다.
 
@@ -28,7 +28,7 @@
 | 설계 관점 8개와 생략 규칙 | [시스템 설계 프레임워크](system-design-framework.md) | 각 관점이 들어가는 절(아래 표) |
 | 경계 판단·공개 계약 필드·분해 중단 | [모듈 경계 가이드](module-boundary-guide.md) | 상세 문서의 표 열([§5](#5-상세-문서-골격))·드릴다운 중단([§6.2](#62-깊이와-분해-중단)) |
 | 설계 깊이 | [Method-R 1장](method-R.md#1-네-가지-설계-깊이) | 드릴다운 깊이([§6.2](#62-깊이와-분해-중단)) |
-| `jobflow` 문법과 의미 — 헤더, 결과 배치, round-trip, 화살표 없는 단독 줄, 출발점, 합류와 합류 뒤 값 분기, 렌더러 특성과 줄 순서·`Object:` 순서 | [Job Flow 가이드](job-flow-diagram-guide.md) | 경계 수준 그림([§4](#4-흐름-절--경계-수준-jobflow))과 드릴다운([§6](#6-경계-내부-job-flow-드릴다운))에 적용하는 법 |
+| `jobflow` 문법·의미·렌더 배치 | [Job Flow 가이드](job-flow-diagram-guide.md) | 경계 수준 그림([§4](#4-흐름-절--경계-수준-jobflow))과 드릴다운([§6](#6-경계-내부-job-flow-드릴다운))에 적용하는 법 |
 | `state`·`navigation`·`layout` 문법 | [State](state-diagram-guide.md)·[Navigation](navigation-diagram-guide.md)·[Layout](screen-layout-guide.md) | 어느 절에 두는가 |
 | 설명용 시스템 흐름 문서 | [시스템 흐름 문서 가이드](system-flow-document-guide.md) | 다루지 않는다. 함께 만들면 흐름 그림의 원본을 한쪽에 두고 다른 쪽은 링크한다 |
 | 파일 배치·절 번호·제목·표 열·ID·근거 브리프·작성 순서·검증·Mermaid 라벨 | 이 가이드 | 전부 |
@@ -63,7 +63,7 @@ docs/design/{DATE}/
   to-be/details/<boundary>.md
 ```
 
-- 상세는 **경계 단위** 파일이다. 경계는 독립 프로세스·모듈·패키지 묶음이다. 파일 이름은 경계 이름을 소문자와 하이픈으로 쓴다(예: `billing-clock.md`). 설계 프레임워크 8관점별로 파일을 나누지 않는다 — 8관점은 [§1](#1-적용-범위와-원본-관계) 대응표의 절에 들어간다.
+- 상세는 **경계 단위** 파일이다. 경계는 독립 프로세스·모듈·패키지 묶음이다. 파일 이름은 경계 이름을 소문자와 하이픈으로 쓴다(`<boundary-name>.md`). 설계 프레임워크 8관점별로 파일을 나누지 않는다 — 8관점은 [§1](#1-적용-범위와-원본-관계) 대응표의 절에 들어간다.
 - 작고 밀접한 두 경계는 한 파일에 `# A.` / `# B.` 두 부분으로 담을 수 있다. 절 번호는 `A.1`…, ID 번호대는 나눈다([§7](#7-id와-교차-참조)).
 - `{DATE}`를 정하는 법과 AS-IS·TO-BE의 날짜 관계는 각 프롬프트가 정한다. 기존 문서 위치나 사용자 지정이 있으면 그것이 우선이다.
 - 큰 TO-BE 설계의 브리프는 자리가 둘이다. 같은 `{DATE}` 폴더에 AS-IS 브리프가 있으면 그 파일을 고치지 않고 `to-be/_evidence-brief.md`를 따로 둔다. TO-BE가 새 `{DATE}` 폴더를 쓰면 `{DATE}/_evidence-brief.md`에 둔다([§8](#8-근거-브리프)).
@@ -140,13 +140,13 @@ TO-BE의 `AS-IS 대비` 열은 변화 종류이고, `상태` 열은 2.3에만 �
 
 ### 3.2 머리 블록
 
-핵심 문서 제목은 `# <시스템 이름> — AS-IS 시스템 설계서`(TO-BE는 `— TO-BE 시스템 설계서`)이고, 제목 다음에 blockquote 한 덩어리를 둔다. 아래는 [§11](#11-예시-산출물) 예시 시스템의 이름·DATE·커밋을 넣은 모양이다.
+핵심 문서 제목은 `# <시스템 이름> — AS-IS 시스템 설계서`(TO-BE는 `— TO-BE 시스템 설계서`)이고, 제목 다음에 blockquote 한 덩어리를 둔다. 아래 자리표시자를 조사 결과로 채운다. 완성 예시는 [AS-IS 핵심](./examples/system-design/as-is/system-design-as-is.md)에 있다.
 
 ```markdown
-# 월별 청구서 발행 시스템 — AS-IS 시스템 설계서
+# <시스템 이름> — AS-IS 시스템 설계서
 
-> **DATE** 2026.03.02 · **기준 커밋** `5e6f7a8`(<커밋 시각>·<브랜치·머지 맥락>), 작업 트리 clean
-> **범위** <분석한 트리 — 경계 5개 + 공유 디렉터리>. <제외한 것>은 제외([근거 브리프 §1.2](../_evidence-brief.md))
+> **DATE** <날짜> · **기준 커밋** `<해시>`(<커밋 시각>·<브랜치·머지 맥락>), 작업 트리 <상태>
+> **범위** <분석한 트리·경계>. <제외한 것>은 제외([근거 브리프 §1.2](../_evidence-brief.md))
 > **근거** <방법 — 소스 역추출·경계별 병렬 조사·문서 대조> → [`_evidence-brief.md`](../_evidence-brief.md), 경계별 상세는 [§8](#8-상세근거-인덱스와-한계)
 > **표기** 구조·의존은 Mermaid `flowchart`, 협력 흐름은 `jobflow`(`job-flow-diagram-guide.md`), 상태 전이는 `state`(`state-diagram-guide.md`), 화면 이동은 `navigation`(`navigation-diagram-guide.md`)
 > **원칙** AS-IS는 현 코드를 있는 그대로 적는다. 찾은 결함은 고치지 않고 ID로 드러낸다([§9](#9-이슈--주제별-교차-뷰) — TO-BE 입력).
@@ -157,7 +157,7 @@ TO-BE는 같은 블록에 두 줄을 더한다.
 
 ```markdown
 > **설계 유형** 기존 시스템 개선 — <근거>. 혼합이면 영역별로 적는다
-> **입력 근거** 요구 <원문 위치>, AS-IS [`../as-is/system-design-as-is.md`](../as-is/system-design-as-is.md)(DATE 2026.03.02·커밋 `5e6f7a8`)
+> **입력 근거** 요구 <원문 위치>, AS-IS [`../as-is/system-design-as-is.md`](../as-is/system-design-as-is.md)(DATE <날짜>·커밋 `<해시>`)
 ```
 
 | 줄 | AS-IS | TO-BE | 쓰는 것 |
@@ -196,18 +196,7 @@ TO-BE는 같은 블록에 두 줄을 더한다.
 4. 라벨에 예약어 `end`·`subgraph`나 연산자 `-->`·`==>`·`---`·`;`를 넣지 않는다.
 5. Mermaid 렌더 도구가 있으면 그려 본다. 없으면 [§10](#10-검증)의 `MERMAID` 검사와 위 규칙 대조까지만 하고 정적 검토라고 적는다.
 
-```mermaid
-flowchart TB
-  U["운영자 브라우저"] -->|"HTTPS :7100"| CON["admin-console :7100<br/>운영 SPA·프록시 2"]
-  subgraph Run["발행 실행 경로"]
-    CLK["billing-clock :7101<br/>주기 타이머·실행 수명"]
-    MKR["invoice-maker :7102<br/>생성 조율자"]
-  end
-  CON -->|"/api/billing/*"| CLK
-  CLK -->|"맡김·생존 확인"| MKR
-  MKR -->|"사용량 조회"| UAPI["usage-api :7103"]
-  UAPI --> UDB[("UsageDB<br/>외부 사용량 저장소")]
-```
+완성된 토폴로지는 [AS-IS 핵심 예시](./examples/system-design/as-is/system-design-as-is.md)를 참조한다.
 
 #### §1 핵심 용어
 
@@ -216,7 +205,7 @@ flowchart TB
 
 #### §2 기능
 
-- AS-IS: 결론 → 표 `사용자·업무 결과 | 트리거 | 책임 경계`(행 하나 = 사용자가 얻는 결과 하나) → `**기능 트리와 소유 모듈**(PBS 관점):` 한 단락. 기능 트리는 묶음과 소유 경계를 적는다(예: `청구서 = {생성·보관·발송}`).
+- AS-IS: 결론 → 표 `사용자·업무 결과 | 트리거 | 책임 경계`(행 하나 = 사용자가 얻는 결과 하나) → `**기능 트리와 소유 모듈**(PBS 관점):` 한 단락. 기능 트리는 묶음과 소유 경계를 적는다(묶음 예시는 [AS-IS §2](./examples/system-design/as-is/system-design-as-is.md#2-기능--무엇을-해주나)).
 - TO-BE 소절과 표 열:
 
 | 소절 | 표 열과 쓰는 법 |
@@ -314,26 +303,22 @@ AS-IS는 세 부분을 차례로 쓴다.
 
 ### 4.1 표기 약속
 
-`### 5.0 표기`에는 아래 약속 중 그 문서에 해당하는 것을 불릿으로 쓰고, 객체 ↔ 경계 범례 표(`객체 | 경계 | 객체 | 경계` 2열 쌍)를 둔다.
+`### 5.0 표기`에는 아래 약속 중 해당하는 것과 객체 ↔ 경계 범례 표(`객체 | 경계 | 객체 | 경계` 2열 쌍)를 둔다. 공통 문법은 복제하지 않고 [실제 요청자](job-flow-diagram-guide.md#scope-그림의-출발점은-실제-요청자다), [이름·객체 순서](job-flow-diagram-guide.md#렌더러-배치-특성), [줄 순서](job-flow-diagram-guide.md#줄-순서-규칙), [선 교차](job-flow-diagram-guide.md#선-교차-줄이기)를 따른다. 이 문서의 예외·해석만 덧붙인다.
 
 | 약속 | 경계 수준 그림에 적용하는 법 | 원본 |
 |---|---|---|
 | 헤더 | 모든 그림이 `scope:`다. 경계 안을 그리지 않으므로, 조율자가 하나뿐인 흐름도 `orchestrator:`로 쓰지 않는다 | [헤더 키워드](job-flow-diagram-guide.md#헤더-키워드--orchestrator-vs-scope) |
-| 노드 | `경계객체.공개계약`. 계약은 HTTP 라우트·메시지 소비자·타이머·부팅·CLI를 뜻이 보이는 이름으로 쓴다(`Clock.issueNow` = `POST /api/plans/:planId/issue`). 원문 경로는 그림 아래 표에 둔다. 사용자 동작으로 시작하는 흐름은 화면 객체의 동작에서 출발한다(`Browser.saveForm` — 무엇인지는 시나리오 목록 표의 트리거 열이 말한다) | [시나리오의 시작점](job-flow-diagram-guide.md#시나리오의-시작점) |
-| 실행 노드 | 응답(202 등)을 돌려준 뒤 따로 도는 실행 단위가 하류를 부르면 `<경계객체>.<실행>` 한 칸으로 둔다(`Maker.work` — 202 뒤의 백그라운드 실행). 응답 전에 하류를 부르는 계약 처리기는 그 계약 노드가 출발점이라 실행 노드가 없다. 실행 단위마다 한 칸이고, 종결 입구와 달리 경계마다 하나로 제한하지 않는다. 같은 경계 안에서 별도 스레드로 넘긴 일은 넘긴 노드에서 출발시켜도 된다(`Clock.finishRun.issued --> Mailer.send`). 실행 안의 단계와 결과 갈래(중지 확인 등)는 그리지 않고 상세 드릴다운에서 연다 | [출발점은 실제 요청자](job-flow-diagram-guide.md#scope-그림의-출발점은-실제-요청자다) |
-| 종결 입구 노드 | 여러 트리거(회신·생존 확인·마감)가 모이는 단일 종결 입구는 한 칸으로 둔다(`Clock.finishRun`). 경계마다 하나까지다. 같은 경계 안 화살표(`Clock.acceptReply --> Clock.finishRun`)는 종결 입구로 들어가는 길을 보일 때만 쓴다 | [합류와 재호출 구분](job-flow-diagram-guide.md#합류와-재호출-구분) |
-| 다음 동작 노드 | 응답을 받은 원 요청자의 다음 동작(화면 표시·다음 요청)은 요청자 객체의 한 칸으로 둔다(`Browser.showInvoice`) | [출발점은 실제 요청자](job-flow-diagram-guide.md#scope-그림의-출발점은-실제-요청자다) |
-| 묶음 노드(5.1 전용) | 5.1에서는 같은 요청자 → 제공자 사이의 여러 계약을 한 칸으로 묶을 수 있다(`Clock.operate` = 계획·실행 운영 API). 묶은 계약은 5.1의 읽는 법 불릿에 적고, 시나리오 그림에서는 실제 계약 노드로 연다 | — |
-| 객체 이름 | ASCII 낙타 표기(`UsageApi`). 공백·`.`·하이픈을 쓰지 않는다 — 렌더러가 첫 `.`으로 객체와 액션을 가른다 | [렌더러 배치 특성](job-flow-diagram-guide.md#렌더러-배치-특성) |
-| 액션 이름 | 이벤트는 `OnXxx`다. 이벤트가 아닌 액션은 `on`·`On`으로 시작하지 않는다 — 렌더러가 대소문자와 상관없이 이벤트 모양으로 그리고 앞 두 글자를 지운다 | 같음 |
-| `Object:` 순서 | 줄 순서가 그림에서도 시간 순서로 보이게 객체 순서를 정한다. 규칙은 원본을 따른다(트리거가 여럿인 5.1은 [§4.2](#42-전체-한-장과-시나리오-분할)) | 같음 |
-| 그릴 객체 | 실제 홉이면 관통 프록시도 그린다(`Console.proxyBilling`). 여러 경계가 직접 읽고 쓰는 디렉터리는 객체로(`FormDir`), 외부 시스템도 객체로 둔다(`UsageDB`·`Mailer`). 프로세스 안에 링크되는 공유 라이브러리는 경계 사이에서 주고받는 것이 없어 그리지 않는다 | — |
-| 프록시를 지나는 응답 | 응답 화살표는 프록시 칸을 생략하고 원 요청자에게 바로 잇는다 — 요청자의 다음 동작 노드로(`Archive.open.result --> Browser.showInvoice`). 응답이 같은 프록시를 지나 돌아간다는 것은 5.0 불릿에 한 줄로 적는다 | [출발점은 실제 요청자](job-flow-diagram-guide.md#scope-그림의-출발점은-실제-요청자다) |
-| `.result` | 흐름을 잇는 응답만 그린다(202 접수, `runId`, `invoiceId`). 그 응답이 접수 확인인지 업무 완료인지 표나 불릿에 적는다 | [표시할 결과 선택](job-flow-diagram-guide.md#표시할-결과-선택) |
-| 출발점 | 화살표 왼쪽은 실제 요청자다. `A.m.result --> C.n`은 A가 C를 부르는 것으로 읽힌다. B가 A의 응답을 받아 C를 부르면 B의 실행 노드에서 `B.run --> C.n`처럼 줄 순서대로 쓰고, 경계 안의 가공은 표·불릿에 적는다 | [출발점은 실제 요청자](job-flow-diagram-guide.md#scope-그림의-출발점은-실제-요청자다) |
-| 시간 | 줄 순서가 시간 순서다. 줄 순서는 깊이 우선이다 — 하류 요청은 그 호출 바로 다음 줄에 쓰고, 같은 출발점의 다음 요청은 그 뒤에 쓴다. 그래야 렌더러가 출발 노드를 끊지 않고 앞 칸에서 이어 그린다. 출발점 열로 돌아오는 콜백·결과 줄의 자리는 원본 규칙을 따른다. 깊이 우선이 실제 시간과 다르면(비동기 하류가 다음 요청보다 늦게 일어나는 등) 실제 순서를 불릿에 적고, 그 순서가 설계에 중요하면 블록을 나눈다. 타깃으로 다시 나온 노드는 새 칸에 그려지지만 이름이 같으면 같은 계약이다. 한 노드의 가지는 그 노드 열을 가로지르는 다른 줄보다 먼저 써서 선이 교차하지 않게 한다 | [줄 순서 규칙](job-flow-diagram-guide.md#줄-순서-규칙)·[선 교차 줄이기](job-flow-diagram-guide.md#선-교차-줄이기)·[렌더러 배치 특성](job-flow-diagram-guide.md#렌더러-배치-특성) |
-| 한 노드로 모이는 화살표 | 합류인지 재호출인지와, 두 번째 진입을 막는 가드를 불릿에 적는다. 합류 뒤 후속이 일부 결과에만 해당하면 줄 순서로 뜻을 만들지 않고 합류 노드의 값 분기로 잇는다(`Clock.finishRun.issued --> Mailer.send`) | [합류와 재호출 구분](job-flow-diagram-guide.md#합류와-재호출-구분) |
-| 후속 없는 분기 | 기본은 그리지 않는다. 그 분기의 끝이 설계 정보(보류·새 오류 응답 등)이면 화살표 없는 단독 줄로 둔다(`Maker.peek.unreachable`). 단독 줄의 뜻과 적는 법은 원본을 따른다 | [무시 분기 표기](job-flow-diagram-guide.md#무시-분기-표기-화살표-없는-단독-줄) |
+| 노드 | `경계객체.공개계약`. 계약은 HTTP 라우트·메시지 소비자·타이머·부팅·CLI를 뜻이 보이는 이름으로 쓴다(`Boundary.action` = 해당 공개 계약). 원문 경로는 그림 아래 표에 둔다. 사용자 동작으로 시작하는 흐름은 화면 객체의 동작에서 출발한다(`Browser.submit` — 무엇인지는 시나리오 목록 표의 트리거 열이 말한다) | [시나리오의 시작점](job-flow-diagram-guide.md#시나리오의-시작점) |
+| 실행 노드 | 응답(202 등)을 돌려준 뒤 따로 도는 실행 단위가 하류를 부르면 `<경계객체>.<실행>` 한 칸으로 둔다(`Boundary.work` — 접수 응답 뒤의 실행). 응답 전에 하류를 부르는 계약 처리기는 그 계약 노드가 출발점이라 실행 노드가 없다. 실행 단위마다 한 칸이고, 종결 입구와 달리 경계마다 하나로 제한하지 않는다. 같은 경계 안에서 별도 스레드로 넘긴 일은 넘긴 노드에서 출발시켜도 된다(`Boundary.finish.ready --> Client.send`). 실행 안의 단계와 결과 갈래(중지 확인 등)는 그리지 않고 상세 드릴다운에서 연다 | [출발점은 실제 요청자](job-flow-diagram-guide.md#scope-그림의-출발점은-실제-요청자다) |
+| 종결 입구 노드 | 여러 트리거(회신·생존 확인·마감)가 모이는 단일 종결 입구는 한 칸으로 둔다(`Boundary.finish`). 경계마다 하나까지다. 같은 경계 안 화살표(`Boundary.receive --> Boundary.finish`)는 종결 입구로 들어가는 길을 보일 때만 쓴다 | [합류와 재호출 구분](job-flow-diagram-guide.md#합류와-재호출-구분) |
+| 다음 동작 노드 | 응답을 받은 원 요청자의 다음 동작(화면 표시·다음 요청)은 요청자 객체의 한 칸으로 둔다(`Browser.showResult`) | [출발점은 실제 요청자](job-flow-diagram-guide.md#scope-그림의-출발점은-실제-요청자다) |
+| 묶음 노드(5.1 전용) | 5.1에서는 같은 요청자 → 제공자 사이의 여러 계약을 한 칸으로 묶을 수 있다(`Boundary.operate` = 관련 운영 API). 묶은 계약은 5.1의 읽는 법 불릿에 적고, 시나리오 그림에서는 실제 계약 노드로 연다 | — |
+| `Object:` 순서 | 줄 순서가 그림에서도 시간 순서로 보이게 객체 순서를 정한다. 규칙은 원본을 따른다(트리거가 여럿인 5.1은 [§4.2](#42-전체-한-장과-시나리오-분할)) | [렌더러 배치 특성](job-flow-diagram-guide.md#렌더러-배치-특성) |
+| 그릴 객체 | 실제 홉이면 관통 프록시도 그린다(`Proxy.forward`). 여러 경계가 직접 읽고 쓰는 디렉터리는 객체로(`SharedDir`), 외부 시스템도 객체로 둔다(`ExternalStore`·`Sender`). 프로세스 안에 링크되는 공유 라이브러리는 경계 사이에서 주고받는 것이 없어 그리지 않는다 | — |
+| 프록시를 지나는 응답 | 응답 화살표는 프록시 칸을 생략하고 원 요청자에게 바로 잇는다 — 요청자의 다음 동작 노드로(`Provider.get.result --> Browser.showResult`). 응답이 같은 프록시를 지나 돌아간다는 것은 5.0 불릿에 한 줄로 적는다 | [출발점은 실제 요청자](job-flow-diagram-guide.md#scope-그림의-출발점은-실제-요청자다) |
+| `.result` | 흐름을 잇는 응답만 그리고, 접수 확인인지 업무 완료인지 표나 불릿에 적는다 | [표시할 결과 선택](job-flow-diagram-guide.md#표시할-결과-선택) |
+| 한 노드로 모이는 화살표 | 합류인지 재호출인지와, 두 번째 진입을 막는 가드를 불릿에 적는다. 합류 뒤 후속이 일부 결과에만 해당하면 줄 순서로 뜻을 만들지 않고 합류 노드의 값 분기로 잇는다(`Boundary.finish.ready --> Client.send`) | [합류와 재호출 구분](job-flow-diagram-guide.md#합류와-재호출-구분) |
+| 후속 없는 분기 | 기본은 그리지 않는다. 그 분기의 끝이 설계 정보(보류·새 오류 응답 등)이면 화살표 없는 단독 줄로 둔다(`Provider.query.unreachable`). 단독 줄의 뜻과 적는 법은 원본을 따른다 | [무시 분기 표기](job-flow-diagram-guide.md#무시-분기-표기-화살표-없는-단독-줄) |
 
 **예외 노드** — 실행 노드·종결 입구 노드·다음 동작 노드·묶음 노드를 이렇게 부른다. §5 그림에서 위 노드 행의 꼴(공개 계약 하나, 또는 사용자 동작 출발점)을 벗어나는 칸은 이 넷뿐이다. 노드 표에 공개 계약이 아니라는 것과 그 역할을 적고, 묶음 노드는 5.1의 읽는 법 불릿에 묶은 계약을 적는다.
 
@@ -367,27 +352,7 @@ AS-IS는 세 부분을 차례로 쓴다.
 - 실패가 여러 단계에 걸치면 불릿 대신 짧은 단락으로 쓸 수 있다(어느 단계 실패가 흐름을 끊고, 어느 단계는 부분 실패를 안고 끝나는가). 단계 전수는 상세에 원본을 둔다.
 - TO-BE 표는 같은 열에 `AS-IS 대비`를 더한 `노드 | 실제 계약 | AS-IS 대비`다. 계약 칸은 유지면 AS-IS 원문, 신규·변경이면 목표 계약에 `(제안)`을 붙인다.
 
-아래는 [§11](#11-예시-산출물) 예시 시스템 이름으로 줄인 모양이다.
-
-```jobflow
-scope: 정기 청구서 1건 생성
-Object: Maker, FormDir, UsageApi, Archive, Clock
-Clock.OnTick --> Maker.make
-Maker.work --> FormDir.read
-Maker.work --> UsageApi.fetch
-Maker.work --> Archive.file
-Maker.work --> Clock.acceptReply
-```
-
-| 노드 | 실제 계약 |
-|---|---|
-| `Clock.OnTick` → `Maker.make` | 20초 틱의 발행일 도래 → `POST /api/makes` → **202** `{runId, alreadyRunning}` — 접수 확인 |
-| `Maker.work` | 202 뒤의 백그라운드 실행(공개 계약 아님). 아래 요청을 줄 순서대로 보낸다 |
-| `FormDir.read` | 서식 `.md` 파일을 직접 읽는다 — HTTP가 아니고 프로세스 간 잠금이 없다 |
-| `UsageApi.fetch`·`Archive.file`·`Clock.acceptReply` | `POST /api/usage`(질의당 30s), `POST /api/invoices`(`dedupKey` upsert), `POST /api/replies`(회신 — 업무 완료 통지) |
-
-- 하류를 부르는 요청자는 `Maker.work`다. 앞 응답(사용량)으로 다음 요청(보관할 청구서)을 만드는 가공은 경계 안이라 그리지 않는다.
-- 트리거 객체 `Clock`이 마지막에 회신을 받으므로 `Object:` 맨 오른쪽에 뒀다. 순서 규칙의 원본은 [렌더러 배치 특성](job-flow-diagram-guide.md#렌더러-배치-특성)이다.
+그림·계약 표·해설이 함께 있는 예시는 [AS-IS 핵심 §5.4](./examples/system-design/as-is/system-design-as-is.md#54-정기-청구서-생성--맡김에서-회신까지)를 참조한다.
 
 **선택 소절** — 시나리오 뒤, 드릴다운 색인 앞에 둔다.
 
@@ -411,9 +376,9 @@ Maker.work --> Clock.acceptReply
 경계 하나를 고치는 사람이 읽는 상세 문서의 머리와 고정 절이다. 경계 1개 = 파일 1개다(A/B 부분 문서는 [§2](#2-산출물-배치)). 머리는 제목과 blockquote다.
 
 ```markdown
-# billing-clock (:7101) — AS-IS 상세
+# <경계> (:<포트>) — AS-IS 상세
 
-> **대상**: `<대상 경로>/**`(소스 N파일·M줄) · **기준**: 커밋 `5e6f7a8`·2026.03.02, 작업 트리 clean
+> **대상**: `<대상 경로>/**`(소스 N파일·M줄) · **기준**: 커밋 `<해시>`·<날짜>, 작업 트리 <상태>
 > **근거 색인**: [`../../_evidence-brief.md`](../../_evidence-brief.md) · **상위**: [`../system-design-as-is.md`](../system-design-as-is.md) · **짝**: [`<짝 문서>.md`](<짝 문서>.md)
 > **표기**: <이 상세에서 처음 쓰는 DSL — 있을 때만>
 > **범위 한정**: <다루지 않는 영역과 이유 — 있을 때만>
@@ -426,10 +391,10 @@ Maker.work --> Clock.acceptReply
 - TO-BE 상세의 머리는 같은 줄을 TO-BE의 뜻으로 쓴다 — **대상**은 바뀌는 범위와 그 `C-ID`, **기준**은 입력 AS-IS의 커밋·DATE, **표기**는 `(제안)` 표시법이다. 짝은 같은 경계의 AS-IS 상세다(있을 때).
 
 ```markdown
-# invoice-maker (:7102) — TO-BE 상세
+# <경계> (:<포트>) — TO-BE 상세
 
-> **대상**: <바뀌는 범위>(`C-01`·`C-03`·`C-04`) · **기준**: 입력 AS-IS 커밋 `5e6f7a8`·2026.03.02
-> **표기**: `(제안)` = 새 계약·제안 심볼 · **짝**: [`../../as-is/details/invoice-maker.md`](../../as-is/details/invoice-maker.md)
+> **대상**: <바뀌는 범위>(`C-01`·`C-03`·`C-04`) · **기준**: 입력 AS-IS 커밋 `<해시>`·<날짜>
+> **표기**: `(제안)` = 새 계약·제안 심볼 · **짝**: [`../../as-is/details/<boundary>.md`](../../as-is/details/<boundary>.md)
 ```
 
 - TO-BE 상세는 신규·변경 경계마다 하나다(예외는 [큰 분석과 작은 분석](#큰-분석과-작은-분석)). 유지 경계는 상세를 새로 쓰지 않고 AS-IS 상세를 링크한다. AS-IS 문서가 없으면 그 경계의 필요한 현재 맥락을 핵심 §4 소절에 요약한다.
@@ -459,14 +424,14 @@ Maker.work --> Clock.acceptReply
 상세 §3은 상위 §5의 노드를 경계 안에서 재귀적으로 연다(`JF-1` → `JF-1.1` → `JF-1.1.1`). 상위 노드가 하위 그림의 시작점이고, 하위의 입력·출력·실패 의미는 상위 계약과 같다([재귀적 세분화](job-flow-diagram-guide.md#재귀적-세분화)).
 
 - **L1**은 상위 §5 노드를 처음 연 그림(`JF-n`)이고, **L2 이하**는 그 안의 협력자를 다시 연 그림(`JF-n.m`…)이다. L은 단계(level)다.
-- 줄 순서(깊이 우선)와 `Object:` 순서는 §5 그림과 같다 — [§4.1](#41-표기-약속)의 「시간」·「`Object:` 순서」 행.
+- 줄 순서와 `Object:` 순서는 [Job Flow 가이드](job-flow-diagram-guide.md#렌더러-배치-특성)를 따른다.
 
 **절 첫머리 순서**
 
 1. `**결론**:` 한 줄 — 이 경계의 실제 조율자(클래스·함수·없음)와 바깥으로 나가는 클라이언트 객체.
 2. 상위 링크 문장 — "상위 §5의 노드가 아래 그림의 시작점이다. 입력·출력·실패 의미가 같다."
 3. `**드릴다운 지도**` 표([§6.1](#61-드릴다운-지도)).
-4. (필요할 때) 상위의 바깥 노드 ↔ 이 경계의 클라이언트 객체 대응 — 한 줄이나 표(예: 상위 `Maker.make` = `MakerClient.make`).
+4. (필요할 때) 상위의 바깥 노드 ↔ 이 경계의 클라이언트 객체 대응 — 한 줄이나 표(외부 계약과 이 경계의 클라이언트 메서드).
 5. `**표기**` — 객체 이름 규칙, 줄 번호의 기준 커밋, 렌더 확인 범위 한 줄. 실제 심볼이 `on…`으로 시작하면(`onTick` 같은 핸들러 메서드) 이름을 바꾸지 않고, 렌더러가 이벤트 모양으로 그린다는 것을 여기 적는다. 클래스가 없는 모듈은 구획 표 `객체 | 코드 범위 | 담는 심볼`을 둔다.
 6. (선택) 단계 표와 그림의 관계, 합류를 읽는 법 한 단락. 열지 않은 것 한 줄.
 
@@ -493,23 +458,11 @@ Maker.work --> Clock.acceptReply
 | L2 이하 | 복잡한 협력자(하위 조율자)만 다시 연다. 단순 워커·순수 함수는 열지 않는다. 보통 깊이 2~3이다(예시 기준). 멈추는 기준은 [모듈 경계 가이드](module-boundary-guide.md#2-무엇을-한-조각으로-묶는가)와 [Method-R의 검증과 분할 종료](method-R.md#8-검증과-분할-종료) |
 | 노드 | 실제 코드 심볼 — `Class.method`·`module.function`·`OnXxx`. 확인하지 못한 심볼은 그리지 않고 "미확인"으로 적는다. 실제 심볼이 `on…`이어도 이름을 바꾸지 않는다(절 첫머리의 표기 줄에 적는다) |
 | TO-BE | 노드는 제안 심볼(`(제안)` 표시)이다. 신규·변경 부분만 판단에 필요한 깊이까지 열고, 유지 부분은 AS-IS 드릴다운을 링크한다. AS-IS 문서가 없으면 유지 부분의 필요한 현재 맥락을 요약한다 |
-| 다른 경계 | 이 경계 쪽 클라이언트·게이트웨이 객체로만 그린다(`MakerClient`·`ArchiveClient`). 원격 경계의 내부를 그리지 않는다 |
+| 다른 경계 | 이 경계 쪽 클라이언트·게이트웨이 객체로만 그린다(`RemoteClient`·`StorageGateway`). 원격 경계의 내부를 그리지 않는다 |
 | 크기 | 한 그림의 Object는 대략 8개 이하(예시 기준). 넘치거나 상한 가까이에서 분기 칸이 몰리면 단계 묶음 `#### JF-nA <묶음 이름>`·`#### JF-nB <묶음 이름>`으로 나눈다. 진입 심볼은 상위 `JF-n` 제목에 있다. 묶음 사이 관계(같은 메서드의 연속인지, 예외 출구인지)를 한 단락으로 적는다 |
 | 단계 표 | 단계 표가 따로 있으면 그림이 표를 대체하지 않는다. 근거 표에 `단계 #` 열을 둬 대응시킨다 |
 
-L1 그림의 모양 — 상위 `Clock.OnTick` → `Maker.make`를 billing-clock 안에서 연 것이다([예시 상세 `JF-1`](./examples/system-design/as-is/details/billing-clock.md#jf-1-틱-1단계-도래맡김--billingclockstartdueruns)을 줄였다). invoice-maker는 이 경계 쪽 클라이언트로만 나오고(`MakerClient.make` = 상위 `Maker.make`), `.error` 분기는 L2 `JF-1.1`로 이어진다. `Ticker.OnTick`은 타이머 발화 이벤트다 — 예시 상세는 이것을 표기 줄에 적는다.
-
-```jobflow
-orchestrator: BillingClock
-Object: Ticker, BillingClock, PlanStore, RunStore, MakerClient
-Ticker.OnTick --> BillingClock.startDueRuns
-BillingClock.startDueRuns --> PlanStore.listDue
-PlanStore.listDue.result --> RunStore.create
-BillingClock.startDueRuns --> RunStore.listReady
-RunStore.listReady.result --> BillingClock.handOff
-BillingClock.handOff --> MakerClient.make
-MakerClient.make.error --> BillingClock.planRetry
-```
+L1 예시는 [AS-IS 상세 `JF-1`](./examples/system-design/as-is/details/billing-clock.md#jf-1-틱-1단계-도래맡김--billingclockstartdueruns)에 있다. 상위 계약을 경계 안의 조율자로 열고, 원격 경계는 클라이언트 객체로만 나타낸다.
 
 ### 6.3 그림 아래 근거
 
@@ -539,7 +492,7 @@ ID는 조사 단계에 한 번 정하고 다시 매기지 않는다. 아래 표�
 - 이슈의 내용·근거·영향은 상세 「8. 이슈」 표 **한 곳**에만 쓴다(작은 분석은 §9). 핵심 §9는 주제별 교차 뷰이고(중복 정의가 아니다), 브리프 §3은 접두 → 근거 표 위치를 매핑한다.
 - 인용은 문장 끝에 ID로 단다. TO-BE는 AS-IS ID를 그대로 인용하고 처분을 TO-BE §9.4에 쓴다. TO-BE 상세의 위험·미확정은 새 ID를 만들지 않고 관련 `R`·`C`·`D`로 단다.
 - AS-IS 이슈 접두가 `R`·`C`·`D`와 겹치면 TO-BE 문서에서는 `AS-IS C-03`처럼 앞에 붙여 TO-BE의 `C-03`과 구분한다.
-- `JF-n`은 상세 문서 안에서만 유일하다. 다른 문서에서 가리킬 때는 문서 이름과 함께 쓴다(예: "billing-clock 상세 `JF-1.1`").
+- `JF-n`은 상세 문서 안에서만 유일하다. 다른 문서에서 가리킬 때는 문서 이름과 함께 쓴다("<경계> 상세 `JF-1.1`").
 
 **고정 앵커** — 링크 대상 제목이 고정이므로 앵커도 문서마다 같다(GitHub 방식 슬러그). 링크 대상 제목에 ①② 같은 기호나 이모지를 넣지 않고, 한 문서 안에서 같은 제목을 두 번 쓰지 않는다(슬러그에 `-1`이 붙는다).
 
@@ -620,24 +573,7 @@ node guides/tools/design-doc-check.mjs [--renderer <path>] [--out <dir>] [--stri
 - 출력은 `LEVEL CODE file:line 메시지` 줄이고, 끝에 파일·jobflow 블록·FAIL·WARN 수를 세는 집계(`files=… blocks=… fail=… warn=…`)가 나온다.
 - exit 0 = FAIL 없음, 1 = FAIL 있음, 2 = 사용법 오류. `--strict`는 WARN도 실패로 센다.
 
-**요약 — 판정 조건 전체는 `--help`와 도구 머리 주석**
-
-| 코드 | 수준 | 잡는 것 |
-|---|---|---|
-| `FENCE` | FAIL | 줄 맨 앞 펜스의 짝 불일치 |
-| `JF-HEADER` | FAIL | 첫 줄이 `orchestrator:`·`scope:`가 아님(`master:`와, `Object:`에 없는 orchestrator 이름은 WARN) |
-| `JF-OBJECT` | FAIL | `Object:` 줄 없음, 화살표 양끝이나 단독 분기 줄의 객체 미선언 |
-| `JF-LABEL` | FAIL | 화살표 줄·단독 분기 줄의 `:` 라벨(` : ` 꼴 포함, `::`만 제외) |
-| `JF-UNUSED` | WARN | 선언했지만 쓰지 않은 객체 |
-| `JF-NAME` | WARN | 객체 이름의 공백·점, 빈 이름, 중복 선언 |
-| `JF-ONNAME` | WARN | 이벤트 꼴이 아닌 `on…` 액션 |
-| `JF-RETURN` | WARN | `orchestrator: X` 그림에서 `--> X.<method>` 타깃이 2회 이상(round-trip 의심) |
-| `JF-REDRAW` | WARN | 앞에서 그린 노드를 출발점으로 이어 쓰지 못하고 새 칸에 다시 그리는 줄 — 그 칸 아래 같은 열에 다른 칸이 먼저 생겼다([줄 순서 규칙](job-flow-diagram-guide.md#줄-순서-규칙)) |
-| `LINK` | FAIL | 상대 링크의 대상 파일 없음 |
-| `ANCHOR` | FAIL | `#조각`이 대상 제목의 슬러그에 없음 |
-| `LINK-OUTSIDE` | WARN | 상대 링크가 문서가 속한 git 저장소 루트를 넘음 — 대상이 루트 밖이거나, 루트 위로 나갔다가 돌아오는 경로(git 루트를 못 찾으면 검사하지 않는다) |
-| `MERMAID` | WARN | self-closing이 아닌 `<br>`, 따옴표 없는 노드·엣지 라벨 |
-| `RENDER` | FAIL | `--renderer`로 그릴 때 예외 |
+검사 코드·옵션은 `node guides/tools/design-doc-check.mjs --help`, 코드별 판정 조건은 [도구 머리 주석](./tools/design-doc-check.mjs)을 확인한다. 정적 검사는 펜스·jobflow 구조·링크·앵커·Mermaid 라벨을 다루며, 그림 의미나 실제 화면 배치를 보장하지 않는다.
 
 - **합격 기준**은 FAIL 0과, 남은 WARN마다 본문에 적은 이유(합류·재호출 등)다. 단 `LINK-OUTSIDE`는 이유를 적어 남기지 않고 고친다 — 다른 컴퓨터에서 깨지는 링크라서다([§3.2](#32-머리-블록)의 가이드 링크 규칙). `JF-REDRAW`는 줄 순서를 고쳐 0으로 만드는 것이 먼저고, 남기면 그 줄과 이유를 그림 아래 불릿에 적는다. 이유를 적고 남긴 WARN이 있으면 `--strict`는 실패하므로 합격 판정에 쓰지 않는다 — WARN을 모두 없애기로 한 문서에서만 쓴다.
 - 앵커를 다른 방법으로 검사할 때 코드펜스는 **줄 맨 앞 펜스만** 지운다. 본문 속 인라인 코드의 백틱 세 개(예: ```` ```yaml ````)를 펜스로 오인하면 그 뒤의 제목이 전부 사라진다.
@@ -645,7 +581,7 @@ node guides/tools/design-doc-check.mjs [--renderer <path>] [--out <dir>] [--stri
 **렌더링 확인** — jobflow 렌더러가 있으면 `--renderer <렌더러 모듈>`로 블록마다 SVG를 만들고, PNG로 바꿔(예: `rsvg-convert -b white -z 0.6 in.svg -o out.png`) 눈으로 본다.
 
 - 렌더러 모듈은 `generateSVG(jobflow 원문)` → SVG 문자열을, default export 객체의 메서드나 이름 있는 export로 내야 한다.
-- SVG는 `<out>/<문서 basename>-NN.svg`로 생긴다(NN = 그 문서 안 jobflow 블록 순번). basename이 같은 문서가 여럿이면 공통 상위 폴더부터의 경로를 `__`로 이어 이름으로 쓴다(`as-is__details__billing-clock-01.svg`).
+- SVG는 `<out>/<문서 basename>-NN.svg`로 생긴다(NN = 그 문서 안 jobflow 블록 순번). basename이 같은 문서가 여럿이면 공통 상위 폴더부터의 경로를 `__`로 이어 이름으로 쓴다(`as-is__details__boundary-01.svg`).
 - 기본 출력 폴더 `./.design-doc-check`는 현재 폴더에 생긴다. 대상 저장소에서 돌릴 때는 `--out`에 그 저장소에 속하지 않는 임시 폴더를 준다(예: `mktemp -d`로 만든 폴더).
 - 눈으로 볼 것:
   - 흐름이 한 줄로 이어지는가 — 앞에서 그린 노드에서 다시 나가는 화살표가 그 칸에서 나가고, 같은 이름 칸이 끊겨 새로 그려지지 않았는가(`JF-REDRAW`가 같은 곳을 잡는다).
@@ -653,7 +589,7 @@ node guides/tools/design-doc-check.mjs [--renderer <path>] [--out <dir>] [--stri
   - 결과·분기 칸이 그 호출 바로 아래에 있는가.
   - 화살표 출발점이 실제 요청자로 읽히는가.
   - 왼쪽으로 가는 화살표가 앞 행의 빈칸에 끼어들어 시간 순서가 흐트러지지 않는가.
-  - 화살표 머리가 의도한 칸에 닿고, 타깃 칸이 빠지지 않았는가. 렌더러는 합류 뒤 화살표를 같은 이름의 마지막 칸에 붙인다 — 합류 뒤 후속이 일부 결과에만 해당하면 줄 순서가 아니라 합류 노드의 값 분기(`Clock.finishRun.issued --> Mailer.send`)로 썼는지 본다([합류와 재호출 구분](job-flow-diagram-guide.md#합류와-재호출-구분)). 앞 행에 끼어든 칸을 다음 줄의 출발점으로 쓰면 다른 칸에 붙을 수 있다.
+  - 화살표 머리가 의도한 칸에 닿고, 타깃 칸이 빠지지 않았는가. 렌더러는 합류 뒤 화살표를 같은 이름의 마지막 칸에 붙인다 — 합류 뒤 후속이 일부 결과에만 해당하면 줄 순서가 아니라 합류 노드의 값 분기(`Boundary.finish.ready --> Client.send`)로 썼는지 본다([합류와 재호출 구분](job-flow-diagram-guide.md#합류와-재호출-구분)). 앞 행에 끼어든 칸을 다음 줄의 출발점으로 쓰면 다른 칸에 붙을 수 있다.
 - 끊겨 다시 그려지면 [줄 순서 규칙](job-flow-diagram-guide.md#줄-순서-규칙)대로 줄을 옮긴다. 다른 계약이 한 노드 이름을 쓰고 있으면 이름을 나눈다. 선이 교차하거나 좌우 가지가 만나면 [선 교차 줄이기](job-flow-diagram-guide.md#선-교차-줄이기)대로 줄 순서·열 순서를 고친다 — 줄 순서가 뜻인 그림(기동 순서 등)은 열 순서로만 푼다. 그 밖에 흐트러지면 [렌더러 배치 특성](job-flow-diagram-guide.md#렌더러-배치-특성)의 `Object:` 순서 규칙을 따르고, 그래도 안 되면 블록을 나눈다(5.1 제외 — [§4.2](#42-전체-한-장과-시나리오-분할)대로 순서를 손으로 고르고 읽는 법에 적는다). 렌더러가 없으면 정적 검토라고 쓴다. SVG 생성 성공을 화면 표시 성공으로 쓰지 않는다.
 
 **의미 검토** — 작성자와 다른 검토자가 사실(수치·경로·단정)과 구조(이 양식·DSL 의미)를 나눠 본다. 필수 결함을 고친 뒤 영향 부분만 다시 검증한다([비판 → 개선 → 평가](../prompts/multi-agent-task-prompt.md#비판--개선--평가)·[교차 검증과 종료](system-design-framework.md#교차-검증과-종료)).

@@ -40,7 +40,7 @@
 
 상위 바깥 노드 ↔ 이 경계의 클라이언트는 AS-IS와 같다 — `FormDir.read` = `FormLoader.load`, `UsageApi.fetch` = `UsageClient.fetchAll`(고객마다 `usageHttp.postUsage` 1회), `Archive.file` = `ArchiveClient.file`, `Clock.acceptReply` = `ReplyClient.send`.
 
-**표기** 유지 노드는 AS-IS 상세의 심볼 이름을 그대로 쓰고 새 노드에는 표에 `(제안)`을 단다. 클래스가 없는 모듈 객체(`checks`·`usageHttp`·`lines`)는 [AS-IS §3](../../as-is/details/invoice-maker.md#3-내부-job-flow--드릴다운) 표기의 구획 표를 따르고, `lines`에 새 심볼 `checkLine`(제안)만 더한다. `단계 #`은 [AS-IS 3.1](../../as-is/details/invoice-maker.md#31-생성-단계와-시간-한도)의 생성 단계 0~7이다. 네 그림은 jobflow 렌더러 사본으로 SVG → PNG를 만들어 눈으로 확인했다([상위 §9.2](../system-design-to-be.md#92-검증)). 열지 않은 것: `ReplyClient.send`의 재시도 반복(단순 워커 — §6 표가 원본), `InvoiceRenderer.render`(순수 변환).
+**표기** 유지 노드는 AS-IS 상세의 심볼 이름을 그대로 쓰고 새 노드에는 표에 `(제안)`을 단다. 클래스가 없는 모듈 객체(`checks`·`usageHttp`·`lines`)는 [AS-IS §3](../../as-is/details/invoice-maker.md#3-내부-job-flow--드릴다운) 표기의 구획 표를 따르고, `lines`에 새 심볼 `checkLine`(제안)만 더한다. `단계 #`은 [AS-IS 3.1](../../as-is/details/invoice-maker.md#31-생성-단계와-시간-한도)의 생성 단계 0~7이다. 네 그림의 이전 렌더 확인 기록은 [상위 §9.2](../system-design-to-be.md#92-검증)에 있다. 열지 않은 것: `ReplyClient.send`의 재시도 반복(단순 워커 — §6 표가 원본), `InvoiceRenderer.render`(순수 변환).
 
 ### JF-1 라우트 진입 — MakeRoutes
 
@@ -195,12 +195,12 @@ usageHttp.postUsage.rejected --> lines.checkLine
 
 | 항목 | 기본값 | 설정 키 | 위치 |
 |---|---|---|---|
-| 회신 | AS-IS 5s 1회 → 시도당 3s, 3회 더(대기 1·4·10s) — 최악 27초 | `MAKER_REPLY_TIMEOUT_MS`(값 5000 → 3000), `MAKER_REPLY_WAITS_MS`(제안 — `1000,4000,10000`) | `ReplyClient.send` |
+| 회신 | AS-IS 5s 1회 → 시도당 3s, 3회 더(대기 1·4·10s) — 설정한 시도·대기 합 27초 | `MAKER_REPLY_TIMEOUT_MS`(값 5000 → 3000), `MAKER_REPLY_WAITS_MS`(제안 — `1000,4000,10000`) | `ReplyClient.send` |
 | 중지 확인 지점 | 조회 중단, 보관 직전 확인 | — | `WorkRegistry`(제안) |
 | `needs-check` 표시 | 이행 중 `off` → 시계 배포 뒤 `on` | `MAKER_NEEDS_CHECK`(제안) | `lines`, `InvoiceRenderer` |
 | 조회·렌더·보관 한도 | 90s·45s·15s — 합 150s(유지) | AS-IS와 같음 | [AS-IS 상세 §6](../../as-is/details/invoice-maker.md#6-실패-경계) |
 
-- **다시 보내는 조건** 타임아웃·5xx·연결 실패만 다시 보낸다. 4xx는 같은 요청이 또 실패하므로 보내지 않는다. 모든 시도의 키가 같다. 최악 27초 = 시도 4번 × 3s + 대기 1+4+10s. 시도당 시간을 줄인 것은 이 창을 시계의 재시도 첫 대기(30s)보다 짧게 두려는 것이다.
+- **다시 보내는 조건** 타임아웃·5xx·연결 실패만 다시 보낸다. 4xx는 같은 요청이 또 실패하므로 보내지 않는다. 모든 시도의 키가 같다. 설정한 예산은 시도 4번 × 3s + 대기 1+4+10s = 27초다. 스케줄링·서버 처리 지연을 포함한 종결 기한이나 수신 멱등을 보장하는 값은 아니다. `R-03`의 40초 종결과 중복 `failed` 처리는 [상위 §9.5](../system-design-to-be.md#95-미확정필요-입력)의 미확정 사항이다.
 - **부분 실패 규칙** 조회 실패 = `needs-check`로 계속(`C-04` — AS-IS는 0원), 렌더 실패 = `failed`, 보관 실패 = `spare/` + `failed`, 회신 실패 = 다시 보낸 뒤 로그(`C-03`), 중지 = 기록만 남기고 끝(`C-01`).
 - **최후 방어** 회신 네 번이 모두 실패하면 로그 한 줄을 남기고 끝난다. 시계의 행은 생존 확인이 `peek`로 거둔다([상위 §5.5](../system-design-to-be.md#55-실행-종결과-발송)).
 
@@ -210,7 +210,7 @@ usageHttp.postUsage.rejected --> lines.checkLine
 |---|---|---|---|
 | 중지 경쟁 | `stop` × 실행 단계 — 조회 중, 렌더 중, `enterArchive` 직후 | 가짜 usage-api로 조회를 붙잡아 두고 중지 → `ArchiveClient.file` 호출 0회, `enterArchive` 뒤 중지 → 409 `TOO_LATE` | 생성기 중지 작업 |
 | 중지 멱등·되살림 | 두 번 중지, `failed` 실행 중지, 중지 뒤 같은 runId `make`, 중지 기록 뒤 `make`, 중지 뒤 렌더 예외 | 200 `was:'stopped'`, 409 `STOPPED` 둘, 레코드가 `stopped`로 남는다 | 생성기 중지 작업 |
-| 회신 장애 주입 | `ReplyClient.send` | 가짜 시계가 타임아웃, 5xx 3회, 4회 모두 실패를 돌려준다 → 간격 1·4·10s, 같은 키, 27초 안, 4xx는 다시 보내지 않음 | 회신 재시도 작업 |
+| 회신 장애 주입 | `ReplyClient.send` | 가짜 시계가 타임아웃, 5xx 3회, 4회 모두 실패를 돌려준다 → 가상 시계 기준 시도·대기 합 27초, 간격 1·4·10s, 같은 키, 4xx는 다시 보내지 않음 | 회신 재시도 작업 |
 | 확인 필요 항목 | 고객 3명 중 1명 조회 실패 | 문서 `확인 필요` 1, 합계에서 제외, `heldLines` 1, 레코드 `issued`. `usage-client.test.ts`의 「0원 항목」 단언은 `MAKER_NEEDS_CHECK=off`일 때만 남긴다 | 조회 실패 표시 작업 |
 | 옛 시계 호환 | 새 필드가 든 회신 | AS-IS 4필드만 읽는 가짜 수신자가 204를 돌려준다 | 배포 전 |
 
@@ -223,7 +223,7 @@ usageHttp.postUsage.rejected --> lines.checkLine
 | `C-04` | 미확정 | 모든 고객의 조회가 실패한 청구서를 `issued` + 보류로 둘지, `failed`로 돌려 시계 재시도(30·60·120s)에 맡길지 | `R-04` | 잠정 `issued` + 보류. usage-api가 잠시 멈추면 그동안 발행한 청구서가 모두 보류된다 — 운영 부담이 크면 「전부 실패 = `failed`」로 바꾼다 |
 | `C-04` | 미확정 | 회신 `outcome`을 `issued`로 둘지 새 값(`held`)으로 둘지 | `R-04` | 잠정 `issued` + `heldLines` — 새 값은 시계의 상태 기계와 재시도 판정을 함께 바꾸므로 피한다 |
 | `C-01` | 위험 | 조회 중단이 상대의 SQL까지 멈추지는 않는다 | §5 | 생성기 쪽은 바로 멈춘다. 상대 부하는 usage-api 계약 확인이 필요하다 |
-| `C-03`·`D-02` | 위험 | 다시 보내는 동안(최악 27초) 그 실행이 끝나지 않는다 | §6 | AS-IS에 동시 `work` 상한이 없어(AS-IS `JF-2A`) 자원을 그만큼 오래 잡을 뿐이다. 시계 쪽 중복 위험은 [시계 상세 §8](billing-clock.md#8-위험미확정) |
+| `C-03`·`D-02` | 위험 | 재시도 중 실행의 자원을 유지한다(설정 합 27초) | §6 | AS-IS에 동시 `work` 상한이 없어(AS-IS `JF-2A`) 재시도 중 자원 사용이 늘 수 있다. 27초는 설정한 시도·대기 합이며 실제 완료 상한은 아니다. 시계 쪽 중복 위험은 [시계 상세 §8](billing-clock.md#8-위험미확정) |
 
 ## 9. 미확인·한계
 

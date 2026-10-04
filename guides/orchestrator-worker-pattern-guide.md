@@ -41,13 +41,13 @@ Worker가 결과를 반환하는 것은 상위를 참조하는 것이 아니다.
 
 도움 요청 후 결과를 쓰지 않는 경우와 반환값으로 내부 처리를 이어가는 경우는 [Method-R의 분업 예제](./method-R.md#21-상위-오케스트레이터가-도움-요청과-결과를-연결한다)를 참고한다. 요청 이벤트의 반환 표기는 [Job Flow 가이드](./job-flow-diagram-guide.md#이벤트가-반환값을-갖는-경우)를 따른다.
 
-조율 방식(Orchestration/Choreography), 프로세스 경계, 동기·비동기 전송은 별개로 결정한다. Orchestrator도 메시지를 통해 비동기로 조율할 수 있다. [Method-R](./method-R.md)에서 설계 단계별로 이 결정을 기록한다.
+조율 방식·프로세스 경계·동기/비동기 전송은 [Method-R의 선택 기준](./method-R.md#24-조율-방식과-전송-방식은-별도로-정한다)에 따라 별개로 결정한다.
 
 ## 4. 상태와 실패 책임
 
 * Worker는 자신의 비즈니스 상태를 소유한다. 조율자는 현재 단계, 실행 식별자 등 워크플로 상태를 소유하며 Worker의 내부 상태를 직접 수정하지 않는다.
 * Gateway는 외부 기술 오류를 계약에서 정한 오류로 변환한다. 업무상 거절과 일시적인 통신 실패를 구별한다.
-* 취소와 타임아웃은 호출 경로에 전달한다. 재시도는 정한 계층 한 곳에서 수행하며, 부작용이 있는 호출은 멱등성·중복 방지 조건을 먼저 확인한다.
+* 취소·타임아웃을 호출 경로에 전달하고, 재시도·중복 방지는 [상태와 실패의 소유권](./module-boundary-guide.md#5-상태데이터와-실패의-소유권)을 따른다.
 * 여러 단계가 성공한 뒤 실패하면 조율자가 후속 정책을 결정한다. 로컬 트랜잭션의 rollback과 이미 외부에 반영된 효과의 보상을 구분한다. 보상 자체도 실패할 수 있다.
 * 이벤트에는 필요한 실행 식별자를 포함한다. 중복·지연 이벤트가 다른 실행을 완료시키거나 취소된 실행을 되살리지 않게 한다.
 
@@ -66,90 +66,7 @@ Sub-Orchestrator는 내부에 독립 책임과 별도 조율 규칙이 생길 �
 
 ## 6. C# 예제: 가져오기 흐름
 
-파싱 Worker는 저장 방식을 모르고, 저장 Port는 파싱 과정을 모른다. 조율자만 둘의 결과를 연결한다. 저장 작업을 그대로 감싸는 별도 업로드 Worker는 만들지 않는다. 아래 타입은 함께 컴파일할 수 있으며, 실제 파일 배치는 [프로젝트 구조 가이드](./project-structure-guide.md)에 따라 책임 단위로 정한다.
-
-```csharp
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-
-public abstract record ParseResult
-{
-    public sealed record Valid(IReadOnlyList<string> Rows) : ParseResult;
-    public sealed record Invalid(string Code) : ParseResult;
-}
-
-public sealed class FileParserWorker
-{
-    public ParseResult Parse(string text)
-    {
-        var rows = text.Split('\n')
-            .Select(row => row.Trim())
-            .Where(row => row.Length > 0)
-            .ToArray();
-
-        if (rows.Length == 0)
-            return new ParseResult.Invalid("empty_input");
-
-        return new ParseResult.Valid(Array.AsReadOnly(rows));
-    }
-}
-
-public interface IImportStore
-{
-    Task SaveAsync(IReadOnlyList<string> rows, CancellationToken cancellationToken);
-}
-
-public sealed class ImportStoreUnavailableException : Exception
-{
-    public ImportStoreUnavailableException(string message) : base(message) { }
-}
-
-public abstract record ImportResult
-{
-    public sealed record Completed(int Count) : ImportResult;
-    public sealed record Rejected(string Code) : ImportResult;
-    public sealed record Unavailable : ImportResult;
-}
-
-public sealed class ImportOrchestrator
-{
-    private readonly FileParserWorker _parser;
-    private readonly IImportStore _store;
-
-    public ImportOrchestrator(FileParserWorker parser, IImportStore store)
-    {
-        _parser = parser;
-        _store = store;
-    }
-
-    public async Task<ImportResult> RunAsync(
-        string text, CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        var parsed = _parser.Parse(text);
-        if (parsed is ParseResult.Invalid invalid)
-            return new ImportResult.Rejected(invalid.Code);
-
-        var valid = (ParseResult.Valid)parsed;
-        try
-        {
-            await _store.SaveAsync(valid.Rows, cancellationToken);
-            return new ImportResult.Completed(valid.Rows.Count);
-        }
-        catch (ImportStoreUnavailableException)
-        {
-            return new ImportResult.Unavailable();
-        }
-    }
-}
-```
-
-예제의 `IImportStore`는 **한 번의 호출에서 전체 행을 저장하거나 전혀 반영하지 않는 저장소**를 전제한다. Gateway 구현은 이 계약을 만족해야 한다. `Unavailable`은 확정된 미반영 실패에만 사용하며, 원격 저장 성공 여부를 모르는 경우는 실제 계약에 별도 결과와 조회·복구 정책을 추가한다. 예제는 자동 재시도를 하지 않는다. 반복 요청을 허용하는 제품이라면 저장 전에 실행 ID와 멱등성 계약을 추가한다.
-
-예상한 저장 불가만 결과로 변환하고 취소와 예상 밖 결함은 호출자에게 전달한다. 실제 Gateway는 좁은 저장 계약을 구현하며 연결·트랜잭션을 관리한다. 입력 형식이나 DB 구현을 바꿀 때 이 예제에 없는 요구사항까지 추정하지 않는다.
+[가져오기 예제](./examples/orchestrator-worker-import-example.md)에서 파싱 Worker·저장 Port·조율자를 함께 컴파일할 수 있는 코드와 저장 원자성·오류·취소 계약을 확인한다. C# 구현 예시가 필요할 때만 읽는다.
 
 ## 7. 검증 기준
 
