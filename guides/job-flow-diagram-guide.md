@@ -4,7 +4,7 @@
 
 한 시나리오에서 **누가 흐름을 조율하고 어떤 공개 계약으로 협력하는가**를 표현한다. 화살표 수나 객체 수를 줄이는 것보다, 다른 조각의 구현을 열지 않고 흐름을 설명할 수 있는지가 중요하다. 경계·계약·분해 중단 기준은 [module-boundary-guide.md](module-boundary-guide.md)를 따른다.
 
-먼저 헤더와 핵심 원칙을 읽고, 작업에 필요한 반환·분기·이벤트 예시만 선택한다. 아래 짧은 블록은 문법 조각이며, 실제 시나리오에는 헤더, 객체 목록, 트리거, 완료/실패 조건을 함께 적는다. 전체 시스템의 모든 흐름을 먼저 작성할 필요는 없다.
+먼저 [헤더](#헤더-키워드--orchestrator-vs-scope)와 해당 관점의 해석을 읽고, 필요한 반환·분기·이벤트 예시만 고른다. 짧은 블록은 문법 조각이다. 실제 시나리오에는 헤더·객체 목록·트리거·완료/실패 조건을 적되 전체 시스템의 흐름을 모두 작성할 필요는 없다.
 
 
 ## 헤더 키워드 — `orchestrator:` vs `scope:`
@@ -22,7 +22,7 @@ jobflow 다이어그램의 첫 줄은 **실제 조율자 또는 관찰 경계**�
 
 ### 문서 의미와 렌더러 지원
 
-`orchestrator:`와 `scope:`는 이 가이드 모음의 기존 Method-R 의미 표기다. [tools-camp-markdown-guide.md](tools-camp-markdown-guide.md)는 별도로 `master:` 헤더를 기술한다. 이 가이드 모음에는 대상 렌더러 소스가 포함되어 있지 않으므로 현재 제품 전체의 지원 여부를 이 문서만으로 단정하지 않는다. 별도로 확인한 tools.camp `d12f230` 스냅샷은 `master:`만 파싱하고 `orchestrator:`/`scope:`의 제어 의미를 해석하지 않는다. 단순 이름 헤더를 무시해도 관계 그림은 생성되므로 생성 성공을 헤더 지원으로 오해하지 않는다. 정확한 확인 범위는 [문법 레퍼런스의 구현 확인 기록](tools-camp-markdown-guide.md#확인한-구현-스냅샷)을 참고한다.
+`orchestrator:`·`scope:`는 이 가이드의 Method-R 의미 표기다. [tools.camp 구현 스냅샷](tools-camp-markdown-guide.md#확인한-구현-스냅샷)은 `master:`만 파싱하며 두 헤더의 제어 의미를 해석하지 않는다. 단순 이름 헤더를 무시해도 관계 그림은 생성되므로 생성 성공을 헤더 지원으로 해석하지 않는다. 이 가이드 모음에는 렌더러 소스가 없으며 현재 제품의 지원은 별도 확인한다.
 
 새 문서는 제어 주체에 맞게 `orchestrator:` 또는 `scope:`를 선택한다. 기존 `master:` 문서는 먼저 주변 설명과 코드에서 제어 주체를 확인한다. 렌더링을 위해 헤더를 바꿔야 한다면 대상 구현에서 지원을 확인하고 의미를 본문에 유지한다. 특히 `scope:`를 `master:`로 기계적으로 바꿔 중앙 조율자가 존재하는 것처럼 설명하지 않는다. 확인한 버전에서는 `Object:` 목록과 코드펜스 밖 조율자/경계 설명을 함께 제공해야 읽는 사람이 의미를 알 수 있다. 헤더만으로 구현의 의존성이나 실행 방식이 보장되지는 않는다.
 
@@ -344,35 +344,20 @@ Orders.getOrder.result --> Browser.showOrder
 
 > `orchestrator:` 다이어그램의 내부 협력 화살표는 **선언된 orchestrator가 연결하는 흐름**이다. 외부 요청의 진입·응답과 객체 안에서 발생한 이벤트는 그 경계 사실을 나타낸다. 하나의 블록 안에서 동일한 화살표를 워커끼리의 직접 호출이라는 뜻으로 바꾸지 않는다. `scope:`에는 이 축약 규칙을 적용하지 않는다.
 
-따라서 다이어그램을 읽을 때(그리고 코드로 구현할 때)는 다음 규칙을 지킨다.
+| 내부 협력 표기 | 선언된 orchestrator가 하는 일 |
+|---|---|
+| `A.Method --> B.Method` | A가 끝나면 B를 호출 |
+| `A.Method.result --> B.Method` | A의 반환값을 B의 입력으로 전달 |
+| `A.OnEvent --> B.Method` | A의 이벤트를 구독해 B를 호출 |
+| `A.Method.result --> Orchestrator.Method.result` | A의 값을 자기 호출자에게 반환. 이 전달이 중요할 때만 표시 |
 
-* `A.Method --> B.Method` 는 "orchestrator 가 A.Method 가 끝나면 B.Method 를 호출한다" 는 뜻.
-  실제 코드도 orchestrator 의 메서드 안에서 A → B 를 순차 호출하거나, A 의 이벤트를 구독해 B 를 부르는
-  형태가 된다 — **A 가 직접 B 를 호출하는 코드가 아니다**.
-* `A.Method.result --> B.Method` 는 "orchestrator 가 A.Method 의 반환값을 받아 B.Method 의 입력으로
-  넘긴다" 는 뜻. 마찬가지로 **A 가 직접 B 를 호출하는 게 아니다**. 코드 상으로는
-  `const r = await a.method(); await b.method(r);` 같이 orchestrator 의 메서드 안에서 결과가 전달되거나,
-  `a.OnDone += (r) => b.method(r)` 같이 orchestrator 가 이벤트로 잇는다.
-* `A.Method.result --> Orchestrator.Method.result` 는 "A 의 반환값이 곧 orchestrator 메서드의 반환값이 된다"
-  는 뜻. 마지막 산출물이 호출자에게 그대로 전달된다는 사실이 시나리오에 중요할 때만 선택해서 쓴다.
+앞 세 관계는 **A가 B를 직접 호출한다는 뜻이 아니다**. 조율자의 코드에서 호출·결과 전달·구독으로 연결한다.
 
-이 원칙의 따름정리:
-
-* 단계 사이마다 `X.result --> Orchestrator.Method` / `Orchestrator.Method --> Y` 식으로 orchestrator 로 명시적으로
-  되돌렸다 다시 내보내는 표기는 **중복**이다. 화살표가 이미 orchestrator 관점이므로, orchestrator 가 결과를
-  받아 다음 단계로 넘긴다는 사실은 `X.result --> Y` 한 줄로 충분히 표현된다.
-* 단계 사이에 orchestrator 가 **다른 메서드로 책임을 넘긴다거나(예: `OnStart` → `InitializeOrchestrator`),
-  결과값에 따라 분기한다거나, 결과를 가공해서 별도 메서드에서 후처리해야 할 때만** 명시적으로
-  `X.result --> Orchestrator.OtherMethod` 로 표기한다. 그 경우는 표기를 통해 "orchestrator 의 메서드 경계가
-  바뀐다" 는 정보를 전달한다.
+단순 결과 전달은 `X.result --> Y`로 충분하다. 실행 중인 조율자 메서드로 되돌렸다 다시 내보내지 않는다. 실제로 책임을 넘기거나 가공·분기를 별도 메서드에서 수행할 때만 `X.result --> Orchestrator.OtherMethod`로 그 경계를 표시한다.
 
 ## 표현 규칙
 
-아래 예시에서 `Orchestrator`는 orchestrator 객체를 의미한다.
-* `Orchestrator.Method --> B.Method`: orchestrator가 자신의 메서드에서 B를 직접 호출
-* `A.OnEvent --> B.Method`: orchestrator가 A의 이벤트를 B의 메서드에 구독 연결
-* `A.Method.result --> B.Method`: orchestrator가 A의 반환값을 받아 B에 입력으로 넘김
-  (A 가 B 를 직접 호출하는 게 아님)
+아래 `Orchestrator`는 선언된 조율자이며, 예시는 위 해석을 코드와 대응한다.
 
 ### 순차 호출
 
@@ -467,11 +452,7 @@ main() {
 
 ### 다른 객체의 결과를 caller 흐름에서 이어 쓰기
 
-caller 메서드가 다른 객체에게 무언가 요청하고, 그 결과를 바탕으로 처리를 이어가야 하는 경우가 있다.
-"caller 자신이 결과를 받아 계속 일한다" 가 의미상 맞지만, 다이어그램이 **orchestrator 관점**이기 때문에
-`B.result --> A.MethodName` 으로 적으면 `A.MethodName` 이 두 번 호출되는 것처럼 오독된다
-(§"주의 — 표기 함정"). orchestrator 는 객체 내부의 일을 알 수 없으므로, 표기 차원에서 두 가지 케이스로
-나눠 표현한다.
+다른 객체의 결과를 받아 계속 처리할 때 `B.result --> A.MethodName`으로 실행 중인 메서드에 되돌리면 재호출로 읽힌다([표기 함정](#결과를-다음-단계로-orchestrator-관점의-기본-표기)). 조율자에게 보이는 메서드 경계에 따라 두 경우를 구분한다.
 
 **Case 1 — 다른 메서드로 결과를 위임**
 
@@ -563,12 +544,7 @@ B.Step2.result --> C.Step3
 C.Step3.result --> Orchestrator.MethodName.result
 ```
 
-* 핵심 원칙의 직접적 적용. orchestrator 가 `A.Step1` 의 반환값을 받아 `B.Step2` 에 넣고, `B.Step2` 의 반환값을
-  받아 `C.Step3` 에 넣은 뒤, 마지막 산출물을 자기 메서드의 반환값으로 흘려보낸다는 뜻.
-* `A.Step1.result --> B.Step2` 가 **A 가 직접 B 를 호출한다는 뜻이 아님**을 다시 강조한다. 결과를
-  넘기는 주체는 orchestrator 다. A 와 B 는 서로를 모른다.
-* LLM 파이프라인, ETL, 컴파일러 패스, 빌드 단계 등에서 단계 사이에 값을 전달할 때 이 표기를 쓴다.
-  위 예시는 최종 산출물을 호출자에게 돌려주는 관계까지 보여 주며, 그 관계가 예제 목적에 없으면 마지막 줄은 생략한다.
+orchestrator가 각 단계의 결과를 다음 입력으로 전달하고 마지막 값을 반환한다. LLM 파이프라인·ETL·컴파일러 패스·빌드 단계 등에 쓰며, 최종 반환을 보여 줄 필요가 없으면 마지막 줄은 생략한다.
 
 orchestrator 코드 예시:
 ```
@@ -580,24 +556,12 @@ MethodName() {
 }
 ```
 
-> **주의 — 표기 함정 (가장 자주 발생하는 안티패턴)**: `A.Step1 --> A`, `A --> B.Step2`,
-> `B.Step2.result --> A`, `A --> C.Step3`, `C.Step3.result --> A` … 식으로 단계마다 orchestrator 로
-> 한 번 돌아갔다 다시 내보내는 round-trip 을 반복하지 말 것. 화살표는 이미 orchestrator 관점이므로
-> 그 round-trip 은 표기 안에 묵시적으로 포함되어 있다.
+> **주의 — 표기 함정**: 단순 결과 전달마다 실행 중인 orchestrator 메서드로 돌아가는 round-trip은 한 번의 진입을 여러 호출처럼 보이게 해 호출 횟수·동시성을 오해하게 한다.
 >
-> **이 안티패턴의 핵심 실패 모드**: orchestrator 의 동일 메서드가 화살표의 타겟으로 여러 번 등장하면
-> (예: `B.result --> Orchestrator.Run` 뒤에 다시 `Orchestrator.Run --> C.Step3`), 그 메서드가
-> **실제로는 한 번만 진입했음에도 마치 여러 번 호출되는 것처럼** 오독된다. 호출 횟수, 진입점,
-> 동시성에 대한 잘못된 멘탈모델로 직결되므로 가장 우선해서 피해야 할 표기 실수이다.
->
-> 검증 휴리스틱 — "한 다이어그램 안에서 같은 `Orchestrator.Method` 가 화살표 **타겟**(`--> Orchestrator.Method`)
-> 으로 두 번 이상 나타나면 의심하라". 그 중 한 번이라도 단순히 결과를 받아 곧바로 다음 단계로
-> 내보내는 용도라면 round-trip 안티패턴이다. **그냥 직접 chaining 으로 바꿔라**:
+> 같은 `Orchestrator.Method`가 화살표 타깃으로 두 번 이상 나오면 확인한다. 단순히 결과를 받아 다음 단계로 넘기는 줄이면 직접 연결한다:
 > `B.result --> Orchestrator.Method` + `Orchestrator.Method --> C.Step3` → `B.result --> C.Step3`.
 >
-> 단계 사이에 **진짜로** orchestrator 의 가공·분기·메서드 책임 전환이 들어갈 때만 `X.result --> Orchestrator.X`
-> 또는 `X.result --> Orchestrator.OtherMethod` 표기를 쓴다 (앞의 "반환값을 같은 객체의 다른 메서드로 위임" 패턴 참조).
-> `X.result --> Orchestrator.X`를 단순히 실행 중인 메서드로 돌아와 계속한다는 뜻으로 쓰지 않는다. 책임이 실제로 나뉘어 있으면 다른 메서드명을 쓰고, 같은 호출의 최종 반환을 보여 줄 필요가 있을 때만 `.result`로 연결한다. 실제 재시도·재호출을 나타내는 경우에는 조건·횟수·중복 효과 처리와 실제 코드 근거를 본문에 밝힌다. 다이어그램을 맞추기 위해 코드에 의미 없는 메서드를 추가하지 않는다.
+> 실제 가공·분기·책임 전환은 그 일을 하는 다른 메서드로 연결하고, 같은 호출의 최종 반환은 `.result`로 표시한다. 실제 재시도·재호출이면 조건·횟수·중복 효과 처리와 코드 근거를 본문에 적는다. 표기에 맞추려고 의미 없는 메서드를 추가하지 않는다.
 >
 > 잘못된 예 — 단순 3 단계를 매 단계 round-trip 으로 표기:
 > ```jobflow

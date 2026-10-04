@@ -10,25 +10,9 @@
 
 ## 핵심 관점
 
-`jobflow`는 **객체/조각의 실행 흐름을 표현하는 독자 다이어그램**이다. 흐름을 검토하며 책임을 나눌 수 있지만, 단계마다 반드시 별도 모듈을 만들라는 뜻은 아니다.
+`jobflow`는 **객체/조각의 실행 흐름을 표현하는 독자 다이어그램**이며, 단계마다 모듈을 만들라는 설계 패턴은 아니다. 조율자가 연결하는 협력과 독립 서비스의 요청·응답·이벤트를 표현하며 필요한 내부만 확대한다.
 
-`jobflow`는 조율자가 워커를 연결하는 흐름뿐 아니라 독립 서비스의 요청·응답과 이벤트 전달도 표현한다. 관점과 화살표의 해석은 [Job Flow 가이드](job-flow-diagram-guide.md), 설계 수준별 협력·통신 방식은 [Method-R](method-R.md)을 따른다. 복잡한 조각의 내부만 별도 흐름으로 확대할 수 있어 재귀적 분해와도 잘 맞는다.
-
-반면 다른 아키텍처 패턴들은 시스템을 나누는 기준이 다르다.
-
-| 기준 | 대표 패턴 |
-|---|---|
-| 실행 흐름 | Pipeline, Saga (`jobflow`로 표현) |
-| 역할 계층 | Layered Architecture |
-| 의존성 방향 | Clean Architecture, Hexagonal Architecture |
-| 업무 의미 | DDD, Bounded Context |
-| 재사용 가능한 부품 | Component-Based Architecture |
-| 이벤트 | Event-Driven Architecture |
-| 상태 변화 | State Machine |
-| 요청 단위 | Command / Handler, CQRS |
-| 독립 실행 단위 | Actor Model, Microservices |
-| 코어와 확장 | Microkernel / Plugin Architecture |
-| 화면/사용자 흐름 | 사용자 시나리오 (`navigation`으로 표현) |
+화살표는 [Job Flow의 헤더 관점](job-flow-diagram-guide.md#헤더-키워드--orchestrator-vs-scope), 협력·통신 방식은 [Method-R](method-R.md)을 따른다. 패턴별 분해 기준은 다음 표에서 비교한다.
 
 ---
 
@@ -233,7 +217,7 @@ Validator.Validate.result --> Saver.Save
 작성 가이드:
 
 * 각 단계는 입력을 받아 출력으로 변환하는 단일 책임을 가진다.
-* 결과의 선택·연결·배치는 [Job Flow 가이드](job-flow-diagram-guide.md)를 따른다.
+* 결과의 [선택](job-flow-diagram-guide.md#표시할-결과-선택)·[배치](job-flow-diagram-guide.md#메서드와-결과의-배치)는 전용 가이드를 따른다.
 * 특정 단계의 내부 협력이 복잡하면 그 단계만 별도 `jobflow`로 확대한다. 단순 단계에 하위 조율자를 의무적으로 만들지 않는다.
 
 ---
@@ -533,21 +517,9 @@ LoginForm --> (/signin)
 
 ## jobflow와 특히 잘 맞는 패턴
 
-`jobflow`는 실행 흐름을 보여주는 표현 방식이므로 다음 패턴과 특히 잘 맞다.
+Pipeline의 결과 전달, Event-Driven의 구독, State Machine의 전이 후 작업, Command / Handler의 요청 처리, Saga의 보상 흐름은 `jobflow`로 설명하기 좋다. 구체 예시는 [패턴별 작성 샘플](#패턴별-작성-샘플)에서 필요한 것만 고른다.
 
-| 패턴 | 잘 맞는 이유 |
-|---|---|
-| Pipeline | 단계별 결과 전달이 `A.result --> B`와 직접 대응한다. |
-| Event-Driven | 이벤트 구독과 후속 작업을 `A.OnEvent --> B.Method`로 표현한다. |
-| State Machine | 특정 상태 전이 이후 실행되는 작업 흐름을 보여준다. |
-| Command / Handler | 요청 하나가 어떤 Handler로 라우팅되는지 간단히 표현한다. |
-| Saga | 성공 경로와 실패 보상 경로를 한 흐름에서 표현한다. |
-
-주의할 점:
-
-* `jobflow`는 전체 아키텍처 패턴 자체라기보다 **흐름을 설명하고 세분화하는 설계 표현 방식**이다.
-* DDD, Clean Architecture, Layered Architecture로 큰 구조를 잡은 뒤, 중요한 유스케이스를 `jobflow`로 풀어 쓰는 방식이 가장 자연스럽다.
-* 화면 중심 시나리오는 `navigation`, 객체/메서드 중심 시나리오는 `jobflow`, 상태 중심 로직은 `state`를 우선 사용하고 Mermaid `stateDiagram-v2`는 별도 관점이 필요할 때 보완한다.
+DDD·Clean·Layered 등의 정적 구조에 중요한 유스케이스 흐름을 보완할 수 있다. 화면·상태처럼 관점이 달라지면 [다이어그램 선택 규칙](#다이어그램-선택-규칙)을 따른다.
 
 ---
 
@@ -563,14 +535,7 @@ DDD로 큰 업무 경계를 나눈다
 → 비동기 후속 처리는 Event-Driven으로 연결한다
 ```
 
-아래는 필요한 항목만 고르는 탐색 순서다. 각 항목의 결과는 해당 경계의 계약과 링크로 연결하고 불필요한 내부 다이어그램은 생략한다.
-
-1. **큰 경계**: DDD Bounded Context 또는 Microservices/Modular Monolith 다이어그램을 먼저 그린다.
-2. **내부 구조**: 각 Context 내부를 Clean Architecture 또는 Layered Architecture로 정리한다.
-3. **요청 단위**: 주요 유스케이스를 Command/Handler로 나눈다.
-4. **실행 흐름**: 복잡한 유스케이스는 `jobflow`로 단계별 호출, 이벤트, 반환값을 표현한다.
-5. **상태 변화**: 상태가 핵심이면 State Machine을 별도 다이어그램으로 분리한다.
-6. **화면 흐름**: 사용자 화면 이동과 그 판단에 필요한 API/처리는 `navigation`으로 표현한다.
+큰 업무·배포 경계에서 내부 구조, 요청 단위, 실행 흐름 순으로 필요한 관점만 연다. 상태가 핵심이면 State Machine, 화면 이동이면 `navigation`을 추가한다. 각 결과는 해당 경계의 계약과 링크로 연결한다.
 
 ---
 

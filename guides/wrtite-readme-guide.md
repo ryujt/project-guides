@@ -50,13 +50,10 @@ README는 프로젝트의 목적, 실행 방법, 책임 모듈과 상세 문서�
 | 모듈의 책임·계약·의존·상태 소유권 | [module-boundary-guide](module-boundary-guide.md) |
 | 전체 구조와 설명의 상세 수준 | [system-flow-document-guide](system-flow-document-guide.md) |
 | 조율자와 Worker의 역할 | [orchestrator-worker-pattern-guide](orchestrator-worker-pattern-guide.md) |
-| 객체 호출·이벤트 | [job-flow-diagram-guide](job-flow-diagram-guide.md), `jobflow` |
-| 화면 이동과 그 판단에 필요한 API·처리 | [navigation-diagram-guide](navigation-diagram-guide.md), `navigation` |
-| 상태 전이 | [state-diagram-guide](state-diagram-guide.md), `state` |
-| 화면 배치 | [screen-layout-guide](screen-layout-guide.md), `layout` |
+| 다이어그램 관점·DSL 선택 | [문법 기준](system-design-framework.md#다이어그램의-문법-기준) |
 | 소스 폴더와 코드 관례 | [project-structure-guide](project-structure-guide.md), [code-structure-guidelines](code-structure-guidelines.md) |
 
-화면 이동, 일반 처리 순서, 상태 전이는 서로 다른 관점이다. 내부 로직이라는 이유만으로 모두 `state`로 작성하지 않는다. 지정 DSL은 그대로 유지하고 시스템 구성·의존 관계는 Mermaid로 보완한다.
+화면 이동·처리 순서·상태 전이를 구분하고 필요한 관점만 링크한다.
 
 ## 완료 기준
 

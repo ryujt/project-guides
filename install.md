@@ -6,7 +6,7 @@
 
 ### 방법 A — Claude Code에서 (권장)
 
-이 저장소(`project-guides`)를 Claude Code로 연 뒤 입력한다.
+문서가 있는 저장소를 Claude Code로 연 뒤 입력한다.
 
 ```
 /install-guides
@@ -38,7 +38,7 @@ bash installer/install.sh
 | `/multi-agent-task` | 여러 전문 에이전트(Architect·Critic·Developer·Tester) 협업 작업 |
 | `/ux-ui-improvement` | 리서치·벤치마킹 기반 UX/UI 개선 설계 |
 | `/verify-first-implementation` | 설계서·요구사항 구현(작은 단위·설계 가정 검증 → 재사용 단위 확정 → 조립) |
-| `/comprehensive-test` | 통합 품질 검증(계측·테스트·버그 수정·UX 리뷰 반복) |
+| `/comprehensive-test` | 위험에 맞는 검증·진단·결함 수정 |
 | `/site-design` | 사이트 전체 설계 문서 생성 |
 
 ### 가이드 인덱스
@@ -47,7 +47,7 @@ bash installer/install.sh
 |---|---|
 | `/project-guides` | README 트리거 표 기준으로 상황에 맞는 가이드 선택·적용 |
 | `/project-guides state-diagram` | 이름이 일치하는 가이드(예: state-diagram-guide)를 읽고 적용 |
-| `/project-guides detailed-logging` | 상세 로깅 작성·분석 중 보강·7일 보존 가이드 적용 |
+| `/project-guides detailed-logging` | 상세 로깅 작성·보강·보존 가이드 적용 |
 | `/project-guides socket-server-stability` | 소켓 서버 안정성 계약·결함 주입·장시간 검증 가이드 적용 |
 
 `~/.claude/skills/project-guides/` 에 `guides/`·`prompts/`·`README.md` 전체 사본이 함께 설치되며, 각 프롬프트 스킬은 이 사본을 참조한다. 가이드 문서(method-R, PRD, 다이어그램 DSL 등)는 별도 명령 없이도 대화 중 관련 주제가 나오면 Claude가 인덱스 스킬을 통해 자동으로 참조할 수 있다.
