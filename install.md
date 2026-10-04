@@ -37,6 +37,7 @@ bash installer/install.sh
 | `/jobflow-walkthrough` | jobflow를 객체·계약·대표 시나리오와 연결해 해설 |
 | `/multi-agent-task` | 여러 전문 에이전트(Architect·Critic·Developer·Tester) 협업 작업 |
 | `/ux-ui-improvement` | 리서치·벤치마킹 기반 UX/UI 개선 설계 |
+| `/verify-first-implementation` | 설계서·요구사항 구현(작은 단위·설계 가정 검증 → 재사용 단위 확정 → 조립) |
 | `/comprehensive-test` | 통합 품질 검증(계측·테스트·버그 수정·UX 리뷰 반복) |
 | `/site-design` | 사이트 전체 설계 문서 생성 |
 
@@ -62,6 +63,7 @@ bash installer/install.sh
 ```
 /system-design-as-is
 /feature-design 주문 취소 기능을 추가하고 환불 처리와 연동
+/verify-first-implementation docs/design/<DATE>/to-be 설계서를 구현
 /project-guides prd
 ```
 

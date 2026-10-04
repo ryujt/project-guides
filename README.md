@@ -28,10 +28,13 @@
 | 화면·객체의 상태 전이 작성 | [frontend-state-diagram-prompt](prompts/frontend-state-diagram-prompt.md) | state, 해당 상태의 소유자·전이 조건 |
 | jobflow를 실제 시나리오로 해설·검토 | [jobflow-walkthrough-prompt](prompts/jobflow-walkthrough-prompt.md) | jobflow, 등장 객체·계약의 실제 근거; 원문을 보존한 연결·책임 검토와 개선안 |
 | UX/UI 분석과 개선 | [ux-ui-improvement-prompt](prompts/ux-ui-improvement-prompt.md) | 대상 사용자 흐름, 필요한 비교 조사 |
+| 설계서·요구사항으로 구현 | [verify-first-implementation-prompt](prompts/verify-first-implementation-prompt.md) | 설계서의 작업 순서·검증 계획·미확정, 쓸 수 있는 실행 환경과 권한; 작은 단위 검증 → 재사용 단위 확정 → 조립 |
 | 테스트와 결함 수정 | [comprehensive-test-prompt](prompts/comprehensive-test-prompt.md) | 변경 위험과 실제 실행 가능한 검증 |
 | 여러 에이전트의 설계·비판·구현·평가 | [multi-agent-task-prompt](prompts/multi-agent-task-prompt.md) | 독립 작업 범위, 공유 계약, 역할별 모델·비용 |
 
 멀티 에이전트 프롬프트는 Architect·Critic·Developer·Tester의 상호 검토와 용도별 모델 배정을 지원한다. 상위·중위·하위 등급은 작업 난이도와 도구의 실제 지원을 기준으로 정하고, 모델 선택이 불가능한 환경에서는 가능한 역할 분리와 검토를 수행한다.
+
+검증 우선 구현 프롬프트는 설계서나 요구사항을 구현할 때의 순서를 정한다. 설계가 기대는 가정과 작은 단위를 먼저 실행으로 검증하고, 통과한 단위를 재사용 단위로 확정한 뒤 조립한다. 멀티 에이전트 프롬프트와 함께 쓰면 역할·검토는 멀티 에이전트 프롬프트가, 순서·증거 수준·권한 규칙은 검증 우선 구현 프롬프트가 정하고, 완료는 두 프롬프트의 완료 기준을 모두 채워야 한다.
 
 ## 주제별 가이드
 
@@ -92,9 +95,9 @@ AS-IS·TO-BE 설계 문서를 쓸 때 함께 보는 자료:
 
 | 상황 | 진행 순서 |
 | --- | --- |
-| 신규 프로젝트 | 목표·수용 기준 → to-be 신규 설계(AS-IS 없이 시작) → 필요한 설계 관점·PRD → 구현 → 계약·통합 검증 |
-| 기존 기능 변경 | feature-design → 대상 계약·소비자 조사 → 변경·검증; 전체 설계는 영향이 실제로 커질 때 |
-| 구조 개선 | as-is 근거 확인 → to-be 경계·호환성 설계 → 단계적 변경 → 소비자 회귀 검증 |
+| 신규 프로젝트 | 목표·수용 기준 → to-be 신규 설계(AS-IS 없이 시작) → 필요한 설계 관점·PRD → 검증 우선 구현(작은 단위 검증 → 재사용 단위 확정 → 조립) → 계약·통합 검증 |
+| 기존 기능 변경 | feature-design → 대상 계약·소비자 조사 → 변경·검증(여러 모듈이나 외부 가정이 걸리면 검증 우선 구현); 전체 설계는 영향이 실제로 커질 때 |
+| 구조 개선 | as-is 근거 확인 → to-be 경계·호환성 설계 → 검증 우선 구현으로 단계적 변경 → 소비자 회귀 검증 |
 | 복잡한 협업 작업 | 작업 맥락 패킷 → 독립 조사 → 설계 비판 → 파일 소유권을 나눠 구현 → 독립 검증·재평가 |
 
 문서의 연결은 탐색 안내다. 아래 모든 단계를 의무적으로 읽으라는 뜻은 아니다.
