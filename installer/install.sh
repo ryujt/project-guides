@@ -40,6 +40,7 @@ desc_of() {
     frontend-user-design)        echo "회원가입·로그인·세션·계정 복구·탈퇴 등 회원제 프론트엔드 설계 문서를 생성한다" ;;
     frontend-navigation-diagram) echo "화면 이동과 그 판단에 필요한 API·처리를 navigation DSL로 작성한다" ;;
     frontend-state-diagram)      echo "프론트엔드 객체·화면의 상태 전이를 state DSL 다이어그램으로 작성한다" ;;
+    frontend-prototype)          echo "TO-BE·navigation·layout 등 설계 후 백엔드 없이 웹 또는 데스크톱 프론트엔드 프로토타입을 구현한다. 가상 데이터와 정상 응답으로 화면 배치·이동·상태 변화를 시뮬레이션해 개발자가 설계를 검토한다. '화면 흐름 시뮬레이션', '백엔드 없는 프로토타입' 요청 시 사용" ;;
     multi-agent-task)            echo "Architect·Critic·Developer·Tester 등 여러 전문 에이전트가 분업·상호 견제하며 작업을 수행한다" ;;
     ux-ui-improvement)           echo "유사 서비스 벤치마킹·오픈소스 리서치를 기반으로 UX/UI 개선 설계안을 도출한다" ;;
     comprehensive-test)          echo "변경 위험에 맞는 계측·테스트·결함 수정으로 품질을 검증한다. 필요한 검증이 통과하면 반복을 끝낸다" ;;

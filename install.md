@@ -34,6 +34,7 @@ bash installer/install.sh
 | `/frontend-user-design` | 회원가입·로그인·세션·탈퇴 등 회원제 프론트엔드 설계 |
 | `/frontend-navigation-diagram` | 화면·API 흐름 navigation 다이어그램 작성 |
 | `/frontend-state-diagram` | 상태 전이 state 다이어그램 작성 |
+| `/frontend-prototype` | 백엔드 없이 정상 흐름을 시뮬레이션하는 웹/데스크톱 화면·흐름 검토용 프로토타입 구현 |
 | `/jobflow-walkthrough` | jobflow를 객체·계약·대표 시나리오와 연결해 해설 |
 | `/multi-agent-task` | 여러 전문 에이전트(Architect·Critic·Developer·Tester) 협업 작업 |
 | `/ux-ui-improvement` | 리서치·벤치마킹 기반 UX/UI 개선 설계 |
