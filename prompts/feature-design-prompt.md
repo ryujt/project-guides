@@ -37,6 +37,8 @@
 
 jobflow에서 경계끼리의 협력만 보이는 그림은 `scope:`로 쓰고 실제 요청자에서 화살표를 시작한다([출발점 규칙](../guides/job-flow-diagram-guide.md#scope-그림의-출발점은-실제-요청자다)). 경계 내부를 열 때는 [설계 문서 양식 §6](../guides/system-design-document-guide.md#6-경계-내부-job-flow-드릴다운)의 드릴다운 규칙(JF 번호·그림 아래 근거 표)을 따른다.
 
+기능 내부의 분석·설계가 범위에 있으면 [내부 추적과 완료 기준](../guides/system-design-document-guide.md#64-내부-추적과-완료-기준)으로 실제/제안 객체·모듈·함수의 협력까지 설명한다. 상위 계약 요약만으로 끝내지 않되 시스템 전체 문서 골격을 추가로 강제하지 않는다.
+
 ## 4. 산출물과 구현 인계
 
 기본은 `docs/design/{DATE}/feature/{slug}/feature-design.md` 하나다. 날짜는 한 번 확정하고 사용자 지정/기존 문서 위치가 있으면 따른다.

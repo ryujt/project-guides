@@ -68,6 +68,7 @@
 AS-IS·TO-BE 설계 문서를 쓸 때 함께 보는 자료:
 
 - 산출물: 핵심 문서는 전체 줄거리를 간명하게 설명한다. `details/`에 반드시 둘 구성 설명서, 시나리오별 jobflow·navigation 설계서, 모든 화면별 layout 설계서의 배치·상세 설명·예외는 [양식 §2](guides/system-design-document-guide.md#2-산출물-배치)를 따른다.
+- 내부 동작: 간명한 **L0 → 실제 객체·모듈·메서드 협력 L1 → 필요한 L2 이하 → 코드 근거**로 내려간다. 시나리오마다 추적표를 두고 API 계약표·산문만으로 내부 분석을 완료하지 않는다. 판정은 [양식 §6.4](guides/system-design-document-guide.md#64-내부-추적과-완료-기준), 구체적인 차이는 [내부 드릴다운 예시](guides/examples/internal-jobflow-drilldown.md)를 본다.
 - 예시: [`guides/examples/system-design/`](guides/examples/system-design/) — 가상의 「월별 청구서 발행 시스템」으로 절 번호·계약·드릴다운을 보여 준다. 기존 예시는 핵심에 시나리오 그림을 두던 배치여서 새 필수 파일 구성을 모두 갖춘 예시는 아니다. 새 산출물은 [양식 §2](guides/system-design-document-guide.md#2-산출물-배치)·[§4](guides/system-design-document-guide.md#4-흐름-절--경계-수준-jobflow)를 우선하고, 파일별 설명은 [양식 §11](guides/system-design-document-guide.md#11-예시-산출물)을 본다. 경로·줄 번호·수치는 형식 예시다.
 - 검사: [`design-doc-check.mjs`](guides/tools/design-doc-check.mjs) — 펜스·jobflow·링크·앵커·Mermaid 라벨을 정적으로 검사한다. 스크립트는 가이드 사본의 경로로 부르고, 문서 폴더는 검사할 프로젝트 기준으로 준다. 예: 그 프로젝트 루트에서 `node <가이드 사본>/guides/tools/design-doc-check.mjs docs/design/<DATE>`. `<가이드 사본>`은 이 README가 있는 폴더이고, 위치는 사용자마다 다르다. `--renderer`로 그릴 때의 출력 위치(`--out`)와 렌더링 확인·의미 검토는 [양식 §10](guides/system-design-document-guide.md#10-검증)을 따른다.
 
