@@ -2,6 +2,8 @@
 
 한 요구사항이 건드리는 모듈과 계약을 설계한다. **담당 모듈의 계약·관련 구현·테스트만으로 구현을 시작할 수 있는 문서**가 목표다. 전체 시스템 분석은 [AS-IS](./system-design-as-is-prompt.md), 전체 신규 설계·재설계는 [TO-BE](./system-design-to-be-prompt.md), 사이트 설계는 [사이트 프롬프트](./site-design-prompt.md)를 사용한다.
 
+Job Flow 산출 범위·형식은 [Job Flow 작성 기준](../guides/system-design-document-guide.md#설계-문서의-job-flow-작성-기준)을 따른다. 이 프롬프트의 시나리오별 필수 파일·표·상세 설명·내부 추적 요구도 Job Flow에는 해당 기준을 우선 적용한다.
+
 ## 입력과 실행 규칙
 
 - 입력: 요구사항, 대상 코드/문서, 성공 기준, 제약. 기존 프로젝트가 없으면 신규 설계임을 표시한다.
@@ -35,7 +37,7 @@
 
 [시스템 설계 프레임워크](../guides/system-design-framework.md)의 8관점 중 이번 변경에 필요한 뷰만 고른다. 표기는 [문법 기준](../guides/system-design-framework.md#다이어그램의-문법-기준)의 해당 행과 전용 가이드를 따른다. 관련 없는 UI·데이터·상태 섹션을 만들거나 사용자 DSL을 다른 형식으로 치환하지 않는다.
 
-jobflow에서 경계끼리의 협력만 보이는 그림은 `scope:`로 쓰고 실제 요청자에서 화살표를 시작한다([출발점 규칙](../guides/job-flow-diagram-guide.md#scope-그림의-출발점은-실제-요청자다)). 경계 내부를 열 때는 [설계 문서 양식 §6](../guides/system-design-document-guide.md#6-경계-내부-job-flow-드릴다운)의 드릴다운 규칙(JF 번호·그림 아래 근거 표)을 따른다.
+jobflow에서 경계끼리의 협력만 보이는 그림은 `scope:`로 쓰고 실제 요청자에서 화살표를 시작한다([출발점 규칙](../guides/job-flow-diagram-guide.md#scope-그림의-출발점은-실제-요청자다)). 경계 내부를 열 때는 [설계 문서 양식 §6](../guides/system-design-document-guide.md#6-경계-내부-job-flow-드릴다운)의 드릴다운 규칙(JF 번호·별도 소유 문서의 근거 기록)을 따른다.
 
 기능 내부의 분석·설계가 범위에 있으면 [내부 추적과 완료 기준](../guides/system-design-document-guide.md#64-내부-추적과-완료-기준)으로 실제/제안 객체·모듈·함수의 협력까지 설명한다. 상위 계약 요약만으로 끝내지 않되 시스템 전체 문서 골격을 추가로 강제하지 않는다.
 

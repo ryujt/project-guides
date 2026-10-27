@@ -67,6 +67,8 @@
 
 AS-IS·TO-BE 설계 문서를 쓸 때 함께 보는 자료:
 
+- Job Flow: [작성 기준](guides/system-design-document-guide.md#설계-문서의-job-flow-작성-기준)에 따라 실제 참여 object가 3개 이상인 시나리오만 작성한다. 출력은 다이어그램과 바로 아래의 짧은 주요 흐름 설명으로 한정한다.
+
 - 산출물: 핵심 문서는 전체 줄거리를 간명하게 설명한다. `details/`에 반드시 둘 구성 설명서, 시나리오별 jobflow·navigation 설계서, 모든 화면별 layout 설계서의 배치·상세 설명·예외는 [양식 §2](guides/system-design-document-guide.md#2-산출물-배치)를 따른다.
 - 내부 동작: 간명한 **L0 → 실제 객체·모듈·메서드 협력 L1 → 필요한 L2 이하 → 코드 근거**로 내려간다. 시나리오마다 추적표를 두고 API 계약표·산문만으로 내부 분석을 완료하지 않는다. 판정은 [양식 §6.4](guides/system-design-document-guide.md#64-내부-추적과-완료-기준), 구체적인 차이는 [내부 드릴다운 예시](guides/examples/internal-jobflow-drilldown.md)를 본다.
 - 연속 작업의 품질: AS-IS가 의도와 어긋나면 종속 단계를 멈추고 지침 수정·재분석·재검토를 반복한다. 대표 경로 통과와 전체 AS-IS 확정의 구분은 [결과 적합성 게이트](guides/system-design-document-guide.md#101-결과-적합성-게이트와-지침-개선)를 따른다.
