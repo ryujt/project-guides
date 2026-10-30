@@ -37,9 +37,9 @@ Job Flow 산출 범위·형식은 [Job Flow 작성 기준](../guides/system-desi
 
 [시스템 설계 프레임워크](../guides/system-design-framework.md)의 8관점 중 이번 변경에 필요한 뷰만 고른다. 표기는 [문법 기준](../guides/system-design-framework.md#다이어그램의-문법-기준)의 해당 행과 전용 가이드를 따른다. 관련 없는 UI·데이터·상태 섹션을 만들거나 사용자 DSL을 다른 형식으로 치환하지 않는다.
 
-jobflow에서 경계끼리의 협력만 보이는 그림은 `scope:`로 쓰고 실제 요청자에서 화살표를 시작한다([출발점 규칙](../guides/job-flow-diagram-guide.md#scope-그림의-출발점은-실제-요청자다)). 경계 내부를 열 때는 [설계 문서 양식 §6](../guides/system-design-document-guide.md#6-경계-내부-job-flow-드릴다운)의 드릴다운 규칙(JF 번호·별도 소유 문서의 근거 기록)을 따른다.
+jobflow는 [관찰 경계와 공개 계약](../guides/job-flow-diagram-guide.md#관찰-경계와-공개-계약)으로 시스템·책임·프로세스 경계와 그림 수준을 먼저 정한다. 경계끼리의 협력만 보이는 그림은 `scope:`로 쓰고 실제 요청자에서 화살표를 시작한다([출발점 규칙](../guides/job-flow-diagram-guide.md#scope-그림의-출발점은-실제-요청자다)). 경계 내부를 열 때는 [설계 문서 양식 §6](../guides/system-design-document-guide.md#6-경계-내부-job-flow-드릴다운)의 드릴다운 규칙(JF 번호·별도 소유 문서의 근거 기록)을 따른다. 조각 간 그림은 공개 요청·응답·알림과 연결 소유자까지만 두고 상대 private는 소유자 문서에서 연다. 통신과 비동기 흐름은 [연결 종류](../guides/job-flow-diagram-guide.md#연결-종류와-생략-금지)·[외부 수신과 응답](../guides/job-flow-diagram-guide.md#외부-경계의-요청응답과-알림)·[등록/실행/반복](../guides/job-flow-diagram-guide.md#등록실행반복을-구분한다)을 적용하고 의미 검토에서 대조한다.
 
-기능 내부의 분석·설계가 범위에 있으면 [내부 추적과 완료 기준](../guides/system-design-document-guide.md#64-내부-추적과-완료-기준)으로 실제/제안 객체·모듈·함수의 협력까지 설명한다. 상위 계약 요약만으로 끝내지 않되 시스템 전체 문서 골격을 추가로 강제하지 않는다.
+기능 내부의 분석·설계가 범위에 있으면 [내부 추적과 완료 기준](../guides/system-design-document-guide.md#64-내부-추적과-완료-기준)으로 실제/제안 객체·모듈·함수의 협력까지 설명한다. 상위 계약 요약만으로 끝내지 않으며 1~2객체라 그림을 생략해도 내부 추적 근거를 남긴다. 시스템 전체 문서 골격은 추가로 강제하지 않는다.
 
 ## 4. 산출물과 구현 인계
 

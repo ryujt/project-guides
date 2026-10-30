@@ -235,23 +235,30 @@ DomainWorker --> ExternalGateway : external access port
 동적 흐름은 요청·이벤트에 따라 작업과 결과가 연결되는 관계를 설명한다.
 대상 시나리오의 가장 높은 필요한 경계에서 시작하고, 복잡한 부분만 세분화한다.
 
-아래는 `ApiServer`가 한 유스케이스를 조율하는 예시다. 독립 서비스 간 요청·응답이나 메시지 협력을 설명할 때는 [Method-R](method-R.md#2-조각의-협력과-서비스-간-통신)에서 해당 방식을 선택한다. 기존 시스템은 실제 호출자와 공개 계약을 근거로 그린다.
+아래는 Client와 ApiServer 사이의 공개 요청·응답이다. 두 조각의 handler나 응답 이후 내부 처리를 노출하지 않는다. 통신 수단과 조율 방식은 [Method-R](method-R.md#2-조각의-협력과-서비스-간-통신)에서 선택하며, 시스템·책임 경계와 프로세스 경계는 [관찰 경계 규칙](job-flow-diagram-guide.md#관찰-경계와-공개-계약)에 따라 구분한다.
+
+```jobflow
+scope: CommandExchange
+Object: Client, ApiServer
+Client.SendCommand --> ApiServer.message.Command
+ApiServer.message.Command --> Client.message.CommandResult
+```
+
+다음은 ApiServer 소유 범위를 확대한다. Worker와 Storage는 ApiServer가 소비하는 공개 계약까지만 보인다.
 
 ```jobflow
 orchestrator: ApiServer
-Object: Client, ApiServer, Worker, Storage
-
-Client.SendCommand --> ApiServer.HandleCommand
+Object: ApiServer, Worker, Storage
 ApiServer.HandleCommand --> Worker.Run
 Worker.Run --> Storage.SaveResult
-ApiServer.HandleCommand --> Client.message.JobResult
+Storage.SaveResult --> ApiServer.HandleCommand.result
 ```
 
 이 예시의 범위와 계약:
 
 - 최소 조각만 사용한다.
 - 복잡한 내부 과정은 다음 섹션에서 새 jobflow로 연다. 이 예시의 외부 데이터 조회는 Worker의 내부 책임이므로 상위에는 `Worker.Run`만 보인다.
-- 응답과 저장 결과의 의미는 공개 계약에서 정한다. 예시의 `Storage.SaveResult`는 저장된 결과를 반환하며, ApiServer가 그 값을 Client의 `JobResult`로 돌려준다. 그림에서는 중간 반환 데이터 노드를 생략했다.
+- `Worker.Run --> Storage.SaveResult`는 ApiServer의 결과 전달 배선이다. 저장 뒤 `HandleCommand`가 반환하고 공개 응답을 보낸다. Client는 이 내부 메서드·대기 순서를 몰라도 같은 계약으로 사용할 수 있다.
 
 호출·반환·이벤트의 표기와 해석은 [Job Flow 가이드](job-flow-diagram-guide.md)를 따른다.
 
@@ -279,20 +286,26 @@ Dashboard --> (/reports/render) : 렌더 요청
 
 SSE, WebSocket, queue, scheduler, timeout/cancel 은 별도 섹션으로 분리한다.
 
-아래는 ApiServer와 Worker가 독립 서비스로서 중앙 업무 조율 없이 메시지를 발행·구독하고, 외부 Client에 결과를 전달하는 예시다. 조율 방식과 통신 수단의 선택은 [Method-R](method-R.md#4-시스템-설계-책임상태-소유권과-협력), 도표의 메시지 선택은 [메시지 사용 범위](job-flow-diagram-guide.md#메시지-사용-범위), 헤더 해석과 렌더러 지원은 [Job Flow 가이드](job-flow-diagram-guide.md)를 따른다.
+아래는 ApiServer와 Worker가 독립 서비스로서 중앙 업무 조율 없이 메시지를 발행·구독하고 Client에 결과를 알리는 공개 협력이다. 프로세스가 다르다는 사실만으로 Client를 제품 외부라고 단정하지 않는다. 조율 방식은 [Method-R](method-R.md#4-시스템-설계-책임상태-소유권과-협력), 메시지·헤더는 [Job Flow 가이드](job-flow-diagram-guide.md)를 따른다.
 
 ```jobflow
 scope: ReportSystem
-Object: Client, ApiServer, Worker, MessageBus
-Client.SendStartMessage --> ApiServer.HandleStart
-ApiServer.HandleStart --> MessageBus.message.JobRequested
-MessageBus.message.JobRequested --> Worker.HandleJob
-Worker.HandleJob --> MessageBus.message.JobCompleted
-MessageBus.message.JobCompleted --> ApiServer.HandleJobCompleted
-ApiServer.HandleJobCompleted --> Client.message.JobCompleted
+Object: ApiServer, MessageBus, Worker
+ApiServer.StartJob --> MessageBus.message.JobRequested
+MessageBus.message.JobRequested --> Worker.message.JobRequested
+Worker.message.JobRequested --> MessageBus.message.JobCompleted
+MessageBus.message.JobCompleted --> ApiServer.message.JobCompleted
 ```
 
-`ApiServer.HandleStart`는 `JobRequested`를 발행하고, Worker는 작업이 끝나면 `JobCompleted`를 발행한다. ApiServer는 이 완료 메시지를 구독해 Client로 전달한다.
+```jobflow
+scope: ReportClientExchange
+Object: Client, ApiServer
+Client.SendStartMessage --> ApiServer.message.StartRequest
+ApiServer.message.StartRequest --> Client.message.StartAccepted
+ApiServer.message.JobCompleted --> Client.message.JobCompleted
+```
+
+`StartJob`은 작업 시작이라는 공개 계약이다. MessageBus가 구독 구성에 따라 전달하고 Worker의 완료 메시지가 오면 ApiServer가 Client에 별도 알림을 보낸다. 접수 응답과 이후 완료 알림은 다른 계약이다. Worker의 handler·Client의 listener와 화면 반영은 각 소유자 내부에서만 연다.
 
 비동기 흐름에서는 다음을 명시한다.
 
@@ -301,6 +314,7 @@ ApiServer.HandleJobCompleted --> Client.message.JobCompleted
 - cancel/timeout/shutdown 때 persist 여부
 - 중복 처리나 재시도 정책과 책임자, 순서 보장 범위, 처리 결과를 기다리는 쪽의 실패/timeout
 - 전달 성공과 업무 성공의 차이, 취소/재시도 중 상태를 변경하는 단일 소유자
+- 소유자 내부에서의 등록·시작과 나중 실행: 구독 등록 뒤 수신, 작업 생성 뒤 본문, 타이머 설정 뒤 tick은 [등록·실행·반복 규칙](job-flow-diagram-guide.md#등록실행반복을-구분한다)에 따른다. 상위에는 필요한 공개 시작·접수·완료·반복 계약만 두며 상대 내부 함수를 요구하지 않는다.
 
 ### 2. 정적 구성
 
@@ -412,7 +426,7 @@ Gateway가 반드시 orchestrator인 것은 아니다. 업무 상태의 변경 �
 
 ### jobflow 규칙
 
-헤더, 호출·이벤트, [메시지 사용 범위](job-flow-diagram-guide.md#메시지-사용-범위), 반환 데이터 생략과 응답 경계·분기 배치, 렌더러 확인은 [Job Flow 가이드](job-flow-diagram-guide.md)를 따른다.
+헤더, [관찰 경계와 공개 계약](job-flow-diagram-guide.md#관찰-경계와-공개-계약), [연결 종류](job-flow-diagram-guide.md#연결-종류와-생략-금지), 분기 배치와 렌더러 확인은 [Job Flow 가이드](job-flow-diagram-guide.md)를 따른다. 상위는 공개 요청·응답·별도 알림의 차이를 남기고, 정확한 대기·재개·반복은 소유자 내부에서 연다. 상대의 private handler나 후처리를 공개 계약으로 승격하지 않는다.
 
 ### 이름 규칙
 

@@ -307,15 +307,15 @@ stateDiagram-v2
     Refunded --> [*]
 ```
 
-상태 전이 과정의 실행 흐름은 `jobflow`로 보완한다. 아래 `OnSucceeded`·`OnFailed`는 결제 요청의 성공·실패 조건에 대응한다([조건의 출처](job-flow-diagram-guide.md#조건의-출처와-그림-적용-범위)).
+상태 전이 과정의 실행 흐름은 `jobflow`로 보완한다. 아래 `Request.success`·`Request.failed`는 결제 요청의 성공·실패 반환값에 대응한다([조건의 출처](job-flow-diagram-guide.md#조건의-출처와-그림-적용-범위)).
 
 ```jobflow
 master: OrderStateMachine
 Object: OrderStateMachine, Payment, Shipping, CancelService
 
 OrderStateMachine.OnCreated --> Payment.Request
-Payment.OnSucceeded --> Shipping.Prepare
-Payment.OnFailed --> CancelService.Cancel
+Payment.Request.success --> Shipping.Prepare
+Payment.Request.failed --> CancelService.Cancel
 ```
 
 작성 가이드:
@@ -450,13 +450,13 @@ Object: OrderSaga, OrderService, PaymentService, InventoryService, DeliveryServi
 
 OrderSaga.Start --> OrderService.CreateOrder
 OrderService.CreateOrder --> PaymentService.Capture
-PaymentService.OnCaptureFailed --> CompensationService.CancelOrder
-PaymentService.OnCaptured --> InventoryService.Reserve
-InventoryService.OnReservationFailed --> CompensationService.RefundPayment
-CompensationService.OnPaymentRefunded --> CompensationService.CancelOrder
-InventoryService.OnReserved --> DeliveryService.RequestDelivery
-DeliveryService.OnDeliveryRequestFailed --> CompensationService.ReleaseInventory
-CompensationService.OnInventoryReleased --> CompensationService.RefundPayment
+PaymentService.Capture.failed --> CompensationService.CancelOrder
+PaymentService.Capture.success --> InventoryService.Reserve
+InventoryService.Reserve.failed --> CompensationService.RefundPayment
+CompensationService.RefundPayment.success --> CompensationService.CancelOrder
+InventoryService.Reserve.success --> DeliveryService.RequestDelivery
+DeliveryService.RequestDelivery.failed --> CompensationService.ReleaseInventory
+CompensationService.ReleaseInventory.success --> CompensationService.RefundPayment
 ```
 
 작성 가이드:
@@ -464,7 +464,7 @@ CompensationService.OnInventoryReleased --> CompensationService.RefundPayment
 * 성공 경로와 실패 보상 경로를 반드시 함께 그린다.
 * 재시도 가능한 단계는 멱등 키와 중복 효과 방지 책임을 정한다. 실패 응답이 부수 효과 없음과 같은지 확인한다.
 * 보상 작업은 `Cancel`, `Refund`, `Release`처럼 업무 의미를 드러내며 원래 동작을 완전히 되돌릴 수 있다고 가정하지 않는다.
-* 배송 요청 성공 뒤에는 추가 작업이 없어 해당 분기는 생략했다. `OnPaymentRefunded`·`OnInventoryReleased`는 각각 환불·재고 해제 성공 뒤 다음 보상을 진행하는 조건을 나타낸다([조건의 출처](job-flow-diagram-guide.md#조건의-출처와-그림-적용-범위)).
+* 배송 요청 성공 뒤에는 추가 작업이 없어 해당 분기는 생략했다. 보상 단계의 `success`는 환불·재고 해제의 성공 반환값이며 다음 보상을 진행하는 조건이다([조건의 출처](job-flow-diagram-guide.md#조건의-출처와-그림-적용-범위)).
 * 위는 주문 생성 성공, 결제/예약 실패 시 해당 단계의 효과 없음, 배송 요청 실패 시 접수되지 않음을 가정한 축약 예시다. 실제 구현은 timeout처럼 결과를 모르는 경우 조회·대사 계약이 필요하다. 취소 완료/보상 실패의 최종 결과, 재시도·운영 인계 책임은 별도로 명시한다.
 
 ---
