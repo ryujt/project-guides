@@ -2,7 +2,7 @@
 
 Job Flow는 시스템을 여러 조각으로 나눴을 때 각 조각(이하 객체) 사이의 관계를 표현한다.
 각 객체가 가능한 한 다른 객체의 존재를 모르고 자신의 책임에 집중하도록 그리는 것이 원칙이다.
-이 원칙을 적용하는 데 [Method-R](method-R.md)과 [Orchestrator-Worker 패턴](orchestrator-worker-pattern-guide.md)이 자주 사용된다.
+이 원칙을 적용하는 데 [Orchestrator-Worker 패턴](orchestrator-worker-pattern-guide.md)이 자주 사용된다.
 
 Job Flow는 다음과 같은 형식을 사용한다.
 
