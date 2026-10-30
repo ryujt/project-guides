@@ -129,6 +129,19 @@ VideoPlayer가 `OnFrameRequested`를 구독하고 `GetFrameBitmap`의 반환값�
 
 ## 선 교차 줄이기
 
-- 같은 노드의 가지와 하류 처리를 이어 쓰고, 다른 흐름은 그 뒤에 둔다.
+- **같은 메서드의 반환값 분기를 먼저 모은다.** 각 분기의 첫 연결을 연속해서 작성한 뒤, 후속 처리·반환을 적는다. 한 분기의 후속 처리를 다른 분기 사이에 끼우지 않는다.
 - 가지가 좌우로 갈라져 엉키면 `Object:` 순서를 바꿔 출발 객체를 대상들의 한쪽 끝에 둔다.
 - 실제 호출 순서와 분기 의미를 유지하며 줄·열 순서를 조정한다. 선이 겹치거나 다른 노드로 연결된 것처럼 보이지 않는지 확인한다.
+
+예를 들어 검사 결과의 두 분기를 먼저 적고, 저장 결과를 받아 완료하는 흐름은 그 뒤에 둔다.
+
+```jobflow
+orchestrator: SaveOrder
+Object: SaveOrder, Validator, OrderStore
+SaveOrder.Run --> Validator.Check
+Validator.Check.true --> OrderStore.Save
+Validator.Check.false --> SaveOrder.Reject
+OrderStore.Save.result --> SaveOrder.Complete
+```
+
+`OrderStore.Save.result --> SaveOrder.Complete`를 두 검사 분기 사이에 넣지 않는다. 줄 배치는 선언 순서이며, 실제 처리는 반환값 조건과 호출 의존관계에 따라 실행된다.
