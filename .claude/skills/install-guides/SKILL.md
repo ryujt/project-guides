@@ -6,8 +6,9 @@ description: 이 저장소의 가이드·프롬프트를 개인 스킬(~/.claude
 # 가이드·프롬프트 스킬 설치
 
 1. 저장소 루트에서 다음을 실행한다.
-   - 인자가 `uninstall` 인 경우: `bash installer/install.sh --uninstall`
-   - 그 외(인자 없음 포함): `bash installer/install.sh`
-2. 스크립트 출력에 나온 설치(또는 제거)된 스킬 목록을 사용자에게 요약해 보여준다.
-3. 설치 시에는 새 스킬이 **새 Claude Code 세션부터** `/system-design-as-is` 처럼 슬래시 명령으로 사용 가능함을 안내한다.
+   - 인자가 `uninstall` 인 경우: `bash installer/claude.sh --uninstall`
+   - 그 외(인자 없음 포함): `bash installer/claude.sh`
+   - 스킬만 설치하고 설정 파일(훅)은 건드리지 않으려면 `bash installer/install.sh`를 쓴다. 사용자가 그렇게 요청한 경우에만 사용한다.
+2. 스크립트 출력에 나온 설치(또는 제거)된 스킬 목록과 훅 등록·해제 결과를 사용자에게 요약해 보여준다. `node`·`python3`가 없어 설정 파일을 고치지 못했다는 경고가 나오면 출력된 JSON 조각을 그대로 전달한다.
+3. 설치 시에는 새 스킬이 **새 Claude Code 세션부터** `/system-design-as-is` 처럼 슬래시 명령으로, 그리고 `asis`·`tobe`·`jobflow` 등이 들어간 일반 문장으로도 사용 가능함을 안내한다.
 4. 자세한 사용법은 저장소 루트의 `install.md` 를 참고하라고 안내한다.

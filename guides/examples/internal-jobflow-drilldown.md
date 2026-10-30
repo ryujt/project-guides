@@ -12,8 +12,10 @@
 scope: 문서 미리보기
 Object: Reader, Preview
 Reader.open --> Preview.render
-Preview.render.result --> Reader.show
+Preview.render --> Reader.show
 ```
+
+`Preview.render → Reader.show`는 원래 요청자에게 미리보기 응답이 돌아와 화면이 표시하는 흐름이다. 서비스가 화면 메서드를 직접 호출한다는 뜻은 아니다.
 
 | 상위 계약 | 입력 | 출력 | 실패 |
 |---|---|---|---|
@@ -52,7 +54,7 @@ AccessRule.check.allowed --> RevisionSource.load
 RevisionSource.load.missing
 RevisionSource.load.unavailable
 RevisionSource.load.found --> HtmlFormatter.format
-HtmlFormatter.format.result --> PreviewComposer.build.result
+HtmlFormatter.format --> PreviewComposer.build.result
 ```
 
 `allowed`·`found` 등은 이 가상 예시의 결과 판정 이름이다. 실제 코드에서는 enum·반환값·분기 조건과의 대응을 근거 표에 적는다. 직접 호출과 결과 전달도 구분한다. `AccessRule.check.allowed → RevisionSource.load`는 `AccessRule`이 저장소를 호출한다는 뜻이 아니라 `PreviewComposer.build`가 검사 결과를 받아 호출한다는 뜻이다.

@@ -50,7 +50,7 @@
 
 상위 바깥 노드 ↔ 이 경계의 클라이언트: `Maker.make` = `MakerClient.make`, `Maker.peek` = `MakerClient.peek`, `Archive.open` = `ArchiveClient.fetchMeta`, `Mailer.send` = `MailChannel.send`.
 
-**표기** 그림의 노드 이름은 코드에 있는 그대로다 — 클래스는 `Class.method`, Kotlin `object`는 선언 이름 그대로(`RetryWaits` = `clock/RetryWaits.kt`, `IssueRule` = `plan/IssueRule.kt`). 줄 번호는 기준 커밋 `5e6f7a8`이다. `Ticker.OnTick`은 타이머 발화 이벤트다 — `Ticker`가 20초마다 등록된 콜백을 부르고, 그 콜백이 `BillingClock.tick`이다. 틱 ③ 마감 정리는 `JF-2`와 협력자가 같아 그림 대신 [§3.1](#31-틱-단계와-마감-정리) 표에 차이를 적었고, 순수 함수 `IssueRule.nextAt`·`IssueRule.cycleOf`는 열지 않는다. `JF-1`·`JF-2` 근거 표의 `단계 #` 열은 §3.1 표의 틱 단계(①·②)다. `Object:` 순서는 [렌더러 배치 특성](../../../../job-flow-diagram-guide.md#렌더러-배치-특성)의 규칙대로다 — 그림마다 첫 줄을 내보내는 트리거(`Ticker`·`ApiRoutes` 등)는 다시 불리지 않으므로 맨 왼쪽(규칙 4)이다. 트리거가 아니면서 요청을 둘 이상 내보내는 객체는 `JF-1`의 `BillingClock`(3건)뿐이라 그 그림에서만 트리거 다음 자리(규칙 1)이고, 나머지는 처음 호출되는 순서(규칙 2)다. 이 절의 그림 6장은 렌더러로 그려 PNG로 확인했다([브리프 §5](../../_evidence-brief.md#5-검증-기록)).
+**표기** 그림의 노드 이름은 코드에 있는 그대로다 — 클래스는 `Class.method`, Kotlin `object`는 선언 이름 그대로(`RetryWaits` = `clock/RetryWaits.kt`, `IssueRule` = `plan/IssueRule.kt`). 줄 번호는 기준 커밋 `5e6f7a8`이다. `Ticker.OnTick`은 타이머 발화 이벤트다 — `Ticker`가 20초마다 등록된 콜백을 부르고, 그 콜백이 `BillingClock.tick`이다. 틱 ③ 마감 정리는 `JF-2`와 협력자가 같아 그림 대신 [§3.1](#31-틱-단계와-마감-정리) 표에 차이를 적었고, 순수 함수 `IssueRule.nextAt`·`IssueRule.cycleOf`는 열지 않는다. `JF-1`·`JF-2` 근거 표의 `단계 #` 열은 §3.1 표의 틱 단계(①·②)다. `Object:` 순서는 [렌더러 배치 특성](../../../../job-flow-diagram-guide.md#렌더러-배치-특성)의 규칙대로다 — 그림마다 첫 줄을 내보내는 트리거(`Ticker`·`ApiRoutes` 등)는 다시 불리지 않으므로 맨 왼쪽(규칙 4)이다. 트리거가 아니면서 요청을 둘 이상 내보내는 객체는 `JF-1`의 `BillingClock`(3건)뿐이라 그 그림에서만 트리거 다음 자리(규칙 1)이고, 나머지는 처음 호출되는 순서(규칙 2)다. 이 절의 이전 작성판 그림 6장은 렌더러로 그려 PNG로 확인했다([브리프 §5](../../_evidence-brief.md#5-검증-기록)). 반환 데이터 노드를 생략한 현재 수정판은 정적으로 검토했으며 다시 렌더하지 않았다.
 
 ### JF-1 틱 1단계 도래·맡김 — BillingClock.startDueRuns
 
@@ -60,10 +60,10 @@ Object: Ticker, BillingClock, PlanStore, RunStore, MakerClient
 
 Ticker.OnTick --> BillingClock.startDueRuns
 BillingClock.startDueRuns --> PlanStore.listDue
-PlanStore.listDue.result --> RunStore.create
+PlanStore.listDue --> RunStore.create
 RunStore.create --> PlanStore.advance
 BillingClock.startDueRuns --> RunStore.listReady
-RunStore.listReady.result --> BillingClock.handOff
+RunStore.listReady --> BillingClock.handOff
 BillingClock.handOff --> MakerClient.make
 MakerClient.make.accepted --> RunStore.markActive
 MakerClient.make.error --> BillingClock.planRetry
@@ -116,7 +116,7 @@ Object: Ticker, BillingClock, RunStore, MakerClient
 
 Ticker.OnTick --> BillingClock.checkAlive
 BillingClock.checkAlive --> RunStore.listAliveDue
-RunStore.listAliveDue.result --> MakerClient.peek
+RunStore.listAliveDue --> MakerClient.peek
 MakerClient.peek.unreachable
 MakerClient.peek.failed --> BillingClock.finishRun
 MakerClient.peek.missing --> BillingClock.finishRun
@@ -168,9 +168,9 @@ Object: DeliveryNotifier, ContactStore, ArchiveClient, MailChannel, DeliveryLog
 
 DeliveryNotifier.deliver --> ContactStore.listFor
 ContactStore.listFor.none
-ContactStore.listFor.result --> ArchiveClient.fetchMeta
-ArchiveClient.fetchMeta.result --> MailChannel.send
-MailChannel.send.result --> DeliveryLog.add
+ContactStore.listFor.nonempty --> ArchiveClient.fetchMeta
+ArchiveClient.fetchMeta --> MailChannel.send
+MailChannel.send --> DeliveryLog.add
 ```
 
 | 노드 | 코드 | 상위 §5 | 비고 |
@@ -180,6 +180,7 @@ MailChannel.send.result --> DeliveryLog.add
 | `MailChannel.send` | `mail/MailChannel.kt:20-48` | `Mailer.send` | 수신자마다 SMTP 1회, `mail.timeout`(10s) |
 | `DeliveryLog.add` | `store/DeliveryLog.kt:10` | — | 수신자마다 `deliveries` 1행 — `sent`·`failed`와 오류 문구. **다시 보내는 코드가 없다**(`B-03`) |
 
+- `.nonempty`는 `listFor`가 반환한 수신자 목록에 항목이 있는 조건, `.none`은 빈 목록이라는 조건의 별칭이다. 실제 필드나 새 메서드가 아니며, 청구서 조회는 그림의 `.nonempty` 분기에서만 이어진다. 반환한 청구서 정보는 메일 입력이 되고, 발송 결과는 기록 입력이 된다.
 - **트리거** `JF-3`의 `markClosed` 뒤. **완료 사실** 수신자 수만큼의 `deliveries` 행.
 - `send` 화살표 하나는 수신자 수만큼의 호출이다 — 수신자 순서대로 하나씩 보낸다(반복은 본문에만 적는다).
 - 한 실행이 두 번 `closed`가 되지는 않지만, 같은 주기 실행이 둘이면 이 그림이 두 번 돌아 메일이 두 번 나간다(`B-02`).
@@ -192,9 +193,9 @@ Object: ApiRoutes, IssueRule, PlanStore, BillingClock, RunStore
 
 ApiRoutes.savePlan --> IssueRule.parse
 IssueRule.parse.invalid
-IssueRule.parse.result --> PlanStore.save
+IssueRule.parse.valid --> PlanStore.save
 ApiRoutes.issueNow --> BillingClock.issueNow
-BillingClock.issueNow.result --> ApiRoutes.issueNow.result
+BillingClock.issueNow --> ApiRoutes.issueNow.result
 ApiRoutes.getRun --> RunStore.get
 ApiRoutes.stopRun --> RunStore.markDropped
 ```
@@ -207,6 +208,7 @@ ApiRoutes.stopRun --> RunStore.markDropped
 | `ApiRoutes.getRun` → `RunStore.get` | `ApiRoutes.kt:110-116` → `RunStore.kt:40` | `Clock.getRun` | 실행 상세 화면이 5초마다 부른다. `listRuns`는 같은 꼴이라 그리지 않았다 |
 | `ApiRoutes.stopRun` → `RunStore.markDropped` | `ApiRoutes.kt:118-126` → `RunStore.kt:76` | `Clock.stopRun` | `pending`·`active`면 `dropped` + `reason='stopped'` → `{stopped:true}` |
 
+- `.valid`는 `parse`가 검사된 발행 규칙을 반환한 조건의 별칭이다. 실제 필드나 새 메서드가 아니며 저장은 그림의 `.valid` 분기에서만 이어진다. `.invalid`는 검사 실패이고 422로 끝난다.
 - `stopRun` 처리기는 `RunStore.markDropped`를 직접 부른다. 생성기에 중지를 알리는 코드는 이 경계에 없다 — `MakerClient`에는 `make`·`peek` 두 메서드만 있다. 그래서 생성은 끝까지 가고, 끝난 뒤의 `issued` 회신이 `JF-3`에서 행을 `closed`로 바꾼다(`B-01`).
 - `issueNow`가 202를 돌려주는 시점은 `handOff`가 끝난 뒤다. 맡김이 실패했어도 응답은 같고, 화면은 실행 상세의 `pending`을 보고서야 안다.
 

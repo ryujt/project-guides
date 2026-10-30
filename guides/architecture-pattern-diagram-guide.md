@@ -12,7 +12,7 @@
 
 `jobflow`는 **객체/조각의 실행 흐름을 표현하는 독자 다이어그램**이며, 단계마다 모듈을 만들라는 설계 패턴은 아니다. 조율자가 연결하는 협력과 독립 서비스의 요청·응답·이벤트를 표현하며 필요한 내부만 확대한다.
 
-화살표는 [Job Flow의 헤더 관점](job-flow-diagram-guide.md#헤더-키워드--orchestrator-vs-scope), 협력·통신 방식은 [Method-R](method-R.md)을 따른다. 패턴별 분해 기준은 다음 표에서 비교한다.
+화살표는 [Job Flow의 헤더 관점](job-flow-diagram-guide.md#헤더-키워드--orchestrator-vs-scope), 이벤트·메서드와 메시지의 선택은 [메시지 사용 범위](job-flow-diagram-guide.md#메시지-사용-범위), 협력·통신 방식은 [Method-R](method-R.md)을 따른다. 패턴별 분해 기준은 다음 표에서 비교한다.
 
 ---
 
@@ -209,9 +209,9 @@ master: PipelineRunner
 Object: PipelineRunner, Loader, Parser, Validator, Saver
 
 PipelineRunner.Run --> Loader.Load
-Loader.Load.result --> Parser.Parse
-Parser.Parse.result --> Validator.Validate
-Validator.Validate.result --> Saver.Save
+Loader.Load --> Parser.Parse
+Parser.Parse --> Validator.Validate
+Validator.Validate --> Saver.Save
 ```
 
 작성 가이드:
@@ -233,8 +233,8 @@ master: OrderOrchestrator
 Object: OrderOrchestrator, OrderService, PaymentService, EmailService, LogService
 
 OrderService.OnOrderCreated --> PaymentService.Pay
-PaymentService.Pay.result --> EmailService.SendReceipt
-PaymentService.Pay.result --> LogService.SavePaymentLog
+PaymentService.Pay --> EmailService.SendReceipt
+PaymentService.Pay --> LogService.SavePaymentLog
 ```
 
 브로커에 구독한 서비스들이 중앙 조율자 없이 협력하는 별도 **choreography** 예시는 다음과 같다. 아래 화살표는 코드 의존성이 아니라 사건 전달이다.
@@ -449,7 +449,7 @@ master: OrderSaga
 Object: OrderSaga, OrderService, PaymentService, InventoryService, DeliveryService, CompensationService
 
 OrderSaga.Start --> OrderService.CreateOrder
-OrderService.CreateOrder.result --> PaymentService.Capture
+OrderService.CreateOrder --> PaymentService.Capture
 PaymentService.Capture.failed --> CompensationService.CancelOrder
 PaymentService.Capture.success --> InventoryService.Reserve
 InventoryService.Reserve.failed --> CompensationService.RefundPayment

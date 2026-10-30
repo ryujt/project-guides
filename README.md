@@ -4,7 +4,7 @@
 
 - [`guides/`](guides/): 설계 원칙·문서 양식·독자 다이어그램 DSL, 설계 문서 예시(`examples/`)와 검사 도구(`tools/`). 필요한 주제만 참조한다.
 - [`prompts/`](prompts/): 현재 작업의 목표와 함께 AI에게 전달하는 실행 프롬프트.
-- 설치와 슬래시 명령은 저장소 루트의 `install.md`를 참조한다. 설치된 문서 사본에서는 이 단계가 필요 없다.
+- Claude Code·Codex 설치와 호출 방법은 저장소 루트의 `install.md`를 참조한다. Claude Code는 `installer/claude.sh`로, Codex는 `installer/codex.sh`로 설치하면 `asis`·`tobe`·`jobflow` 등이 들어간 일반 요청의 작업 의도에 맞춰 스킬을 선택할 수 있다. 설치된 문서 사본에서는 재설치가 필요 없다.
 
 ## 처음 사용할 때
 
@@ -79,7 +79,7 @@ AS-IS·TO-BE 설계 문서를 쓸 때 함께 보는 자료:
 
 | 질문 | 펜스 | 문법 기준 |
 | --- | --- | --- |
-| 누가 무엇을 호출하고 결과·이벤트를 어떻게 연결하는가? | `jobflow` | [job-flow-diagram-guide](guides/job-flow-diagram-guide.md) |
+| 누가 어떤 이벤트·메서드로 협력하고 경계 메시지를 주고받는가? | `jobflow` | [job-flow-diagram-guide](guides/job-flow-diagram-guide.md) |
 | 화면 이동과 그 판단에 어떤 API·처리가 필요한가? | `navigation` | [navigation-diagram-guide](guides/navigation-diagram-guide.md) |
 | 어느 상태에서 어떤 조건으로 전이하는가? | `state` | [state-diagram-guide](guides/state-diagram-guide.md) |
 | 화면 요소를 어떻게 배치하는가? | `layout` | [screen-layout-guide](guides/screen-layout-guide.md) |

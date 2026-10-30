@@ -42,7 +42,7 @@
 
 상위 바깥 노드 ↔ 이 경계의 클라이언트: `FormDir.read` = `FormLoader.load`, `UsageApi.fetch` = `UsageClient.fetchAll`(고객마다 `usageHttp.postUsage` 1회 — `JF-2.1`), `Archive.file` = `ArchiveClient.file`, `Clock.acceptReply` = `ReplyClient.send`.
 
-**표기** 그림의 노드 이름은 코드에 있는 그대로다 — 클래스는 `Class.method`이고, 클래스가 없는 모듈은 아래 구획 표의 객체 이름(파일 이름을 낙타 표기로 바꾼 것)으로 그린다. 줄 번호는 기준 커밋 `5e6f7a8`이다. 단계마다의 출력·실패 처리·시간 한도는 [§3.1](#31-생성-단계와-시간-한도) 표에 적었고, `JF-2`의 그림에는 단계마다 어느 객체를 부르는지만 그렸다. 근거 표의 `단계 #` 열이 그 표의 `#`이다. 이 절의 그림 5장은 렌더러로 그려 PNG로 확인했다([브리프 §5](../../_evidence-brief.md#5-검증-기록)).
+**표기** 그림의 노드 이름은 코드에 있는 그대로다 — 클래스는 `Class.method`이고, 클래스가 없는 모듈은 아래 구획 표의 객체 이름(파일 이름을 낙타 표기로 바꾼 것)으로 그린다. 줄 번호는 기준 커밋 `5e6f7a8`이다. 단계마다의 출력·실패 처리·시간 한도는 [§3.1](#31-생성-단계와-시간-한도) 표에 적었고, `JF-2`의 그림에는 단계마다 어느 객체를 부르는지만 그렸다. 근거 표의 `단계 #` 열이 그 표의 `#`이다. 이 절의 이전 작성판 그림 5장은 렌더러로 그려 PNG로 확인했다([브리프 §5](../../_evidence-brief.md#5-검증-기록)). 반환 데이터 노드를 생략한 현재 수정판은 정적으로 검토했으며 다시 렌더하지 않았다.
 
 | 객체 | 코드 범위 | 담는 심볼 |
 |---|---|---|
@@ -53,17 +53,19 @@
 
 ### JF-1 라우트 진입 — MakeRoutes
 
+분기명은 이 가상 예시의 반환 계약에서 도출한 조건 별칭이다. `checks.makeBody.valid`는 검사된 요청 본문을 반환한 경우, `.invalid`는 검사 실패다. `MakeRecords.read.found`는 레코드를 찾은 경우, `.missing`은 찾지 못한 경우다. 새 메서드나 반환 필드를 추가한 표기가 아니며, 후속 호출은 그림의 해당 분기에서만 이어진다.
+
 ```jobflow
 orchestrator: MakeRoutes
 Object: MakeRoutes, checks, InvoiceMaker, MakeRecords
 
 MakeRoutes.make --> checks.makeBody
 checks.makeBody.invalid
-checks.makeBody.result --> InvoiceMaker.receive
-InvoiceMaker.receive.result --> MakeRoutes.make.result
+checks.makeBody.valid --> InvoiceMaker.receive
+InvoiceMaker.receive --> MakeRoutes.make.result
 MakeRoutes.peek --> MakeRecords.read
 MakeRecords.read.missing
-MakeRecords.read.result --> MakeRoutes.peek.result
+MakeRecords.read.found --> MakeRoutes.peek.result
 ```
 
 | 노드 | 코드 | 비고 |
@@ -91,7 +93,7 @@ MakeRecords.read.free --> MakeRecords.write
 MakeRecords.write --> InvoiceMaker.work
 InvoiceMaker.work --> FormLoader.load
 InvoiceMaker.work --> CycleWindow.of
-CycleWindow.of.result --> UsageClient.fetchAll
+CycleWindow.of --> UsageClient.fetchAll
 ```
 
 | 노드 | 코드 | 단계 # | 비고 |
@@ -108,16 +110,18 @@ CycleWindow.of.result --> UsageClient.fetchAll
 
 #### JF-2B 계산·보관·회신
 
+`ArchiveClient.file.accepted`는 보관 응답으로 `{invoiceId, replaced}`를 받은 성공 조건의 별칭이다. 반환 데이터 노드나 실제 응답 필드를 추가한 것이 아니다. 보관 실패는 기존 `.rejected` 경로에서 `work`가 처리하며, 성공·실패 두 경로의 공통 후속이 회신이다.
+
 ```jobflow
 orchestrator: InvoiceMaker
 Object: InvoiceMaker, UsageClient, InvoiceRenderer, ArchiveClient, SpareCopy, MakeRecords, ReplyClient
 
 InvoiceMaker.work --> UsageClient.fetchAll
-UsageClient.fetchAll.result --> InvoiceRenderer.render
-InvoiceRenderer.render.result --> ArchiveClient.file
+UsageClient.fetchAll --> InvoiceRenderer.render
+InvoiceRenderer.render --> ArchiveClient.file
+ArchiveClient.file.accepted --> MakeRecords.finish
 ArchiveClient.file.rejected --> SpareCopy.keep
 SpareCopy.keep --> MakeRecords.finish
-ArchiveClient.file.result --> MakeRecords.finish
 MakeRecords.finish --> ReplyClient.send
 ```
 
@@ -127,10 +131,10 @@ MakeRecords.finish --> ReplyClient.send
 | `InvoiceRenderer.render` | `invoice-maker.ts:68`, `invoice-renderer.ts:10-96` | 4 | 서식 + 항목 + 요금표 → 금액 계산(항목 합, 부가세 10%) → 청구서 HTML. `MAKER_RENDER_LIMIT_MS`(45s)를 넘기면 throw |
 | `ArchiveClient.file` | `invoice-maker.ts:72-80`, `archive-client.ts:12-36` | 5 | 상위 `Archive.file` — `dedupKey = <planId>/<cycle>`, 15s |
 | `.rejected` → `SpareCopy.keep` → `MakeRecords.finish` | `invoice-maker.ts:82-86`, `spare-copy.ts:8-20` | 5·6 | **보관 실패 분기** — 문서를 `spare/<runId>/invoice.html`에 남기고 `failed`(`note='보관 실패'`). 시계의 재시도 판정으로 이어진다 |
-| `.result` → `MakeRecords.finish` | `invoice-maker.ts:88`, `make-records.ts:48-60` | 6 | `issued` + `invoiceId` |
+| `ArchiveClient.file.accepted` → `MakeRecords.finish` | `invoice-maker.ts:88`, `make-records.ts:48-60` | 6 | `issued` + `invoiceId` |
 | `ReplyClient.send` | `invoice-maker.ts:90`, `reply-client.ts:6-24` | 7 | 상위 `Clock.acceptReply` — 4필드, 5s, **재시도 없음**. 실패는 로그 1줄(`C-02`) |
 
-- **완료 사실** 레코드 `issued` 또는 `failed` + 회신 1회. `finish`로 들어오는 화살표 둘은 보관 성공과 실패가 같은 메서드로 모이는 합류이고, 보관 결과는 하나뿐이라 `finish`는 한 번 실행된다. 렌더러는 `finish` 칸을 둘 그리고 회신 화살표를 아래 칸에서 냈지만, 회신은 성공·실패 어느 쪽에서도 나간다.
+- **완료 사실** 레코드 `issued` 또는 `failed` + 회신 1회. `finish`로 들어오는 화살표 둘은 보관 성공과 실패가 같은 메서드로 모이는 합류이고, 보관 결과는 하나뿐이라 `finish`는 한 번 실행된다. 이전 작성판의 렌더러는 `finish` 칸을 둘 그리고 회신 화살표를 아래 칸에서 냈지만, 회신은 성공·실패 어느 쪽에서도 나간다.
 - 회신 본문에는 0원으로 채운 고객이 없다 — `fetchAll`이 실패를 0원 항목으로 바꿔 넘기기 때문이다(`C-03`).
 - `spare/` 사본은 다음 시도가 보관에 성공해도 지우지 않는다 — 운영자가 손으로 정리한다(§4).
 
@@ -163,7 +167,7 @@ Object: main, InvoiceMaker, MakeRecords
 
 main.start --> InvoiceMaker.failInterrupted
 InvoiceMaker.failInterrupted --> MakeRecords.listWorking
-MakeRecords.listWorking.result --> MakeRecords.finish
+MakeRecords.listWorking --> MakeRecords.finish
 InvoiceMaker.failInterrupted --> MakeRecords.prune
 ```
 

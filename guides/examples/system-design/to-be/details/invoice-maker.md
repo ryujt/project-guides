@@ -40,9 +40,11 @@
 
 상위 바깥 노드 ↔ 이 경계의 클라이언트는 AS-IS와 같다 — `FormDir.read` = `FormLoader.load`, `UsageApi.fetch` = `UsageClient.fetchAll`(고객마다 `usageHttp.postUsage` 1회), `Archive.file` = `ArchiveClient.file`, `Clock.acceptReply` = `ReplyClient.send`.
 
-**표기** 유지 노드는 AS-IS 상세의 심볼 이름을 그대로 쓰고 새 노드에는 표에 `(제안)`을 단다. 클래스가 없는 모듈 객체(`checks`·`usageHttp`·`lines`)는 [AS-IS §3](../../as-is/details/invoice-maker.md#3-내부-job-flow--드릴다운) 표기의 구획 표를 따르고, `lines`에 새 심볼 `checkLine`(제안)만 더한다. `단계 #`은 [AS-IS 3.1](../../as-is/details/invoice-maker.md#31-생성-단계와-시간-한도)의 생성 단계 0~7이다. 네 그림의 이전 렌더 확인 기록은 [상위 §9.2](../system-design-to-be.md#92-검증)에 있다. 열지 않은 것: `ReplyClient.send`의 재시도 반복(단순 워커 — §6 표가 원본), `InvoiceRenderer.render`(순수 변환).
+**표기** 유지 노드는 AS-IS 상세의 심볼 이름을 그대로 쓰고 새 노드에는 표에 `(제안)`을 단다. 클래스가 없는 모듈 객체(`checks`·`usageHttp`·`lines`)는 [AS-IS §3](../../as-is/details/invoice-maker.md#3-내부-job-flow--드릴다운) 표기의 구획 표를 따르고, `lines`에 새 심볼 `checkLine`(제안)만 더한다. `단계 #`은 [AS-IS 3.1](../../as-is/details/invoice-maker.md#31-생성-단계와-시간-한도)의 생성 단계 0~7이다. 네 그림의 이전 렌더 확인 기록은 [상위 §9.2](../system-design-to-be.md#92-검증)에 있다. 반환 데이터 노드를 생략한 현재 수정판은 정적으로 검토했으며 다시 렌더하지 않았다. 열지 않은 것: `ReplyClient.send`의 재시도 반복(단순 워커 — §6 표가 원본), `InvoiceRenderer.render`(순수 변환).
 
 ### JF-1 라우트 진입 — MakeRoutes
+
+분기명은 이 가상 예시의 반환 계약에서 도출한 조건 별칭이다. `checks.makeBody.valid`는 검사된 요청 본문을 반환한 경우, `.invalid`는 검사 실패다. `MakeRecords.read.found`는 레코드를 찾은 경우, `.missing`은 찾지 못한 경우다. 새 메서드나 반환 필드를 추가한 표기가 아니며, 후속 호출은 그림의 해당 분기에서만 이어진다.
 
 ```jobflow
 orchestrator: MakeRoutes
@@ -50,13 +52,13 @@ Object: MakeRoutes, checks, InvoiceMaker, MakeRecords
 
 MakeRoutes.make --> checks.makeBody
 checks.makeBody.invalid
-checks.makeBody.result --> InvoiceMaker.receive
-InvoiceMaker.receive.result --> MakeRoutes.make.result
+checks.makeBody.valid --> InvoiceMaker.receive
+InvoiceMaker.receive --> MakeRoutes.make.result
 MakeRoutes.peek --> MakeRecords.read
 MakeRecords.read.missing
-MakeRecords.read.result --> MakeRoutes.peek.result
+MakeRecords.read.found --> MakeRoutes.peek.result
 MakeRoutes.stop --> InvoiceMaker.stop
-InvoiceMaker.stop.result --> MakeRoutes.stop.result
+InvoiceMaker.stop --> MakeRoutes.stop.result
 ```
 
 | 노드 | 근거 | 비고 |
@@ -96,7 +98,7 @@ MakeRecords.read.missing --> MakeRecords.markStopped
 
 ### JF-2 생성 조율과 중지 확인 지점 — InvoiceMaker.work
 
-`work`의 단계 1~2(서식 읽기·사용 기간 — AS-IS `JF-2A`의 `FormLoader`·`CycleWindow`)는 바뀌지 않아 그리지 않았다. 단계 0의 접수(`receive`)에서 바뀌는 것은 `JF-1` 표에 있다. 아래 그림은 `work`의 단계 3(`UsageClient.fetchAll`)부터 끝까지다 — AS-IS `JF-2B`와 같은 구간에 중지 확인 지점 두 자리를 더했다.
+`work`의 단계 1~2(서식 읽기·사용 기간 — AS-IS `JF-2A`의 `FormLoader`·`CycleWindow`)는 바뀌지 않아 그리지 않았다. 단계 0의 접수(`receive`)에서 바뀌는 것은 `JF-1` 표에 있다. 아래 그림은 `work`의 단계 3(`UsageClient.fetchAll`)부터 끝까지다 — AS-IS `JF-2B`와 같은 구간에 중지 확인 지점 두 자리를 더했다. `UsageClient.fetchAll.completed`는 고객별 조회 결과 목록이 정상 반환된 조건의 별칭이며, `.stopped`는 조회 중지다. `ArchiveClient.file.accepted`는 보관 응답으로 `{invoiceId, replaced}`를 받은 성공 조건의 별칭이며, 보관 실패는 기존 `.rejected` 경로에서 `work`가 처리한다. 이 분기명은 반환 데이터 노드나 실제 응답 필드를 추가한 것이 아니다.
 
 ```jobflow
 orchestrator: InvoiceMaker
@@ -104,24 +106,24 @@ Object: InvoiceMaker, UsageClient, InvoiceRenderer, WorkRegistry, ArchiveClient,
 
 InvoiceMaker.work --> UsageClient.fetchAll
 UsageClient.fetchAll.stopped
-UsageClient.fetchAll.result --> InvoiceRenderer.render
-InvoiceMaker.work --> WorkRegistry.enterArchive
+UsageClient.fetchAll.completed --> InvoiceRenderer.render
+InvoiceRenderer.render --> WorkRegistry.enterArchive
 WorkRegistry.enterArchive.stopped
 WorkRegistry.enterArchive.clear --> ArchiveClient.file
+ArchiveClient.file.accepted --> MakeRecords.finish
 ArchiveClient.file.rejected --> SpareCopy.keep
 SpareCopy.keep --> MakeRecords.finish
-ArchiveClient.file.result --> MakeRecords.finish
 MakeRecords.finish --> ReplyClient.send
 ```
 
 | 노드 | 근거 | 단계 # | 비고 |
 |---|---|---|---|
-| `UsageClient.fetchAll`·`.stopped` | `C-01`·`C-04`, 나머지 유지 — [AS-IS `JF-2B`](../../as-is/details/invoice-maker.md#jf-2b-계산보관회신) | 3 | 실행의 중단 신호를 함께 넘긴다(제안). 중지면 `.stopped` — 렌더·보관·회신 없이 끝난다(중지 확인 지점의 첫 자리 — 상위 §5에는 그리지 않았다). 결과는 고객별 항목이고, 조회에 실패한 고객은 `needs-check` 항목이다 — `JF-2.1` |
+| `UsageClient.fetchAll`·`.completed`·`.stopped` | `C-01`·`C-04`, 나머지 유지 — [AS-IS `JF-2B`](../../as-is/details/invoice-maker.md#jf-2b-계산보관회신) | 3 | 실행의 중단 신호를 함께 넘긴다(제안). 중지면 `.stopped` — 렌더·보관·회신 없이 끝난다(중지 확인 지점의 첫 자리 — 상위 §5에는 그리지 않았다). 결과는 고객별 항목이고, 조회에 실패한 고객은 `needs-check` 항목이다 — `JF-2.1` |
 | `InvoiceRenderer.render` | `C-04`, 호출은 유지 — [AS-IS `JF-2B`](../../as-is/details/invoice-maker.md#jf-2b-계산보관회신) | 4 | `needs-check` 항목은 금액 칸에 `확인 필요`를 쓰고 합계·부가세에서 뺀다. 합계 옆에 「확인 필요 n건 제외」를 적는다(제안) |
 | `WorkRegistry.enterArchive`(제안)·`.stopped`·`.clear` | `C-01`·`R-01` | 4·5 사이 | 렌더 다음에 `work`가 부른다. 중지 확인과 보관 단계 표시를 한 동기 구간에서 한다. `.stopped`는 중지 확인 지점의 둘째 자리이고, `.clear` 뒤의 중지는 `too-late`다 |
 | `ArchiveClient.file`·`.rejected` → `SpareCopy.keep` | 유지 — [AS-IS `JF-2B`](../../as-is/details/invoice-maker.md#jf-2b-계산보관회신) | 5 | 상위 `Archive.file`(15s). 렌더한 문서를 보관하고, 보관이 실패하면 `spare/<runId>/` 사본 + `failed` |
 | `MakeRecords.finish` | 유지 — [AS-IS `JF-2B`](../../as-is/details/invoice-maker.md#jf-2b-계산보관회신), 필드는 `C-03`·`C-04` | 6 | `issued`(+`invoiceId`·`heldLines`)나 `failed`. 들어오는 화살표 둘은 보관 실패·성공의 **합류**다 — 보관 결과는 하나뿐이라 `finish`도 실행마다 한 번이다 |
-| `ReplyClient.send` | `C-03`·`C-04` | 7 | 상위 `Clock.acceptReply`. 본문 4필드 + `heldLines`, 헤더 `Idempotency-Key: <runId>:<try>`. 다시 보내는 규칙은 §6. 회신 화살표는 두 경로에 공통이고 렌더러가 마지막 `finish` 칸에 잇는다 |
+| `ReplyClient.send` | `C-03`·`C-04` | 7 | 상위 `Clock.acceptReply`. 본문 4필드 + `heldLines`, 헤더 `Idempotency-Key: <runId>:<try>`. 다시 보내는 규칙은 §6. 회신 화살표는 두 경로에 공통이고 이전 작성판의 렌더러는 마지막 `finish` 칸에 이었다 |
 
 - **트리거** 상위 `Maker.make` 202 뒤의 백그라운드 실행(상위 `Maker.work`). **완료 사실** 레코드 `issued`(+`heldLines`) 또는 `failed` + 회신 1건(재시도 포함). 중지면 레코드 `stopped`만 남는다 — `JF-1.1`이 이미 썼다.
 - **실패 분기** 서식·기간·렌더 예외는 AS-IS 바깥 `catch`처럼 `failed` + 회신이다. 단 중지된 실행이면 아무것도 쓰지 않고 끝나 `stopped`를 덮지 않는다(제안).

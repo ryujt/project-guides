@@ -155,8 +155,10 @@ flowchart TB
 
 ### 5.0 표기
 
-- 그림은 모두 `scope:`다. 화살표는 요청을 보낸 경계에서 받은 경계로 긋는다([출발점은 실제 요청자](../../../job-flow-diagram-guide.md#scope-그림의-출발점은-실제-요청자다)). 생성처럼 한 경계가 조율하는 흐름도 그 경계 안을 그리지 않으므로 `orchestrator:`를 쓰지 않았다.
-- 노드는 `경계객체.공개계약`이다. 원문 경로는 그림 아래 `노드 | 실제 계약` 표에 두었다. `.result`는 흐름을 잇는 응답만 그렸다(202 접수, `runId`, ETag, 청구서 문서).
+반환 데이터 노드를 생략한 현재 수정판은 정적으로 검토했다. [브리프 §5](../_evidence-brief.md#5-검증-기록)의 렌더 확인은 이전 작성판에 대한 기록이며, 현재 그림을 다시 렌더한 결과는 아니다.
+
+- 그림은 모두 `scope:`다. 요청 화살표는 요청을 보낸 경계에서 받은 경계로 긋고, 응답 화살표는 응답을 돌려주는 경계에서 원래 요청자의 다음 동작으로 잇는다([출발점은 실제 요청자](../../../job-flow-diagram-guide.md#scope-그림의-출발점은-실제-요청자다)). 생성처럼 한 경계가 조율하는 흐름도 그 경계 안을 그리지 않으므로 `orchestrator:`를 쓰지 않았다.
+- 노드는 `경계객체.공개계약`이다. 원문 경로는 그림 아래 `노드 | 실제 계약` 표에 두었다. 응답을 다음 동작에 쓰는 흐름은 반환 데이터 노드 없이 메서드끼리 이었다. 전달하는 값(202 접수, `runId`, ETag, 청구서 문서)은 계약 표와 본문에 적었다([결과 표기](../../../job-flow-diagram-guide.md#표시할-결과-선택)).
 - **실행 노드** `Maker.work` — 생성기 안에서 서식·사용량·보관·회신 요청을 차례로 보내는 실행 단위다. 맡김 요청이 202로 끝난 다음에 돌고, 공개 계약이 아니라는 것을 노드 표에 적었다.
 - **종결 입구 노드** `Clock.finishRun` — 회신, 생존 확인, 마감 정리가 실행을 끝낼 때 모두 이 메서드를 부른다. 같은 경계 안의 화살표 `Clock.acceptReply --> Clock.finishRun`은 종결 입구로 들어가는 길을 보일 때만 썼다.
 - **프록시를 지나는 응답** — 요청은 관통 프록시(`Console.proxyBilling`·`Console.proxyInvoices`)를 실제 홉으로 그렸다. 응답도 같은 프록시를 지나 돌아가지만, 응답 화살표는 프록시 칸을 빼고 원래 요청자의 다음 동작 노드(`Browser.showList` 등 — 공개 계약 아님)로 바로 이었다.
@@ -193,7 +195,7 @@ Console.route --> Clock.operate
 Console.route --> Archive.browse
 ```
 
-**읽는 법** 줄은 네 무리다. 처음 둘은 `Clock.OnTick`이 생성기에 일을 맡기고 진행을 묻는 줄이다. 다음 다섯은 `Maker.work`가 서식 읽기·사용량 조회·보관·회신을 차례로 내보내는 부분이고, 그중 사용량 조회는 usage-api가 UsageDB로 다시 넘긴다. 그 뒤 셋은 회신이 종결 입구를 거쳐 청구서 정보 조회와 메일로 이어지는 줄이다(메일이 `issued` 종결에서만 나간다는 조건은 §5.5에 값 분기로 그렸다). 마지막 넷은 운영자 요청이 `Console.route`에서 서식 디렉터리·시계·보관소로 나뉘는 길이다. 트리거가 여럿(`Clock`·`Browser`)인 그림이라 `Object:` 순서는 [규칙](../../../job-flow-diagram-guide.md#렌더러-배치-특성)을 출발점으로 손으로 정했다 — 다시 불리지 않는 `Browser`는 맨 왼쪽이고, 회신을 받는 `Clock`은 오른쪽에 두어 회신 화살표가 앞 행에 끼어들지 않게 했다. 규칙대로면 `Clock`이 맨 오른쪽인데, 그렇게 두어도 그림이 흐트러지지 않는 것을 렌더로 확인한 뒤 메일 화살표가 오른쪽으로 나가도록 `Mailer`를 그 뒤에 두었다. 줄은 정기 발행이 중심 흐름이라 틱에서 시작하는 무리를 먼저 썼다.
+**읽는 법** 줄은 네 무리다. 처음 둘은 `Clock.OnTick`이 생성기에 일을 맡기고 진행을 묻는 줄이다. 다음 다섯은 `Maker.work`가 서식 읽기·사용량 조회·보관·회신을 차례로 내보내는 부분이고, 그중 사용량 조회는 usage-api가 UsageDB로 다시 넘긴다. 그 뒤 셋은 회신이 종결 입구를 거쳐 청구서 정보 조회와 메일로 이어지는 줄이다(메일이 `issued` 종결에서만 나간다는 조건은 §5.5에 값 분기로 그렸다). 마지막 넷은 운영자 요청이 `Console.route`에서 서식 디렉터리·시계·보관소로 나뉘는 길이다. 트리거가 여럿(`Clock`·`Browser`)인 그림이라 `Object:` 순서는 [규칙](../../../job-flow-diagram-guide.md#렌더러-배치-특성)을 출발점으로 손으로 정했다 — 다시 불리지 않는 `Browser`는 맨 왼쪽이고, 회신을 받는 `Clock`은 오른쪽에 두어 회신 화살표가 앞 행에 끼어들지 않게 했다. 이전 작성판에서는 규칙대로 `Clock`을 맨 오른쪽에 두어도 그림이 흐트러지지 않는 것을 렌더로 확인한 뒤 메일 화살표가 오른쪽으로 나가도록 `Mailer`를 그 뒤에 두었다. 줄은 정기 발행이 중심 흐름이라 틱에서 시작하는 무리를 먼저 썼다.
 
 - `Console.route`는 경로 접두만 보고 넘긴다 — 발행 순서를 정하는 코드는 admin-console에 없다. 묶음 노드가 묶은 계약은 이렇다: `Browser.call` = 화면이 보내는 서버 요청 전부, `Console.route` = 두 프록시와 서식 API, `Clock.operate` = 계획·실행 API, `Archive.browse` = 검색·열람, `FormDir.edit` = 서식 파일 읽기·쓰기.
 - invoice-archive 칸에서는 화살표가 하나도 나가지 않는다. 대신 들어오는 화살표가 셋(`file`·`open`·`browse`)으로 가장 많다.
@@ -215,10 +217,10 @@ Object: Browser, Console, FormDir
 
 Browser.openForm --> Console.getForm
 Console.getForm --> FormDir.read
-Console.getForm.result --> Browser.showForm
+Console.getForm --> Browser.showForm
 Browser.saveForm --> Console.putForm
 Console.putForm --> FormDir.write
-Console.putForm.result --> Browser.keepTag
+Console.putForm --> Browser.keepTag
 ```
 
 | 노드 | 실제 계약 |
@@ -227,9 +229,9 @@ Console.putForm.result --> Browser.keepTag
 | `FormDir.read`·`.write` | `<FORM_ROOT>/<formId>.md`. 쓰기는 같은 디렉터리의 임시 파일에 쓴 뒤 rename |
 | `Browser.showForm`·`.keepTag` | 응답을 받은 화면의 다음 동작(공개 계약 아님) — 편집기 표시, 새 ETag를 다음 저장의 `If-Match`로 보관 |
 
-- 두 `.result`는 열 때와 저장 뒤의 ETag를 화면에 돌려준다. 412가 오면 화면은 「다른 사람이 먼저 저장했다」를 띄우고 편집 내용을 버린다. 두 판을 견줘 합치는 기능은 없다(§7).
+- `getForm → showForm`과 `putForm → keepTag`는 열 때와 저장 뒤의 ETag를 화면에 돌려주는 흐름이다. 412가 오면 화면은 「다른 사람이 먼저 저장했다」를 띄우고 편집 내용을 버린다. 두 판을 견줘 합치는 기능은 없다(§7).
 - **저장할 때 서식 내용을 검사하지 않는다** — 자리 표시 `{{lines}}`가 빠진 서식도 저장되고, 생성기 1단계에서야 실패해 그 주기 실행이 재시도로 넘어간다(§5.4).
-- 열기와 저장은 계약이 달라 노드도 `getForm`·`putForm` 둘로 썼다. 한 이름으로 묶으면 두 응답이 한 노드의 `.result`로 읽히고, 렌더러는 저장 응답을 그 이름의 새 칸에 다시 그린다([줄 순서 규칙](../../../job-flow-diagram-guide.md#줄-순서-규칙)).
+- 열기와 저장은 계약이 달라 노드도 `getForm`·`putForm` 둘로 썼다. 한 이름으로 묶으면 열기와 저장의 호출·응답이 같은 계약으로 읽힌다. 렌더러가 같은 이름을 새 칸에 그려도 두 계약이 구분되는 것은 아니다([줄 순서 규칙](../../../job-flow-diagram-guide.md#줄-순서-규칙)).
 
 ### 5.3 청구 계획 등록·즉시 발행·중지
 
@@ -242,7 +244,7 @@ Console.proxyBilling --> Clock.plans
 Browser.issueNow --> Console.proxyBilling
 Console.proxyBilling --> Clock.issueNow
 Clock.issueNow --> Maker.make
-Clock.issueNow.result --> Browser.openRun
+Clock.issueNow --> Browser.openRun
 Browser.openRun --> Console.proxyBilling
 Console.proxyBilling --> Clock.getRun
 Browser.stopRun --> Console.proxyBilling
@@ -258,6 +260,7 @@ Console.proxyBilling --> Clock.stopRun
 | `Clock.stopRun` | `POST /api/runs/:runId/stop` → `{stopped}` — **실행 행만** `dropped(stopped)`로 닫는다. 이미 끝난 행은 `stopped:false` |
 | (그림 밖) `Clock.listRuns` | `GET /api/runs?state=` — 실행 목록 화면이 「중지」 버튼을 붙일 행을 받는다 |
 
+- `Clock.issueNow → Browser.openRun`은 프록시를 거쳐 원래 요청자에게 돌아온 202 응답을 화면이 쓰는 흐름이다. Clock이 화면을 직접 호출하는 것은 아니다.
 - 「지금 발행」에 202가 와도 청구서는 아직 없다. 실행 행을 만들고 맡김을 한 번 시도한 시점에 응답하기 때문이다. 그 뒤의 길은 정기 발행(§5.4·§5.5)과 같고, 같은 주기 실행이 이미 있는지는 보지 않는다(`B-02`).
 - 중지 요청은 `Clock.stopRun`에서 끝난다. 이 그림에 생성기로 가는 줄이 없는 것은 코드에 그런 호출이 없어서다. 생성은 끝까지 가고, 그 `issued` 회신이 중지된 행을 `closed`로 바꾼 뒤 메일을 보낸다(`B-01`, §5.5·§5.7).
 - 프록시 칸이 넷인 것은 요청이 넷이어서다(합류가 아니다). `Browser.openRun`의 반복은 실제 재호출 — 5초 간격으로 화면을 닫을 때까지 부른다.
@@ -329,10 +332,10 @@ Object: Browser, Console, Archive
 
 Browser.searchInvoices --> Console.proxyInvoices
 Console.proxyInvoices --> Archive.search
-Archive.search.result --> Browser.showList
+Archive.search --> Browser.showList
 Browser.openInvoice --> Console.proxyInvoices
 Console.proxyInvoices --> Archive.open
-Archive.open.result --> Browser.showInvoice
+Archive.open --> Browser.showInvoice
 ```
 
 | 노드 | 실제 계약 |
@@ -341,6 +344,7 @@ Archive.open.result --> Browser.showInvoice
 | `Archive.search`·`.open` | `GET /api/invoices/search?q=` → 상위 25건 `{invoiceId, title, total, issuedAt}`, `GET /api/invoices/:invoiceId` → 메타 + 청구서 문서 |
 | `Browser.showList`·`.showInvoice` | 응답을 받은 화면의 다음 동작(공개 계약 아님) — 목록 표시, 문서 표시 |
 
+- `Archive.search → Browser.showList`와 `Archive.open → Browser.showInvoice`는 프록시를 거쳐 원래 요청자에게 돌아온 응답의 사용이다.
 - `Archive.open`은 §5.5에서 시계가 메일 본문을 채우려고 부르는 것과 같은 `GET /api/invoices/:invoiceId`다. 여기서는 브라우저가 프록시를 거쳐 부른다.
 - 색인은 `dedupKey`로 덮어쓴 청구서를 한 건으로 보여 준다 — 같은 주기 메일이 두 번 나갔어도(`B-02`) 화면에는 하나다.
 

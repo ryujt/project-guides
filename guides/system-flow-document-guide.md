@@ -243,16 +243,15 @@ Object: Client, ApiServer, Worker, Storage
 
 Client.SendCommand --> ApiServer.HandleCommand
 ApiServer.HandleCommand --> Worker.Run
-Worker.Run.result --> Storage.SaveResult
-Storage.SaveResult.result --> ApiServer.HandleCommand.result
-ApiServer.HandleCommand.result --> Client.message.JobResult
+Worker.Run --> Storage.SaveResult
+ApiServer.HandleCommand --> Client.message.JobResult
 ```
 
 이 예시의 범위와 계약:
 
 - 최소 조각만 사용한다.
 - 복잡한 내부 과정은 다음 섹션에서 새 jobflow로 연다. 이 예시의 외부 데이터 조회는 Worker의 내부 책임이므로 상위에는 `Worker.Run`만 보인다.
-- 응답과 저장 결과의 의미는 공개 계약에서 정한다. 예시의 `Storage.SaveResult`는 저장된 결과를 반환한다.
+- 응답과 저장 결과의 의미는 공개 계약에서 정한다. 예시의 `Storage.SaveResult`는 저장된 결과를 반환하며, ApiServer가 그 값을 Client의 `JobResult`로 돌려준다. 그림에서는 중간 반환 데이터 노드를 생략했다.
 
 호출·반환·이벤트의 표기와 해석은 [Job Flow 가이드](job-flow-diagram-guide.md)를 따른다.
 
@@ -280,7 +279,7 @@ Dashboard --> (/reports/render) : 렌더 요청
 
 SSE, WebSocket, queue, scheduler, timeout/cancel 은 별도 섹션으로 분리한다.
 
-아래는 중앙 업무 조율 없이 발행·구독하는 예시다. 조율 방식과 통신 수단의 선택은 [Method-R](method-R.md#4-시스템-설계-책임상태-소유권과-협력), 헤더·메시지 해석과 렌더러 지원은 [Job Flow 가이드](job-flow-diagram-guide.md)를 따른다.
+아래는 ApiServer와 Worker가 독립 서비스로서 중앙 업무 조율 없이 메시지를 발행·구독하고, 외부 Client에 결과를 전달하는 예시다. 조율 방식과 통신 수단의 선택은 [Method-R](method-R.md#4-시스템-설계-책임상태-소유권과-협력), 도표의 메시지 선택은 [메시지 사용 범위](job-flow-diagram-guide.md#메시지-사용-범위), 헤더 해석과 렌더러 지원은 [Job Flow 가이드](job-flow-diagram-guide.md)를 따른다.
 
 ```jobflow
 scope: ReportSystem
@@ -327,9 +326,9 @@ orchestrator: SystemOrchestrator
 Object: ApiBoundary, SystemOrchestrator, Validator, ContextBuilder, DomainWorker, StorageGateway
 ApiBoundary.HandleCommand --> SystemOrchestrator.HandleCommand
 SystemOrchestrator.HandleCommand --> Validator.Validate
-Validator.Validate.result --> ContextBuilder.Build
-ContextBuilder.Build.result --> DomainWorker.Run
-DomainWorker.Run.result --> StorageGateway.Save
+Validator.Validate --> ContextBuilder.Build
+ContextBuilder.Build --> DomainWorker.Run
+DomainWorker.Run --> StorageGateway.Save
 ```
 
 어떤 협력자를 더 깊이 열지 판단할 질문:
@@ -406,14 +405,14 @@ Gateway가 반드시 orchestrator인 것은 아니다. 업무 상태의 변경 �
 | 전체 구성, 소유/의존 관계 | Mermaid `flowchart` 또는 `classDiagram`, 범례로 관계 구분 |
 | 객체/모듈 간 실행 순서 | `jobflow` |
 | 사용자 화면 이동 및 그 판단에 필요한 API | `navigation` |
-| 내부 API/queue/topic 메시지 흐름 | 경계 계약 표와 `jobflow`; 시간 순서는 Mermaid `sequenceDiagram`으로 보완 |
+| 독립 서비스 간 API/queue/topic 메시지 흐름 | 경계 계약 표와 `jobflow`; 시간 순서는 Mermaid `sequenceDiagram`으로 보완 |
 | 상태 전이 | `state`; 필요한 별도 상태 관점은 Mermaid `stateDiagram-v2`로 보완 |
 
 선택한 독자 DSL을 원본으로 유지한다. Mermaid는 정적 구성·시간 순서 같은 추가 관점을 보완하며 기존 jobflow/state를 대체하지 않는다.
 
 ### jobflow 규칙
 
-헤더, 호출·이벤트·요청 이벤트의 반환, 표시할 결과와 배치, 렌더러 확인은 [Job Flow 가이드](job-flow-diagram-guide.md)를 따른다.
+헤더, 호출·이벤트, [메시지 사용 범위](job-flow-diagram-guide.md#메시지-사용-범위), 반환 데이터 생략과 응답 경계·분기 배치, 렌더러 확인은 [Job Flow 가이드](job-flow-diagram-guide.md)를 따른다.
 
 ### 이름 규칙
 

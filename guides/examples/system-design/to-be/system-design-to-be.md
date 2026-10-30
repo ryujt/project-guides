@@ -253,6 +253,8 @@ Console.route --> Archive.browse
 
 ### 5.3 청구 계획 등록·즉시 발행·중지
 
+`Clock.issueNow → Browser.openRun`은 관통 프록시를 거쳐 원래 요청자에게 돌아온 202 응답을 화면이 쓰는 흐름이다. Clock이 화면을 직접 호출하는 것은 아니다.
+
 ```jobflow
 scope: 청구 계획 등록·즉시 발행·중지 — TO-BE
 Object: Browser, Console, Clock, Maker
@@ -262,7 +264,7 @@ Console.proxyBilling --> Clock.plans
 Browser.issueNow --> Console.proxyBilling
 Console.proxyBilling --> Clock.issueNow
 Clock.issueNow --> Maker.make
-Clock.issueNow.result --> Browser.openRun
+Clock.issueNow --> Browser.openRun
 Browser.openRun --> Console.proxyBilling
 Console.proxyBilling --> Clock.getRun
 Browser.stopRun --> Console.proxyBilling
@@ -460,6 +462,8 @@ Clock.finishRun.issued --> Mailer.send
 - 읽을 계약은 작업마다 작다 — 생성기 작업은 [생성기 상세 §2](details/invoice-maker.md#2-공개-계약)·§3·§6, 시계 작업은 [시계 상세 §2](details/billing-clock.md#2-공개-계약)·§3과 §5.3·§5.5의 생성기 응답만 본다.
 
 ### 9.2 검증
+
+반환 데이터 노드를 생략한 현재 수정판은 정적으로 검토했으며 다시 렌더하지 않았다. 아래 렌더 기록을 현재 그림의 확인 결과로 적용하지 않는다.
 
 **이전 작성판의 검사 기록** — 아래는 이 예시 문서에 남아 있던 정적·렌더 검사 기록이다. 현재 수정판의 재검증 결과와 구분하며, 가상 시스템의 코드 시험은 아니다.
 

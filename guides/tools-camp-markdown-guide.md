@@ -30,7 +30,7 @@ AI 작업에는 이 레퍼런스 전체를 기본 첨부하지 않는다. 필요
 | layout ` V ` / ` > ` | 각각 세로/가로 방향으로 파싱, `H` 연산자는 없음 | `>`를 단순 포함 관계라고 재정의하지 않음 |
 | layout 크기 | 가로는 `flex` 배분 값, 세로는 입력 수치를 사용하지 않음 | 정밀한 픽셀/비율은 제품 화면에서 별도 확인 |
 
-기존 `jobflow-result-line.test.mjs` 69개와 `jobflow-xss.test.mjs` 32개 단언이 통과했고, 가이드의 구체 예시 48개에서 변환/문자열 생성을 확인했다(jobflow 30, navigation 12, state 3, layout 3). 이는 **파서·변환·SVG/HTML 문자열 생성 검사**다. 브라우저에서의 Mermaid/SVG 표시, 모든 의미적 올바름, UI의 시각적 품질은 확인하지 않았다. 임시 복사본은 검사 뒤 제거했고 원본 구현은 변경하지 않았다.
+기존 `jobflow-result-line.test.mjs` 69개와 `jobflow-xss.test.mjs` 32개 단언이 통과했고, 당시 작성판 가이드의 구체 예시 48개에서 변환/문자열 생성을 확인했다(jobflow 30, navigation 12, state 3, layout 3). 이는 **파서·변환·SVG/HTML 문자열 생성 검사**다. 반환 데이터 표기를 생략한 현재 jobflow 예시는 정적으로 검토했으며 이 검사·렌더링을 다시 실행하지 않았다. 브라우저에서의 Mermaid/SVG 표시, 모든 의미적 올바름, UI의 시각적 품질은 확인하지 않았다. 임시 복사본은 검사 뒤 제거했고 원본 구현은 변경하지 않았다.
 
 `orchestrator:`/`scope:`처럼 인식되지 않는 줄이 항상 안전하게 무시된다고 일반화하지 않는다. 이 파서는 점을 포함한 알 수 없는 줄을 독립 노드로 해석할 수도 있다. 문서 헤더의 의미, 파서 입력 수용, 시각적 표현은 각각 확인한다.
 
@@ -165,7 +165,7 @@ master: ClassC
 Object: ClassC, ClassA, ClassB
 ClassC.Start --> ClassA.Show
 ClassC.Start --> ClassB.GetList
-ClassB.GetList.result --> ClassC.AddList
+ClassB.GetList --> ClassC.AddList
 ```
 ````
 
@@ -185,11 +185,11 @@ ClassB.GetList.result --> ClassC.AddList
 - 액션 경로에 **점이 포함**(예: `GetList.result`, `state.value`) → 데이터/결과 모양(노랑, 양쪽 세로선).
 - 그 외 일반 액션 → 사각형(파랑).
 
-**결과(result) 경로**
+**결과(result) 경로 — 기존 표기의 렌더러 처리**
 - 입력 전체에서 `.result.`(중간 세그먼트)는 내부적으로 `.data.`로 치환된다.
 - `ClassB.GetList.result` 처럼 끝에 오는 `.result`는 점이 포함된 경로이므로 위 규칙에 따라 **데이터 모양(노랑)**으로 그려진다.
 
-실행 의미와 [이벤트 반환값](job-flow-diagram-guide.md#이벤트가-반환값을-갖는-경우), [결과 선택](job-flow-diagram-guide.md#표시할-결과-선택)·[배치](job-flow-diagram-guide.md#메서드와-결과의-배치)는 전용 가이드를 따른다. 위 모양·경로 처리는 해당 스냅샷의 동작이다. 세부 지원은 대상 구현에서 확인하고, 미확인 표기는 코드펜스 밖에 설명한다.
+새 도표의 반환 데이터 생략·메서드 간 연결·응답 경계는 [결과 선택](job-flow-diagram-guide.md#표시할-결과-선택)·[배치](job-flow-diagram-guide.md#메서드와-결과의-배치)·[이벤트 반환값](job-flow-diagram-guide.md#이벤트가-반환값을-갖는-경우)을 따른다. 위 `.result` 처리는 기존 표기와 명시적인 응답 경계에 대한 구현 설명이며 다음 메서드로 전달할 때 `.result` 노드를 추가하라는 규칙이 아니다. 위 모양·경로 처리는 해당 스냅샷의 동작이다. 세부 지원은 대상 구현에서 확인하고, 미확인 표기는 코드펜스 밖에 설명한다.
 
 ---
 

@@ -5,11 +5,11 @@ Method-R은 시스템을 **책임과 계약이 분명한 조각으로 재귀적�
 설계 수준에 따라 다음 방식을 선호한다.
 
 * **시스템 수준**: 마이크로서비스 아키텍처(MSA)로 독립적인 서비스를 구성한다. 서비스 간에는 **이벤트·메시지 기반 통신**과 **REST API의 요청·응답**을 활용한다. 메시지 큐에는 **Amazon SQS**, 발행·구독에는 **Amazon SNS**, 이벤트 스트리밍에는 **Apache Kafka**나 **Amazon Kinesis Data Streams**를 사용할 수 있다.
-* **모듈·상세 수준**: **오케스트레이터–워커 패턴**을 기본으로 한다. 오케스트레이터는 작업 흐름과 결과를 연결하고, 각 워커는 자기 역할을 수행한다. 모듈의 메시지 처리가 필요하면 **이벤트 버스의 발행·구독**을 함께 사용한다.
+* **모듈·상세 수준**: **오케스트레이터–워커 패턴**을 기본으로 한다. 오케스트레이터는 작업 흐름과 결과를 연결하고, 각 워커는 자기 역할을 수행한다. 발행·구독 계약이 필요하면 이벤트 버스를 사용할 수 있다. Job Flow에서 내부 협력을 그리는 방식은 [메시지 사용 범위](./job-flow-diagram-guide.md#메시지-사용-범위)를 따른다.
 
 이 선호를 바탕으로 시스템 규모와 요구사항에 맞는 구조를 선택한다. 목적은 한 조각과 인접 계약만으로 변경을 판단하여 AI가 읽어야 할 구현 맥락을 줄이는 것이다.
 
-분할·계약·검증의 공통 기준은 [모듈 경계와 최소 맥락 가이드](./module-boundary-guide.md), 조율자의 구현 책임은 [Orchestrator-Worker 가이드](./orchestrator-worker-pattern-guide.md), 다이어그램의 작성·해석·결과 배치는 [Job Flow 가이드](./job-flow-diagram-guide.md)를 따른다. 이 문서는 **어떤 경계를 어느 깊이까지 나누고, 각 경계에 맞는 협력과 통신 방식을 어떻게 선택할지**를 다룬다.
+분할·계약·검증의 공통 기준은 [모듈 경계와 최소 맥락 가이드](./module-boundary-guide.md), 조율자의 구현 책임은 [Orchestrator-Worker 가이드](./orchestrator-worker-pattern-guide.md), 다이어그램의 작성·해석·결과 전달은 [Job Flow 가이드](./job-flow-diagram-guide.md)를 따른다. 이 문서는 **어떤 경계를 어느 깊이까지 나누고, 각 경계에 맞는 협력과 통신 방식을 어떻게 선택할지**를 다룬다.
 
 ## 1. 네 가지 설계 깊이
 
@@ -41,7 +41,7 @@ flowchart TB
 
 ## 2. 조각의 협력과 서비스 간 통신
 
-2.1·2.2는 상위 조율자·구독 구성이 형제 조각의 계약을 연결하는 방식, 2.3은 독립 서비스의 공개 API 호출을 다룬다. 공개 계약 의존과 내부 구현 의존을 구분한다.
+2.1·2.2는 상위 조율자·구독 구성이 형제 조각의 계약을 연결하는 방식, 2.3은 독립 서비스의 공개 API 호출을 다룬다. 공개 계약 의존과 내부 구현 의존을 구분한다. 도표의 이벤트·메서드와 메시지 선택은 [Job Flow 가이드](./job-flow-diagram-guide.md#메시지-사용-범위)를 따른다.
 
 | 방식 | 요청·발행 객체가 아는 것 | 연결을 책임지는 곳 | 결과가 필요할 때 |
 |---|---|---|---|
@@ -150,7 +150,7 @@ Object: Orchestrator, WorkerA, WorkerB
 Orchestrator.ProcessRequest --> WorkerA.ProcessRequest
 
 WorkerA.OnNeedHelp --> WorkerB.ProvideHelp
-WorkerB.ProvideHelp.result --> WorkerA.OnNeedHelp.result
+WorkerB.ProvideHelp --> WorkerA.OnNeedHelp.result
 ```
 
 마지막 화살표는 **Orchestrator가 WorkerB의 결과를 WorkerA의 `OnNeedHelp` 호출에 반환한다**는 뜻이다. `WorkerA.OnNeedHelp.result`는 위에서 정의한 단일 응답 콜백의 반환값이다. WorkerA는 `ProcessRequest` 안의 `await` 다음부터 후처리를 이어가고, 보고서를 완성해 반환하면 자기 몫이 끝난다. 결과를 받아도 `ProcessRequest`를 다시 호출하지 않으며, Orchestrator는 WorkerA 내부의 후처리에 관여하지 않는다.
@@ -159,7 +159,7 @@ WorkerB.ProvideHelp.result --> WorkerA.OnNeedHelp.result
 
 ### 2.2 메시지를 알리고 각 수신자가 필요한 메시지에 반응한다
 
-발행자는 수신자의 목록과 구현을 모른 채 메시지를 발행한다. 구독 구성에 따라 WorkerA는 EventA, WorkerB는 EventB에 반응하고, SharedEvent에는 둘 다 반응할 수 있다. 여기서 불특정 다수는 발행 시 수신 객체를 지정하지 않는다는 뜻이며, 모든 객체가 모든 메시지를 처리한다는 뜻은 아니다.
+발행자는 수신자의 목록과 구현을 모른 채 메시지를 발행한다. 구독 구성에 따라 WorkerA는 EventA, WorkerB는 EventB에 반응하고, SharedEvent에는 둘 다 반응할 수 있다. 여기서 불특정 다수는 발행 시 수신 객체를 지정하지 않는다는 뜻이며, 모든 객체가 모든 메시지를 처리한다는 뜻은 아니다. 같은 프로세스 안의 형제 조각에도 사용할 수 있는 방식이며 독립 서비스를 요구하지 않는다.
 
 | 사용 흐름 | 발행·요청 객체의 동작 | 완료의 의미 |
 |---|---|---|
@@ -169,7 +169,7 @@ WorkerB.ProvideHelp.result --> WorkerA.OnNeedHelp.result
 
 마지막 행의 “동기식”은 **호출자 흐름이 결과에 의존한다**는 뜻이다. 내부 메시지 전달과 대기는 `await` 등으로 비동기 구현할 수 있으며 스레드 차단을 요구하지 않는다. 반대로 결과를 기다리지 않는 발행도 전송 오류·재처리 책임이 사라진다는 뜻은 아니다.
 
-다음은 네 가지 독립 시나리오다. MessageBus는 메시지 라우팅과 요청·응답 대응을 맡고, 업무 처리는 각 서비스와 Worker가 수행한다.
+다음은 네 가지 독립 시나리오다. MessageBus는 메시지 라우팅과 요청·응답 대응을 맡고, 업무 처리는 각 서비스와 Worker가 수행한다. 도표에서는 버스의 발행·요청 메서드와 구체적인 이벤트·처리 메서드를 연결하고, 전달 데이터는 계약으로 설명한다([메시지 사용 범위](./job-flow-diagram-guide.md#메시지-사용-범위)).
 
 ```jobflow
 scope: WorkflowMessageExchange
@@ -192,16 +192,14 @@ WorkerB.onSharedEvent --> WorkerB.executeTask
 WorkflowService.loadData --> MessageBus.requestAndWait
 MessageBus.requestAndWait --> WorkerA.onDataRequest
 WorkerA.onDataRequest --> WorkerA.fetchData
-WorkerA.fetchData --> WorkerA.fetchData.result
-WorkerA.fetchData.result --> MessageBus.reply
-MessageBus.reply --> MessageBus.requestAndWait.result
-MessageBus.requestAndWait.result --> WorkflowService.continueWithData
+WorkerA.fetchData --> MessageBus.reply
+MessageBus.reply --> WorkflowService.continueWithData
 ```
 
 * `publishEventA`, `publishEventB`, `publishSharedEvent`는 각각 `publish(EventA)`, `publish(EventB)`, `publish(SharedEvent)`를 그림에서 구별하는 동작명이다. 구현에 세 메서드를 강제하지 않는다.
 * `onEventA`·`onSharedEvent`·`onDataRequest`는 각 Worker의 수신 핸들러다.
 * `SharedEvent`의 두 전달은 서로를 기다리지 않는다. 그림에서 WorkerA의 처리가 WorkerB의 수신보다 위에 있는 것은 수신자마다 처리까지 이어 썼기 때문이며 실행 순서가 아니다.
-* `requestAndWait`의 입력은 `DataRequest`와 `requestId`, `reply`의 입력은 같은 `requestId`와 결과다. `WorkflowService.loadData`가 응답을 받아 자신의 `continueWithData`를 호출한다. 버스가 WorkflowService의 업무 메서드를 직접 호출하거나 `loadData`를 다시 실행하는 흐름이 아니다.
+* `requestAndWait`의 입력은 `DataRequest`와 `requestId`, `reply`의 입력은 같은 `requestId`와 결과다. `reply`가 대기 중인 `requestAndWait`에 응답을 돌려주면 `WorkflowService.loadData`가 그 값을 받아 자신의 `continueWithData`를 호출한다. 반환 데이터 노드는 생략하고 응답을 쓰는 다음 메서드로 이었다. 버스가 WorkflowService의 업무 메서드를 직접 호출하거나 `loadData`를 다시 실행하는 흐름이 아니다.
 
 알림용 이벤트는 발생한 사실을, `DataRequest`는 결과가 필요한 요청을 나타낸다. 이 예제의 DataRequest 응답자는 WorkerA 하나다. 완료·응답 대응·실패 처리는 [메시지 계약 기준](./module-boundary-guide.md#메시지-발행과-요청응답)을 따른다.
 
@@ -216,10 +214,10 @@ scope: 서비스간상품조회
 Object: 주문서비스, 상품서비스
 
 주문서비스.상품조회요청 --> 상품서비스.상품조회
-상품서비스.상품조회.result --> 주문서비스.상품조회요청.result
+상품서비스.상품조회 --> 주문서비스.상품조회요청.result
 ```
 
-`상품조회요청`은 `GET /products/{productId}` 호출을 뜻한다. `상품조회`의 성공 응답에는 상품 ID·이름·가격이 담긴다. 이 응답은 상품 조회의 결과이며, 주문 생성이나 결제 완료를 뜻하지 않는다. HTTP 클라이언트와 주소·직렬화 등 서비스 내부 구현의 배치는 [모듈 경계 가이드](./module-boundary-guide.md#4-의존과-제어-흐름)를 따른다.
+`상품조회요청`은 `GET /products/{productId}` 호출을 뜻한다. 마지막 화살표는 상품서비스가 조회 응답을 주문서비스의 원 요청에 돌려주는 관계다. `상품조회`의 성공 응답에는 상품 ID·이름·가격이 담긴다. 이 응답은 상품 조회의 결과이며, 주문 생성이나 결제 완료를 뜻하지 않는다. HTTP 클라이언트와 주소·직렬화 등 서비스 내부 구현의 배치는 [모듈 경계 가이드](./module-boundary-guide.md#4-의존과-제어-흐름)를 따른다.
 
 서비스 간 통신은 결과가 필요한 시점과 수신자 관계에 따라 선택한다. 공개 API 요청·응답과 비동기 메시징의 구분은 [Microsoft의 서비스 간 통신 가이드](https://learn.microsoft.com/en-us/azure/architecture/microservices/design/interservice-communication)를 참고한다.
 
@@ -253,12 +251,12 @@ scope: 쇼핑몰시스템
 Object: 사용자, 쇼핑몰시스템, 결제사
 
 사용자.On취소요청 --> 쇼핑몰시스템.주문취소
-쇼핑몰시스템.주문취소.result --> 사용자.message.취소처리결과
+쇼핑몰시스템.주문취소 --> 사용자.message.취소처리결과
 쇼핑몰시스템.On환불요청 --> 결제사.message.환불요청
 결제사.On환불상태변경 --> 쇼핑몰시스템.message.환불결과수신
 ```
 
-외부 환불 결과가 지연될 수 있다면 사용자에게 반환할 결과는 “취소 완료”와 “처리 중”을 구분해야 한다.
+`주문취소 --> 취소처리결과`는 사용자의 원 요청에 대한 응답이며, 별도의 사용자 작업을 요청하는 화살표가 아니다. 외부 환불 결과가 지연될 수 있다면 사용자에게 반환할 결과는 “취소 완료”와 “처리 중”을 구분해야 한다.
 
 산출물은 외부 계약, 성공·실패·대기 결과, 주요 제약이다. UI가 없는 CLI나 작은 변환 도구라면 이 경계와 함수 계약만으로 충분할 수 있다.
 
@@ -289,7 +287,7 @@ Object: 취소조율자, 주문관리, 결제관리
 
 ### 4.2 Choreography 예제: 확정된 사실의 독립 소비
 
-취소 확정 뒤 알림과 통계가 독립적으로 반응한다면 두 번째 방식으로 이벤트를 발행한다. 주문관리는 수신자를 지정하지 않으며, 각 소비자는 중앙 업무 조율 없이 자기 구독에 반응한다.
+이 예제의 주문관리·알림관리·통계관리·운영알림은 메시지로 통신하는 독립 서비스다. 취소 확정 뒤 알림과 통계가 독립적으로 반응하므로 두 번째 방식으로 이벤트를 발행한다. 주문관리는 수신자를 지정하지 않으며, 각 소비자는 중앙 업무 조율 없이 자기 구독에 반응한다. 같은 모듈 안의 협력을 그리는 경우에는 [메시지 사용 범위](./job-flow-diagram-guide.md#메시지-사용-범위)를 따른다.
 
 ```jobflow
 scope: 취소후속처리

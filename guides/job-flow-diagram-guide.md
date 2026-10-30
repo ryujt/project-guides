@@ -2,7 +2,7 @@
 
 ## 적용 범위와 읽는 순서
 
-한 시나리오에서 **누가 흐름을 조율하고 어떤 객체·모듈·함수가 협력하는가**를 표현한다. 상위 그림은 공개 계약으로 전체를 설명하고, 내부 그림은 해당 경계를 열어 실제 코드의 호출·결과·상태 접근 관계를 설명한다. 화살표나 객체 수를 줄이려고 필요한 협력을 숨기지 않는다. 경계 설계는 [module-boundary-guide.md](module-boundary-guide.md), 내부 분석의 깊이·중단·완료는 [설계 문서 양식 §6.4](system-design-document-guide.md#64-내부-추적과-완료-기준)를 따른다.
+한 시나리오에서 **누가 흐름을 조율하고 어떤 객체·모듈·함수가 협력하는가**를 최대한 이벤트와 메서드(process)로 표현한다. 메시지 표기는 [메시지 사용 범위](#메시지-사용-범위)에 해당하는 경계 전달에만 쓴다. 상위 그림은 공개 계약으로 전체를 설명하고, 내부 그림은 해당 경계를 열어 실제 코드의 호출·결과·상태 접근 관계를 설명한다. 화살표나 객체 수를 줄이려고 필요한 협력을 숨기지 않는다. 경계 설계는 [module-boundary-guide.md](module-boundary-guide.md), 내부 분석의 깊이·중단·완료는 [설계 문서 양식 §6.4](system-design-document-guide.md#64-내부-추적과-완료-기준)를 따른다.
 
 먼저 [헤더](#헤더-키워드--orchestrator-vs-scope)와 해당 관점의 해석을 읽고, 필요한 반환·분기·이벤트 예시만 고른다. 짧은 블록은 문법 조각이다. 실제 시나리오에는 헤더·객체 목록·트리거·완료/실패 조건을 적되 전체 시스템의 흐름을 모두 작성할 필요는 없다.
 
@@ -34,7 +34,7 @@ jobflow 다이어그램의 첫 줄은 **실제 조율자 또는 관찰 경계**�
 |---|---|---|
 | 헤더 | `master:`만 값으로 읽고 SVG에는 쓰지 않는다. `orchestrator:`·`scope:`는 값에 `.`이 있어도 무시한다 | 조율자·경계는 `Object:`와 블록 밖 설명으로 밝힌다(앞 절과 같다) |
 | 객체와 액션 | 첫 `.`에서 객체와 액션을 가르고, 열은 `Object:`에 적은 객체로만 만든다 | 객체 이름에 `.`을 넣지 않는다. 화살표에 쓴 객체는 모두 `Object:`에 적는다(빠지면 아래처럼 깨진다) |
-| 표시 글자 | 액션의 마지막 조각만 쓴다(`Orders.listUnbilled.result`→`result`) | 결과·분기 칸이 어느 호출의 것인지는 위치로만 보인다 → [메서드와 결과의 배치](#메서드와-결과의-배치) |
+| 표시 글자 | 액션의 마지막 조각만 쓴다(`Orders.listUnbilled.result`→`result`) | 일반 결과 전달은 메서드끼리 잇는다. 명시한 응답·분기 칸의 대응은 [메서드와 결과의 배치](#메서드와-결과의-배치)를 따른다 |
 | 모양 | 마지막 조각이 `on`으로 시작하면 대소문자와 상관없이 이벤트 모양으로 그리고 앞 두 글자를 지운다 | 이벤트가 아닌 액션은 `on`·`On`으로 시작하는 이름을 피한다(아래) |
 | `.result.` | 입력 전체의 `.result.`를 `.data.`로 바꾼 뒤 읽는다 | 끝의 `.result`는 그대로다. 표시 글자는 마지막 조각이라 달라지지 않는다 |
 | 다시 나오는 노드 | 같은 이름이 타깃으로 다시 나오면 새 칸에 그린다. 출발점은 그 이름의 마지막 칸 아래 같은 열이 비어 있을 때만 그 칸을 다시 쓰고, 아니면 새 칸에 다시 그린다(예외는 아래 「출발점」) | 같은 열의 같은 이름 칸은 같은 계약이다. 칸 수로 호출 횟수를 세지 않는다 → [합류와 재호출 구분](#합류와-재호출-구분). 다시 그리기를 막는 줄 순서 → [줄 순서 규칙](#줄-순서-규칙) |
@@ -64,7 +64,7 @@ Billing.closeMonth --> Orders.markBilled
 **`Object:` 순서 규칙**: 처음 쓸 때 이 순서로 두고, 렌더 결과가 흐트러지면 이 순서로 고친다. 규칙 3·4는 규칙 1보다 먼저다. 아래에서 트리거는 흐름을 시작하는 객체다 — 첫 줄을 내보내는 객체, 그리고 어떤 화살표의 타깃도 되지 않으면서 요청을 내보내는 객체.
 
 1. 요청을 둘 이상 내보내는 객체 가운데 가장 많이 내보내는 객체를 맨 왼쪽에 둔다.
-   - 요청 화살표만 센다. `.result`·값 분기에서 나가는 화살표와 같은 객체 안 화살표는 세지 않는다.
+   - 계약상 요청인 화살표만 센다. 응답 전달·값 분기에서 나가는 화살표와 같은 객체 안 화살표는 세지 않는다. 반환 데이터 표기를 생략한 메서드 간 연결도 응답 전달이면 제외한다.
    - 수가 같으면 줄 순서상 먼저 요청을 내보내는 객체를 왼쪽에 둔다.
 2. 나머지는 처음 호출되는 순서대로 오른쪽에 둔다.
 3. 트리거를 다시 부르는 요청(콜백)이 앞 줄에 이미 나온 노드에서 나가면 트리거를 맨 오른쪽에 둔다. 트리거를 맨 왼쪽에 두면 콜백이 왼쪽으로 가는 타깃이 되어 위 `markBilled`처럼 앞 행에 끼어들 수 있다.
@@ -101,13 +101,13 @@ Payments.charge --> Billing.recordPaid
 
 - 그 칸 아래 같은 열이 비어 있으면 그 칸에서 나간다. 타깃이 놓이는 행은 위 「행 배치」를 따른다.
 - 그 칸 아래 같은 열에 다른 칸이 이미 있으면 출발 노드를 맨 아래 새 칸에 다시 그린다. 다시 그린 칸은 앞 칸과 이어지지 않아 흐름이 끊겨 보인다. 바로 앞 줄이 그린 타깃에서 나갈 때는 예외다(위 「출발점」).
-- 같은 열에 칸을 만드는 줄은 셋이다. 그 열 객체가 타깃인 줄(콜백, `.result`를 받는 다음 동작, 같은 객체 안 화살표 `X.a --> X.b` 포함), 그 열에서 새로 그리는 출발 노드(`.result`·값 분기 포함), 그 열 객체의 단독 줄이다.
+- 같은 열에 칸을 만드는 줄은 셋이다. 그 열 객체가 타깃인 줄(콜백, 결과를 받는 다음 동작, 명시한 응답 노드, 같은 객체 안 화살표 `X.a --> X.b` 포함), 그 열에서 새로 그리는 출발 노드(값 분기 포함), 그 열 객체의 단독 줄이다.
 
 이 조건을 피하는 줄 순서는 다음과 같다.
 
 1. **깊이 우선** — 요청이 하류를 부르면 그 하류 줄을 그 요청 바로 다음 줄에 쓰고, 형제 요청은 그 뒤에 쓴다. 동기 호출이면 하류가 끝나야 형제를 부르므로 시간 순서와도 맞다.
-2. **팬아웃은 이어 쓴다** — 한 출발 노드에서 나가는 여러 요청(팬아웃)은 각자의 하류와 함께 연달아 쓴다. 출발점 열에 칸을 만드는 줄(콜백, 출발점 객체가 `.result`를 받는 다음 동작, 같은 객체 안 화살표, 그 객체의 단독 줄)은 팬아웃 뒤에 쓴다. 시간 순서상 사이에 와야 하면 다음 요청을 실제로 내는 노드에서 출발시킨다. 콜백 `Payments.charge --> Billing.recordPaid`를 처리하며 메일을 보낸다면 `Billing.closeMonth --> Mailer.sendInvoice`가 아니라 `Billing.recordPaid --> Mailer.sendInvoice`로 쓴다. 그런 노드가 없으면 블록을 나눈다.
-3. **값 분기·결과 칸도 그 열을 차지한다** — `Payments.charge.declined` 단독 줄이나 `Payments.charge.result --> …` 뒤에 `Payments.charge --> Bank.debit`을 쓰면 `charge`가 다시 그려진다. 그 호출의 하류 줄을 먼저 쓰고 분기·결과 줄을 뒤에 쓴다. 분기 뒤에 같은 노드에서 다시 출발하지 않는다. 합류 노드도 공통 후속(`Ledger.Record --> Mailer.SendResult`)을 값 분기(`Ledger.Record.Paid --> …`)보다 먼저 쓴다([합류와 재호출 구분](#합류와-재호출-구분)).
+2. **팬아웃은 이어 쓴다** — 한 출발 노드에서 나가는 여러 요청(팬아웃)은 각자의 하류와 함께 연달아 쓴다. 출발점 열에 칸을 만드는 줄(콜백, 출발점 객체가 결과를 받는 다음 동작, 명시한 응답 노드, 같은 객체 안 화살표, 그 객체의 단독 줄)은 팬아웃 뒤에 쓴다. 시간 순서상 사이에 와야 하면 다음 요청을 실제로 내는 노드에서 출발시킨다. 콜백 `Payments.charge --> Billing.recordPaid`를 처리하며 메일을 보낸다면 `Billing.closeMonth --> Mailer.sendInvoice`가 아니라 `Billing.recordPaid --> Mailer.sendInvoice`로 쓴다. 그런 노드가 없으면 블록을 나눈다.
+3. **값 분기·명시한 응답 칸도 그 열을 차지한다** — `Payments.charge.declined` 단독 줄이나 `Bank.debit --> Payments.charge.result` 뒤에 `Payments.charge --> Bank.debit`을 쓰면 `charge`가 다시 그려진다. 그 호출의 하류 줄을 먼저 쓰고 분기·명시한 응답 줄을 뒤에 쓴다. 분기 뒤에 같은 노드에서 다시 출발하지 않는다. 합류 노드도 공통 후속(`Ledger.Record --> Mailer.SendResult`)을 값 분기(`Ledger.Record.Paid --> …`)보다 먼저 쓴다([합류와 재호출 구분](#합류와-재호출-구분)).
 4. **시간 순서와 다르면 밝힌다** — 깊이 우선(1)이나 분기 뒤 순서(3)로 쓴 줄이 실제 시간 순서와 다르면(비동기 하류가 형제 요청보다 늦게 일어나는 등) 실제 순서를 그림 아래 불릿에 적는다. 그 순서가 설계에 중요하면 블록을 나눈다.
 5. **확인** — 렌더 결과에서 위에 같은 이름 칸이 있는데 들어오는 화살표 없이 나가기만 하는 칸이 다시 그린 칸이다. 검사 도구 [`design-doc-check.mjs`](tools/design-doc-check.mjs)의 `JF-REDRAW` 경고를 0으로 만들고, 남기면 그 줄과 이유를 그림 아래에 적는다. 렌더러가 없으면 이 경고로만 확인했다고 적는다(정적 검토).
 
@@ -245,13 +245,22 @@ Object: [객체1], [객체2], [객체3], ...
 
 | 요소 | 표기 | 설명 |
 |-----|------|------|
-| 메서드 | `Object.MethodName` | 해당 관찰 깊이의 메서드·모듈 함수 호출. 내부 그림의 private 심볼도 실제 이름과 근거로 표시 |
+| 메서드(process) | `Object.MethodName` | 처리 동작을 나타내는 기본 노드. 해당 관찰 깊이의 메서드·모듈 함수 호출이며 내부 그림의 private 심볼도 실제 이름과 근거로 표시 |
 | 이벤트 | `Object.OnEventName` | 이벤트 발생 |
-| 경계 메시지 | `Object.message.MessageName` | 해당 객체가 보내거나 받는 메시지 |
-| 반환값 | `Object.Method.result` | 메서드 반환값 |
-| 이벤트 반환값 | `Object.OnEventName.result` | 반환 계약이 있는 요청 이벤트가 요청자에게 돌려주는 값 ([예시](#이벤트가-반환값을-갖는-경우)) |
+| 경계 메시지 | `Object.message.MessageName` | 독립 서비스 간 또는 외부 시스템·사용자 등 매크로 경계에서 보내거나 받는 메시지에만 사용 |
+| 결과를 다음 메서드로 전달 | `Object.Method --> OtherObject.Method` | 반환 데이터 이름을 생략하고 메서드끼리 연결. 데이터 계약은 블록 밖에 설명 |
+| 명시한 호출자 응답 | `Object.Method.result` (화살표 도착점) | 같은 호출의 반환 경계를 보여 줄 필요가 있을 때만 사용 |
+| 이벤트 반환값 | `Object.OnEventName.result` (화살표 도착점) | 반환 계약이 있는 요청 이벤트가 요청자에게 돌려주는 값 ([예시](#이벤트가-반환값을-갖는-경우)) |
 | 조건값 | `Object.Method.value` | 분기 조건 |
 | 무시 분기 | `Object.Method.value` 단독 줄 (화살표 없음) | 그 분기 뒤로 그린 객체 사이의 후속 화살표가 없음 — §무시 분기 표기 |
+
+### 메시지 사용 범위
+
+**이벤트와 메서드(process)를 기본으로 삼고, 메시지는 독립적인 서비스들끼리 메시지를 전달하거나 외부 시스템·사용자 등 매크로 수준에서 메시지 전달을 표현할 때만 사용한다.** 협력 방식은 [Method-R](method-R.md#2-조각의-협력과-서비스-간-통신)을 따르고, 그중 경계에서 주고받는 메시지 자체를 보여 줄 필요가 있을 때 `Object.message.MessageName`으로 적는다. 이 범위에서도 실제 수신 핸들러나 처리 동작을 보여 줄 수 있으면 이벤트·메서드로 표현한다.
+
+객체·Worker 사이의 내부 협력은 `A.OnEvent --> B.Process` 또는 `A.Method --> B.NextMethod`처럼 잇는다. 입력·반환 데이터를 중간 메시지 노드로 만들지 않는다. 내부에서 버스를 사용하더라도 전달 동작·이벤트·처리 메서드를 중심으로 그리고, 메시지 종류·페이로드는 블록 밖 계약에 적는다. 이 표기 원칙을 맞추려고 실제 호출·통신 구조를 바꾸거나 없는 이벤트·메서드를 만들지 않는다.
+
+`scope:`라는 이유만으로 내부 호출을 메시지 전달로 바꾸지 않는다. `orchestrator:`에서도 독립 서비스나 외부 경계의 실제 메시지 전달을 설명하는 경우에만 메시지 표기를 쓸 수 있다. 헤더는 메시지 사용 범위나 전송 방식을 대신 결정하지 않는다.
 
 ### 제한 사항
 
@@ -261,49 +270,53 @@ Object: [객체1], [객체2], [객체3], ...
 
 ### 표시할 결과 선택
 
-흐름을 이해하는 데 필요한 결과만 표시한다. 다음 메서드의 입력, 다음 동작을 결정하는 분기값, 요청 콜백의 `await` 이후 처리를 이어가는 값, 시나리오에서 중요한 외부 응답이 해당한다. 호출자가 사용하지 않는 반환값과 예제 목적에 필요 없는 최종 반환 전달은 생략한다. 생략했다고 실제 코드에 반환값이 없거나 처리가 끝나지 않았다는 뜻은 아니다.
+**메서드의 반환값으로 다음 메서드를 처리할 때는 반환 데이터 표기를 생략하고 메서드끼리 연결한다.** 기존 `A.Method.result --> B.NextMethod` 대신 `A.Method --> B.NextMethod`로 쓴다. `.result`뿐 아니라 반환 데이터 이름을 붙인 중간 노드도 만들지 않는다. 생략했다고 실제 코드에 반환값이 없다는 뜻은 아니다. 어떤 값을 다음 입력으로 전달하는지는 블록 밖 설명·계약에 적는다.
 
-`A.Method.result --> Orchestrator.Run.result`처럼 결과에서 결과로 잇는 표기는 **A의 값을 Orchestrator의 호출자에게 그대로 반환한다**는 뜻이다. 그 전달 자체를 보여 줄 필요가 있을 때만 쓴다. 모든 메서드에 반환 노드를 붙여야 하는 것은 아니며, `.result`를 단순 종료 표시로 쓰지 않는다. 요청 콜백의 응답이나 API 응답처럼 값의 수신·소비가 중요한 흐름은 이 표기를 유지할 수 있다.
+다음 동작을 결정하는 `.true`·`.false`·값 분기는 유지한다. 요청 콜백의 `await` 이후 처리를 이어가는 응답이나 시나리오에서 중요한 호출자 응답을 별도로 보여 줘야 한다면 **도착점에만** `.result`를 쓴다. 예를 들어 `A.Method --> Orchestrator.Run.result`는 A의 값을 실행 중인 `Run`의 호출자에게 반환한다는 뜻이며 `Run`을 다시 호출하지 않는다. 응답 도착점도 후속 메서드나 수신 메시지로 충분히 표현되면 생략한다.
+
+반환 데이터 생략과 조건 생략은 구분한다. 반환값이 비어 있지 않을 때만 후속 메서드를 부른다면 `A.Read.found --> B.Handle`처럼 실제 반환값에서 도출한 조건을 남긴다. `.found`는 반환 데이터 이름이 아니라 분기 조건이며, 빈 결과 경로와 공통으로 실행되는 호출처럼 그린 뒤 본문에서만 제외하지 않는다([조건의 출처](#조건의-출처와-그림-적용-범위)).
+
+호출자가 사용하지 않는 반환값과 예제 목적에 필요 없는 최종 반환 전달은 그리지 않는다. 모든 메서드에 반환 노드를 붙이거나 `.result`를 단순 종료 표시로 쓰지 않는다.
 
 ### 메서드와 결과의 배치
 
-**표시가 필요한 결과에 한해** 메서드 호출과 그 호출의 반환·분기를 같은 묶음으로 연속 작성한다. 그림에서도 반환값·분기값은 해당 메서드 바로 아래에 모여야 어느 호출의 결과인지 알 수 있다. 관계없는 메서드나 다른 분기를 사이에 끼워 넣고 `.result`들을 블록 끝에 모으지 않는다.
+메서드 호출과 그 결과를 쓰는 다음 메서드를 연속 작성한다. **별도로 표시할 필요가 있는 응답 도착점·분기에 한해** 해당 호출과의 대응이 드러나게 같은 묶음에 둔다. 일반 결과 전달을 위해 반환 노드를 추가하거나, 관계없는 메서드·다른 분기를 사이에 끼워 넣고 응답 노드를 블록 끝에 모으지 않는다.
 
 ```jobflow
 orchestrator: Orchestrator
 Object: Orchestrator, Reader, Converter
 Orchestrator.Run --> Reader.Read
-Reader.Read.result --> Converter.Convert
+Reader.Read --> Converter.Convert
 ```
 
-이 그림은 `Read`의 값을 `Convert`에 전달하는 관계만 보여 준다. `Convert` 이후의 결과 소비는 예제 목적에 없으므로 반환 노드를 덧붙이지 않는다.
+이 그림은 `Read`의 값을 `Convert`에 전달한다. 반환 데이터 이름을 생략해 두 메서드만 잇고, `Convert` 이후의 결과 소비는 예제 목적에 없으므로 덧붙이지 않는다.
 
 후속 메서드의 결과도 표시해야 한다면 그 처리까지 이어 쓴 다음 다른 분기로 넘어간다. 중첩 호출의 최종 반환은 하위 처리가 끝난 뒤에 연결하며, 배치를 맞추기 위해 아직 끝나지 않은 메서드가 먼저 반환하는 것처럼 그리지 않는다. 필요한 결과만 남겨도 호출·결과의 대응이 흐려지면 성공·거절·실패 같은 경로별 블록으로 나눈다.
 
-선언 순서만으로 모든 렌더러의 배치를 보장할 수는 없다. 대상 렌더러가 있으면 실제 그림에서 메서드와 결과가 인접하는지 확인한다. 렌더러가 없으면 호출·결과의 연속 선언과 대응 관계를 정적으로 확인했다고 기록한다.
+선언 순서만으로 모든 렌더러의 배치를 보장할 수는 없다. 대상 렌더러가 있으면 실제 그림에서 메서드 연결과 명시한 응답·분기의 대응을 확인한다. 렌더러가 없으면 선언 순서와 대응 관계를 정적으로 확인했다고 기록한다.
 
 ## scope에서 요청·응답과 이벤트 읽기
 
-`scope:`에서는 화살표의 양 끝이 실제 요청자·제공자 또는 이벤트 발행자·수신자다. 선언하지 않은 상위 조율자가 대신 연결한다고 해석하지 않는다.
+`scope:`에서는 화살표의 양 끝이 요청이면 실제 요청자·제공자, 응답이면 제공자·원 요청자, 이벤트면 발행자·수신자다. 선언하지 않은 상위 조율자가 대신 연결한다고 해석하지 않는다.
 
 ```jobflow
 scope: 배송정보조회
 Object: 주문서비스, 배송서비스
 주문서비스.배송정보조회 --> 배송서비스.배송조회
-배송서비스.배송조회.result --> 주문서비스.배송정보조회.result
+배송서비스.배송조회 --> 주문서비스.배송정보조회.result
 ```
 
-주문서비스가 배송서비스의 공개 조회 API를 요청하고, 받은 배송정보를 자신의 호출자에게 반환하는 흐름이다. 이 예시에서는 외부 응답의 출처를 보여 주기 위해 결과 간 전달을 표시했다. `.result`는 해당 메서드의 응답이며, 실행 중인 메서드 이름으로 다시 연결해 재호출처럼 표현하지 않는다. 응답을 받은 뒤 내부에서 가공하는 경우에는 그 사실을 본문에 적고, 시나리오에서 중요한 최종 응답만 표시한다. 공개된 별도 후처리 메서드를 실제로 호출할 때만 그 메서드로 화살표를 잇는다.
+주문서비스가 배송서비스의 공개 조회 API를 요청하고, 받은 배송정보를 자신의 호출자에게 반환하는 흐름이다. 둘째 화살표는 첫 요청의 응답 전달이다. 출발점에는 반환 데이터를 붙이지 않고, 도착점의 `.result`로 같은 호출의 반환 경계를 표시했다. 실행 중인 메서드 이름으로 다시 연결해 재호출처럼 표현하지 않는다. 응답을 받은 뒤 내부에서 가공하는 경우에는 그 사실을 본문에 적고, 시나리오에서 중요한 최종 응답만 표시한다. 별도 후처리 메서드를 실제로 호출할 때만 그 메서드로 화살표를 잇는다.
 
-이벤트도 실제 전달 경로를 적는다. `발행자.OnEvent --> 소비자.HandleEvent`는 소비자가 이벤트를 수신해 처리한다는 뜻이다. 수신 경계의 메시지를 보여 주는 경우에는 `소비자.message.MessageName`으로 표시하고, 실제 핸들러 호출을 보여 주는 경우에는 메서드명을 쓴다. 브로커를 통해 전달하는 구조를 보여 줄 필요가 있으면 발행자 → 브로커 → 소비자를 명시한다. 일반 알림 이벤트의 처리 완료를 반환값으로 가정하지 않는다. 결과를 돌려주는 계약은 [이벤트 반환값](#이벤트가-반환값을-갖는-경우)으로 표현하고, HTTP 응답이 접수 확인인지 업무 결과인지는 해당 계약에 적는다. 전송 방식과 동기·비동기는 헤더만으로 결정되지 않는다.
+이벤트도 실제 전달 경로를 적는다. `발행자.OnEvent --> 소비자.HandleEvent`는 소비자가 이벤트를 수신해 처리한다는 뜻이다. [메시지 사용 범위](#메시지-사용-범위)에 해당하는 경계에서 수신 메시지 자체를 보여 줘야 할 때만 `소비자.message.MessageName`으로 표시하고, 실제 핸들러 호출을 보여 주는 경우에는 메서드명을 쓴다. 브로커를 통해 전달하는 구조를 보여 줄 필요가 있으면 발행자 → 브로커 → 소비자를 명시한다. 일반 알림 이벤트의 처리 완료를 반환값으로 가정하지 않는다. 결과를 돌려주는 계약은 [이벤트 반환값](#이벤트가-반환값을-갖는-경우)으로 표현하고, HTTP 응답이 접수 확인인지 업무 결과인지는 해당 계약에 적는다. 전송 방식과 동기·비동기는 헤더만으로 결정되지 않는다.
 
 ### scope 그림의 출발점은 실제 요청자다
 
-`scope:`에서는 선언하지 않은 조율자가 결과를 넘겨 준다고 읽지 않으므로 화살표의 출발점이 곧 요청자다. `orchestrator:`에서 `A.m.result --> C.n`은 "조율자가 A의 결과를 C에 넘긴다"로 읽지만, `scope:`에서는 **A가 C를 부르는 것**으로 읽힌다. 실제로는 B가 A의 응답을 받아 C를 부른다면, 존재하지 않는 A→C 연결이 그림에 생긴다.
+`scope:`에서는 선언하지 않은 조율자가 결과를 넘겨 준다고 읽지 않는다. **요청 화살표의 출발점은 실제 요청자**다. `orchestrator:`에서 `A.m --> C.n`은 "조율자가 A의 결과를 C에 넘긴다"로 읽을 수 있지만, `scope:`에서 제3자 C로 잇는 요청은 **A가 C를 부르는 것**으로 읽힌다. 실제로는 B가 A의 응답을 받아 C를 부른다면, 존재하지 않는 A→C 연결이 그림에 생긴다.
 
 - 실제 요청자 B의 실행 노드(예: `B.run`)에서 출발시킨다. `B.run --> A.m` 다음 줄에 `B.run --> C.n`처럼 같은 출발 노드에서 줄 순서대로 쓴다. 줄 순서가 시간 순서다. `A.m`의 하류 줄(`A.m --> D.k`)은 `B.run --> A.m` 바로 다음에 쓴다([줄 순서 규칙](#줄-순서-규칙)).
 - B가 앞 응답을 가공해 다음 요청을 만드는 일은 B 경계 안의 일이라 그리지 않는다. "앞 응답이 다음 요청의 입력"이라는 사실은 그림 아래 표나 불릿에 적는다.
-- 결과 화살표의 머리가 그 요청을 보낸 원 요청자이면 그대로 쓴다. 받은 응답을 자기 호출자에게 돌려주는 경우(위 배송 예시), 응답을 받은 원 요청자의 다음 동작(화면 표시·다음 요청)으로 잇는 경우, 요청자의 별도 공개 동작을 실제로 부르는 경우가 그렇다. 머리가 제3자인 결과 화살표만 고친다.
+- 응답 화살표의 머리가 그 요청을 보낸 원 요청자이면 메서드끼리 바로 이을 수 있다. 받은 응답을 자기 호출자에게 돌려줄 때는 위 배송 예시처럼 도착점에 `.result`를 쓰고, 원 요청자의 다음 동작(화면 표시·다음 요청)이나 별도 공개 동작을 실제로 호출하면 그 메서드로 잇는다. 반환 데이터 표기가 없으므로 어떤 요청의 응답인지와 누가 받아 후속 메서드를 실행하는지는 그림 아래 계약·불릿으로 밝힌다. 머리가 제3자인 응답 전달을 조율자 배선처럼 축약하지 않는다.
 - 요청이 내용을 바꾸지 않는 관통 프록시를 지나면, 응답 화살표는 프록시 칸을 생략하고 원 요청자에게 바로 이을 수 있다. 프록시 앞의 원 요청자는 제3자가 아니다. 프록시가 응답을 바꾸지 않는다는 사실은 그림 아래 표나 불릿에 적는다.
 
 > 잘못된 예 — 응답을 다음 경계로 이어 그려 Orders가 Payments를, Payments가 Mailer를 부르는 것처럼 읽힌다:
@@ -311,8 +324,8 @@ Object: 주문서비스, 배송서비스
 > scope: 월말 청구 1건
 > Object: Billing, Orders, Payments, Mailer
 > Billing.closeMonth --> Orders.listUnbilled
-> Orders.listUnbilled.result --> Payments.charge
-> Payments.charge.result --> Mailer.sendInvoice
+> Orders.listUnbilled --> Payments.charge
+> Payments.charge --> Mailer.sendInvoice
 > ```
 
 올바른 예 — 세 요청을 모두 Billing이 보낸다:
@@ -335,10 +348,10 @@ scope: 주문 상세 보기
 Object: Browser, Storefront, Orders
 Browser.openOrder --> Storefront.proxyOrders
 Storefront.proxyOrders --> Orders.getOrder
-Orders.getOrder.result --> Browser.showOrder
+Orders.getOrder --> Browser.showOrder
 ```
 
-- `Storefront.proxyOrders`는 요청과 응답을 바꾸지 않고 넘기는 관통 프록시다. 응답도 Storefront를 지나지만 그 칸을 생략하고, 원 요청자 Browser의 다음 동작 `showOrder`로 바로 이었다.
+- `Storefront.proxyOrders`는 요청과 응답을 바꾸지 않고 넘기는 관통 프록시다. 마지막 화살표는 `openOrder` 요청의 응답 전달이다. 응답도 Storefront를 지나지만 그 칸과 반환 데이터 표기를 생략하고, 원 요청자 Browser가 실행하는 다음 동작 `showOrder`로 바로 이었다. Orders가 Browser의 메서드를 직접 호출한다는 뜻이 아니다.
 
 ## 핵심 원칙 — 내부 협력은 선언된 orchestrator의 관점이다
 
@@ -346,14 +359,13 @@ Orders.getOrder.result --> Browser.showOrder
 
 | 내부 협력 표기 | 선언된 orchestrator가 하는 일 |
 |---|---|
-| `A.Method --> B.Method` | A가 끝나면 B를 호출 |
-| `A.Method.result --> B.Method` | A의 반환값을 B의 입력으로 전달 |
+| `A.Method --> B.Method` | A가 끝나면 B를 호출. A의 반환값을 B의 입력으로 전달할 때도 같은 표기를 사용 |
 | `A.OnEvent --> B.Method` | A의 이벤트를 구독해 B를 호출 |
-| `A.Method.result --> Orchestrator.Method.result` | A의 값을 자기 호출자에게 반환. 이 전달이 중요할 때만 표시 |
+| `A.Method --> Orchestrator.Method.result` | A의 값을 자기 호출자에게 반환. 이 전달이 중요할 때만 표시 |
 
-앞 세 관계는 **A가 B를 직접 호출한다는 뜻이 아니다**. 조율자의 코드에서 호출·결과 전달·구독으로 연결한다.
+이 관계들은 **A가 B를 직접 호출한다는 뜻이 아니다**. 조율자의 코드에서 호출·결과 전달·구독으로 연결한다. 메서드 간 연결에 반환 데이터 표기를 붙이지 않으므로, 입력으로 넘기는 값과 정상 반환·실패 조건은 블록 밖 계약에 적는다.
 
-단순 결과 전달은 `X.result --> Y`로 충분하다. 실행 중인 조율자 메서드로 되돌렸다 다시 내보내지 않는다. 실제로 책임을 넘기거나 가공·분기를 별도 메서드에서 수행할 때만 `X.result --> Orchestrator.OtherMethod`로 그 경계를 표시한다.
+단순 결과 전달은 `X.Method --> Y.Method`로 충분하다. 실행 중인 조율자 메서드로 되돌렸다 다시 내보내지 않는다. 실제로 책임을 넘기거나 가공·분기를 별도 메서드에서 수행할 때만 `X.Method --> Orchestrator.OtherMethod`로 그 경계를 표시한다.
 
 ### 코드 호출 사슬과 조율 배선의 구분
 
@@ -408,7 +420,7 @@ Object: Orchestrator, WorkerA, WorkerB
 
 Orchestrator.ProcessRequest --> WorkerA.ProcessRequest
 WorkerA.OnNeedHelp --> WorkerB.ProvideHelp
-WorkerB.ProvideHelp.result --> WorkerA.OnNeedHelp.result
+WorkerB.ProvideHelp --> WorkerA.OnNeedHelp.result
 ```
 
 Orchestrator가 WorkerB의 결과를 `OnNeedHelp` 호출의 반환값으로 돌려준다. WorkerA는 그 값을 받아 **실행 중인 `ProcessRequest` 안에서** 후처리를 이어간다. 결과를 `WorkerA.ProcessRequest`로 다시 연결하거나 외부에 별도 후처리 메서드를 노출할 필요가 없다.
@@ -437,15 +449,15 @@ class Orchestrator {
 }
 ```
 
-이 예제의 결과 간 화살표는 WorkerA가 실제로 사용하는 응답을 나타낸다. 결과가 필요 없는 이벤트에는 `.result`를 붙이지 않는다. 일반 다중 구독 이벤트가 자동으로 반환값을 모아 준다고 가정하지 않으며, 여러 응답이 필요하다면 [응답·집계 계약](./module-boundary-guide.md#메시지-발행과-요청응답)을 정한다.
+이 예제의 마지막 화살표는 WorkerA가 실제로 사용하는 응답을 나타낸다. 반환 데이터는 생략하고 응답 도착점 `OnNeedHelp.result`만 남겼다. 결과가 필요 없는 이벤트에는 `.result`를 붙이지 않는다. 일반 다중 구독 이벤트가 자동으로 반환값을 모아 준다고 가정하지 않으며, 여러 응답이 필요하다면 [응답·집계 계약](./module-boundary-guide.md#메시지-발행과-요청응답)을 정한다.
 
 ### 반환값 처리
 
 ```jobflow
 A.MethodName --> B.MethodName
-B.MethodName.result --> A.HandleResult
+B.MethodName --> A.HandleResult
 ```
-* 후속 처리에 쓰이는 B의 반환값을 `.result`로 표기한다.
+* 후속 처리에 쓰이는 B의 반환 데이터 표기를 생략하고 `B.MethodName`에서 `A.HandleResult`로 바로 잇는다.
 * orchestrator 가 A, B 를 차례로 호출하고, B 의 반환값을 `A.HandleResult` 에 전달한다.
   A 가 B 를 직접 호출하는 것이 아니다 (§핵심 원칙).
 
@@ -460,13 +472,13 @@ main() {
 
 ### 다른 객체의 결과를 caller 흐름에서 이어 쓰기
 
-다른 객체의 결과를 받아 계속 처리할 때 `B.result --> A.MethodName`으로 실행 중인 메서드에 되돌리면 재호출로 읽힌다([표기 함정](#결과를-다음-단계로-orchestrator-관점의-기본-표기)). 조율자에게 보이는 메서드 경계에 따라 두 경우를 구분한다.
+다른 객체의 결과를 받아 계속 처리할 때 `B.MethodName --> A.MethodName`으로 실행 중인 메서드에 되돌리면 재호출로 읽힌다([표기 함정](#결과를-다음-단계로-orchestrator-관점의-기본-표기)). 조율자에게 보이는 메서드 경계에 따라 두 경우를 구분한다.
 
 **Case 1 — 다른 메서드로 결과를 위임**
 
 ```jobflow
 A.MethodName --> B.MethodName
-B.MethodName.result --> A.OtherMethod
+B.MethodName --> A.OtherMethod
 ```
 
 * orchestrator 가 `A.MethodName` 을 호출한 뒤 `B.MethodName` 을 호출하고, `B.MethodName` 의 반환값을
@@ -486,7 +498,7 @@ main() {
 * 예:
     ```jobflow
     Main.OnStart --> Container.BuildContainer
-    Container.BuildContainer.result --> Main.InitializeOrchestrator
+    Container.BuildContainer --> Main.InitializeOrchestrator
     Main.InitializeOrchestrator --> Orchestrator.NewOrchestrator
     ```
     "Main.OnStart 는 Container 생성까지만, 생성된 Container 는 Main.InitializeOrchestrator 가 받아
@@ -500,7 +512,7 @@ caller가 자신의 메서드 안에서 결과를 받아 계속 처리하는 경
 
 ```jobflow
 A.OnEventName --> B.MethodName
-B.MethodName.result --> C.HandleResult
+B.MethodName --> C.HandleResult
 ```
 * A의 이벤트로 B가 호출되고, B의 결과를 **다른 객체 C**의 메서드가 처리한다.
 * 위의 "같은 객체의 다른 메서드로 위임" 패턴과 다른 점: 결과를 받는 쪽이 **다른 객체**이다.
@@ -529,7 +541,7 @@ A가 내부의 B 계약을 호출하는 기존 코드나 설계를 설명할 때
 orchestrator: Orchestrator
 Object: Orchestrator, A, C
 Orchestrator.Run --> A.MethodName
-A.MethodName.result --> C.HandleResult
+A.MethodName --> C.HandleResult
 ```
 
 A의 내부 흐름이 설명에 필요한 경우:
@@ -538,7 +550,7 @@ A의 내부 흐름이 설명에 필요한 경우:
 orchestrator: A
 Object: A, B
 A.MethodName --> B.MethodName
-B.MethodName.result --> A.MethodName.result
+B.MethodName --> A.MethodName.result
 ```
 
 이때 A는 내부 B의 공개 계약에 의존한다. B가 A 책임 안의 하위 조각이나 포트인지, 독립된 형제 워커인지 책임 표로 구분한다. 형제 워커의 구현을 직접 참조하는 문제를 하위 다이어그램으로 감추지 않는다. 기존 의존성이 있다면 AS-IS에 사실과 근거를 남기고, 변경 필요성은 별도로 평가한다. 단순 함수나 조회를 표현하려고 불필요한 이벤트·Sub-Orchestrator를 추가하지 않는다.
@@ -547,9 +559,9 @@ B.MethodName.result --> A.MethodName.result
 
 ```jobflow
 Orchestrator.MethodName --> A.Step1
-A.Step1.result --> B.Step2
-B.Step2.result --> C.Step3
-C.Step3.result --> Orchestrator.MethodName.result
+A.Step1 --> B.Step2
+B.Step2 --> C.Step3
+C.Step3 --> Orchestrator.MethodName.result
 ```
 
 orchestrator가 각 단계의 결과를 다음 입력으로 전달하고 마지막 값을 반환한다. LLM 파이프라인·ETL·컴파일러 패스·빌드 단계 등에 쓰며, 최종 반환을 보여 줄 필요가 없으면 마지막 줄은 생략한다.
@@ -567,25 +579,25 @@ MethodName() {
 > **주의 — 표기 함정**: 단순 결과 전달마다 실행 중인 orchestrator 메서드로 돌아가는 round-trip은 한 번의 진입을 여러 호출처럼 보이게 해 호출 횟수·동시성을 오해하게 한다.
 >
 > 같은 `Orchestrator.Method`가 화살표 타깃으로 두 번 이상 나오면 확인한다. 단순히 결과를 받아 다음 단계로 넘기는 줄이면 직접 연결한다:
-> `B.result --> Orchestrator.Method` + `Orchestrator.Method --> C.Step3` → `B.result --> C.Step3`.
+> `B.Step2 --> Orchestrator.Method` + `Orchestrator.Method --> C.Step3` → `B.Step2 --> C.Step3`.
 >
-> 실제 가공·분기·책임 전환은 그 일을 하는 다른 메서드로 연결하고, 같은 호출의 최종 반환은 `.result`로 표시한다. 실제 재시도·재호출이면 조건·횟수·중복 효과 처리와 코드 근거를 본문에 적는다. 표기에 맞추려고 의미 없는 메서드를 추가하지 않는다.
+> 실제 가공·분기·책임 전환은 그 일을 하는 다른 메서드로 연결하고, 같은 호출의 최종 반환 경계가 필요하면 도착점에만 `.result`를 표시한다. 실제 재시도·재호출이면 조건·횟수·중복 효과 처리와 코드 근거를 본문에 적는다. 표기에 맞추려고 의미 없는 메서드를 추가하지 않는다.
 >
 > 잘못된 예 — 단순 3 단계를 매 단계 round-trip 으로 표기:
 > ```jobflow
 > Orchestrator.MethodName --> A.Step1
-> A.Step1.result --> Orchestrator.MethodName
+> A.Step1 --> Orchestrator.MethodName
 > Orchestrator.MethodName --> B.Step2
-> B.Step2.result --> Orchestrator.MethodName
+> B.Step2 --> Orchestrator.MethodName
 > Orchestrator.MethodName --> C.Step3
-> C.Step3.result --> Orchestrator.MethodName
+> C.Step3 --> Orchestrator.MethodName
 > ```
 > 올바른 예:
 > ```jobflow
 > Orchestrator.MethodName --> A.Step1
-> A.Step1.result --> B.Step2
-> B.Step2.result --> C.Step3
-> C.Step3.result --> Orchestrator.MethodName.result
+> A.Step1 --> B.Step2
+> B.Step2 --> C.Step3
+> C.Step3 --> Orchestrator.MethodName.result
 > ```
 
 ### 합류와 재호출 구분
@@ -594,7 +606,7 @@ MethodName() {
 
 | 경우 | 뜻 | 쓰는 법 |
 |---|---|---|
-| round-trip | 조율자가 결과를 받으려고 자기 메서드로 돌아왔다가 다음 단계로 다시 내보낸다 | 금지 — `X.result --> Y`로 바로 잇는다 |
+| round-trip | 조율자가 결과를 받으려고 자기 메서드로 돌아왔다가 다음 단계로 다시 내보낸다 | 금지 — `X.Method --> Y.Method`로 바로 잇는다 |
 | 합류 | 택일 분기(성공·실패, 승인·거절)나 서로 다른 트리거(콜백과 폴링 회수 등)가 같은 호출로 모인다 | 허용 — 택일이면 한 실행에서 한 번만 실행된다고 적는다. 서로 다른 트리거처럼 두 경로가 같은 건으로 함께 올 수 있으면 두 번째 진입을 무엇이 막는지(상태 가드 등) 적는다 |
 | 실제 재호출 | 같은 계약을 실제로 다시 부른다 — 폴링·재시도·같은 대상의 두 번째 요청 | 허용 — 조건·간격·횟수·중복 효과 처리와 코드 근거를 적는다. 반복 루프는 화살표 하나로 그리고 반복은 본문에 적는다(필요하면 별도 시나리오). 정해진 순서로 두 번 부르면 줄 순서대로 두 번 그린다 |
 
@@ -610,7 +622,7 @@ Ledger.Record --> Mailer.SendResult
 - `Ledger.Record`로 들어오는 화살표 둘은 승인·거절 두 경로의 합류다. `Pay` 한 번에 `Record`는 한 번만 실행된다. 값 분기 표기는 [반환값에 따른 분기](#반환값에-따른-분기)를 따른다.
 - 확인한 렌더러는 들어오는 화살표마다 `Record` 칸을 따로 그리고, `SendResult`는 마지막 `Record` 칸에만 잇는다. 같은 열의 같은 이름 칸은 같은 계약이며, 그 뒤 화살표는 두 경로에 공통이다([렌더러 배치 특성](#렌더러-배치-특성)).
 - 합류 뒤 후속이 일부 경로나 결과에만 해당하면 합류 노드의 값 분기로 쓴다. 줄 순서로 뜻을 만들지 않는다(아래 예).
-- `scope:`에서는 화살표마다 출발점이 실제 요청자다. 서로 다른 요청자가 같은 계약을 부르는 화살표는 각자의 실제 요청이며 round-trip 판정 대상이 아니다.
+- `scope:`에서는 요청 화살표마다 출발점이 실제 요청자다. 서로 다른 요청자가 같은 계약을 부르는 화살표는 각자의 실제 요청이며 round-trip 판정 대상이 아니다.
 
 승인된 결제에만 영수증을 보내는 예:
 
@@ -693,7 +705,7 @@ main() {
 
 ### 무시 분기 표기 (화살표 없는 단독 줄)
 
-`X.result --> Orchestrator.Method.result`는 마지막 산출물이 orchestrator 메서드의 **반환값으로 호출자에게 실제로 흘러나가고, 그 전달을 보여 줄 필요가 있을 때만** 쓴다. 반환값을 받아가는 호출자가 없는 메서드(UI 이벤트 핸들러, 콜백 등)가 분기 결과에 따라 **아무 후속 동작 없이 끝나는** 경우에 `.result` 를 종료 표기로 차용하면 "없는 반환값을 누군가 받아가는 것처럼" 오독된다. 이 경우는 다음 둘 중 하나로 표기한다.
+`X.Method --> Orchestrator.Method.result`는 마지막 산출물이 orchestrator 메서드의 **반환값으로 호출자에게 실제로 흘러나가고, 그 전달을 보여 줄 필요가 있을 때만** 쓴다. 반환값을 받아가는 호출자가 없는 메서드(UI 이벤트 핸들러, 콜백 등)가 분기 결과에 따라 **아무 후속 동작 없이 끝나는** 경우에 `.result` 를 종료 표기로 차용하면 "없는 반환값을 누군가 받아가는 것처럼" 오독된다. 이 경우는 다음 둘 중 하나로 표기한다.
 
 1. **기본 — 그리지 않는다**: 단일 조건 분기 패턴과 동일하게, 아무 일도 일어나지 않는 분기는 생략한다. 그 동작 사실은 다이어그램 하단 설명에 문장으로 남긴다.
 2. **명시가 필요할 때 — 분기 값만 적고 화살표를 잇지 않는다**: "조용히 무시된다"는 사실 자체가 설계 정보일 때(예: 불법 입력의 무반응 처리)는 해당 분기 값을 **화살표 없는 단독 줄**로 남긴다.
@@ -737,7 +749,7 @@ NewParent() {
 
 ## 다이어그램 예제
 
-### 예제 1. 기능 실행 시나리오 (기존 패턴)
+### 예제 1. 기능 실행 시나리오
 
 ```jobflow
 orchestrator: VideoPlayer
@@ -749,11 +761,11 @@ VideoPlayer.Play --> FileStream.StartReading
 FileStream.OnVideoData --> VideoDecoder.Decode
 FileStream.OnAudioData --> AudioDecoder.Decode
 VideoRenderer.OnFrameRequested --> VideoDecoder.GetFrameBitmap
-VideoDecoder.GetFrameBitmap.result --> VideoRenderer.DrawFrame
+VideoDecoder.GetFrameBitmap --> VideoRenderer.DrawFrame
 ```
 * orchestrator 인 `VideoPlayer` 의 `Open` / `Play` 가 시작점.
 * `FileStream.OnXxx` 같은 이벤트는 orchestrator 가 구독한 상위 흐름.
-* `VideoDecoder.GetFrameBitmap.result --> VideoRenderer.DrawFrame` 은 반환값을 다른 객체의 메서드로 전달하는 패턴.
+* `VideoDecoder.GetFrameBitmap --> VideoRenderer.DrawFrame` 은 반환 데이터 표기를 생략한 메서드 간 연결이다. VideoPlayer가 비트맵 반환값을 받아 `DrawFrame`에 전달한다.
 
 ### 예제 2. 프로세스 조립과 실행 책임 분리
 
@@ -763,8 +775,8 @@ VideoDecoder.GetFrameBitmap.result --> VideoRenderer.DrawFrame
 orchestrator: Main
 Object: Main, ConfigLoader, CompositionRoot, Runtime
 Main.Start --> ConfigLoader.Load
-ConfigLoader.Load.result --> CompositionRoot.Build
-CompositionRoot.Build.result --> Main.RunRuntime
+ConfigLoader.Load --> CompositionRoot.Build
+CompositionRoot.Build --> Main.RunRuntime
 Main.RunRuntime --> Runtime.Run
 ```
 
@@ -844,7 +856,7 @@ public class VideoPlayer
 orchestrator: VideoPlayer
 Object: VideoPlayer, VideoDecoder
 VideoPlayer.DecodeFrame --> VideoDecoder.Decode
-VideoDecoder.Decode.result --> VideoPlayer.DecodeFrame.result
+VideoDecoder.Decode --> VideoPlayer.DecodeFrame.result
 ```
 
 VideoDecoder의 분해가 필요한 경우:
@@ -853,8 +865,8 @@ VideoDecoder의 분해가 필요한 경우:
 orchestrator: VideoDecoder
 Object: VideoDecoder, FrameParser, FrameConverter
 VideoDecoder.Decode --> FrameParser.Parse
-FrameParser.Parse.result --> FrameConverter.Convert
-FrameConverter.Convert.result --> VideoDecoder.Decode.result
+FrameParser.Parse --> FrameConverter.Convert
+FrameConverter.Convert --> VideoDecoder.Decode.result
 ```
 
 하위의 `VideoDecoder.Decode` 입력·출력·실패 의미는 상위 계약과 같아야 한다. 하위 그림에서 내부 워커를 설명하더라도 상위 호출자의 계약에 그 구현 지식을 요구하지 않는다. 단순 워커라는 명칭만으로 분석을 멈추지 않으며, [내부 추적과 완료 기준](system-design-document-guide.md#64-내부-추적과-완료-기준)으로 펼칠 협력자와 근거가 충분한 말단을 가른다.

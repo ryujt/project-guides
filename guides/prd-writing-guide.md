@@ -106,11 +106,11 @@ Object: SaveOrder, Validator, OrderStore
 SaveOrder.Run --> Validator.Check
 Validator.Check.invalid --> SaveOrder.Reject
 Validator.Check.valid --> OrderStore.Save
-OrderStore.Save.result --> SaveOrder.Complete
+OrderStore.Save --> SaveOrder.Complete
 ```
 
 - **객체**: SaveOrder가 흐름을 조율하고, Validator는 입력 판정, OrderStore는 저장 경계를 맡는다. Validator와 OrderStore는 다음 단계를 선택하지 않는다.
-- **결과**: `Check`는 `valid` 또는 `invalid`를 반환한다. `Save.result`는 성공 결과이며 저장 오류와 중복 처리 계약은 별도 정의한다. `Complete`와 `Reject`는 `Run` 호출자의 성공·거절 결과를 구성한다. 이 예제에는 이벤트가 없다.
+- **결과**: `Check`는 `valid` 또는 `invalid`를 반환한다. `Save`의 반환값은 성공 결과이며 저장 오류와 중복 처리 계약은 별도 정의한다. `Complete`와 `Reject`는 `Run` 호출자의 성공·거절 결과를 구성한다. 이 예제에는 이벤트가 없다.
 - **시나리오**: 유효한 입력이면 저장 후 완료한다. 입력이 유효하지 않으면 저장하지 않고 거절한다. 저장 실패 시의 외부 오류·재시도 정책은 실제 PRD에서 빠뜨리지 않는다.
 
 이벤트가 있는 시스템에서는 다음 계약 표를 사용한다. 이벤트 전달 보장은 사용하는 구현의 확인된 능력에 근거해야 한다.
