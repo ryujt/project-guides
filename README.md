@@ -19,8 +19,8 @@
 
 | 하려는 일 | 시작 문서 | 추가로 읽을 기준 |
 | --- | --- | --- |
-| 기존 시스템의 현재 구조 분석 | [system-design-as-is-prompt](prompts/system-design-as-is-prompt.md) | 확인한 코드와 계약, 필요한 설계 관점; 문서 골격은 [설계 문서 양식](guides/system-design-document-guide.md) |
-| 시스템 신규·개선 설계 | [system-design-to-be-prompt](prompts/system-design-to-be-prompt.md) | 요구·제약으로 시작; 시나리오별 연결 검증·책임 조정·대안 비교; 기존 시스템은 현재 계약·소비자와 분석 유효성도 확인; 문서 골격은 AS-IS와 같은 [설계 문서 양식](guides/system-design-document-guide.md) |
+| 기존 시스템의 현재 구조 분석 | [system-design-as-is-prompt](prompts/system-design-as-is-prompt.md) | 확인한 코드와 계약; 문서 구성과 파일 배치는 해당 프롬프트 기준 |
+| 시스템 신규·개선 설계 | [system-design-to-be-prompt](prompts/system-design-to-be-prompt.md) | 요구·제약과 목표 구조·시나리오 검증; AS-IS는 있는 경우 참고하며 문서 구성과 파일 배치는 해당 프롬프트 기준 |
 | 기능 하나 추가·변경 설계 | [feature-design-prompt](prompts/feature-design-prompt.md) | 대상 책임 모듈과 직접 관련된 계약 |
 | 사이트 전체 설계 | [site-design-prompt](prompts/site-design-prompt.md) | 채택한 기능·화면에 해당하는 DSL |
 | 회원·인증·세션·탈퇴 설계 | [frontend-user-design-prompt](prompts/frontend-user-design-prompt.md) | 채택할 회원 흐름, 보안·데이터 경계 |
@@ -35,7 +35,7 @@
 
 멀티 에이전트 프롬프트는 Architect·Critic·Developer·Tester의 상호 검토와 용도별 모델 배정을 지원한다. 상위·중위·하위 등급은 작업 난이도와 도구의 실제 지원을 기준으로 정하고, 모델 선택이 불가능한 환경에서는 가능한 역할 분리와 검토를 수행한다.
 
-검증 우선 구현 프롬프트는 가정 선검증 → 제품 단위 확정 → 조립의 순서와 질문별 증거 수준·권한을 정한다. 작은 작업의 축소 적용과 미검증 상태의 조건부 진행은 해당 프롬프트 기준을 따르며, 조건부 진행은 검증 완료와 구분한다. 멀티 에이전트 프롬프트와 함께 쓰면 역할·검토는 협업 프롬프트가 정하고, 완료는 두 프롬프트의 기준을 모두 충족해야 한다.
+검증 우선 구현은 가정 확인 → 제품 단위 검증 → 조립 순서로 진행한다. 작은 수정은 기존 테스트로 확인하고, 단위·통합 검증과 미검증 범위를 구분한다. 병렬 분업과 독립 검토는 협업 프롬프트를 함께 참고한다.
 
 ## 주제별 가이드
 
@@ -55,7 +55,7 @@
 | 문서 | 해결할 질문 |
 | --- | --- |
 | [system-design-framework](guides/system-design-framework.md) | Input Datas·Key Events·Services List·PBS와 다이어그램 중 어떤 관점이 필요할까? |
-| [system-design-document-guide](guides/system-design-document-guide.md) | 간명한 AS-IS·TO-BE 핵심 문서와 필수 구성 설명서, 시나리오별 jobflow·navigation 설계서, 모든 화면별 layout 설계서, 경계별 상세를 어떻게 나누고 연결할까? |
+| [system-design-document-guide](guides/system-design-document-guide.md) | 핵심 문서와 상세 문서를 나누어 작성할 때 어떤 양식과 검증 기준을 참고할까? |
 | [prd-writing-guide](guides/prd-writing-guide.md) | 요구사항→책임·계약→시나리오→검증을 7개 Part로 어떻게 연결할까? |
 | [system-flow-document-guide](guides/system-flow-document-guide.md) | 최소 책임 조각부터 전체 시스템 흐름을 어떻게 설명할까? |
 | [wrtite-readme-guide](guides/wrtite-readme-guide.md) | 빠른 실행과 필요한 상세 문서 탐색을 어떻게 돕는 README를 쓸까? |
@@ -65,14 +65,12 @@
 
 `wrtite-readme-guide.md`는 기존 링크 호환성을 위해 현재 파일명을 유지한다.
 
-AS-IS·TO-BE 설계 문서를 쓸 때 함께 보는 자료:
+AS-IS·TO-BE 설계 문서를 쓸 때 함께 보는 자료다. 문서 구성과 파일 배치는 각 프롬프트를 우선한다.
 
-- Job Flow: [작성 기준](guides/system-design-document-guide.md#설계-문서의-job-flow-작성-기준)에 따라 실제 참여 object가 3개 이상인 시나리오만 작성한다. 출력은 다이어그램과 바로 아래의 짧은 주요 흐름 설명으로 한정한다. [관찰 경계와 공개 계약](guides/job-flow-diagram-guide.md#관찰-경계와-공개-계약)에 따라 그림 수준·공개 계약을 먼저 정하고, [연결 종류](guides/job-flow-diagram-guide.md#연결-종류와-생략-금지)·[외부 수신과 응답](guides/job-flow-diagram-guide.md#외부-경계의-요청응답과-알림)·[등록/실행/반복](guides/job-flow-diagram-guide.md#등록실행반복을-구분한다)을 구분하며, 통신을 내부 메서드의 일회 호출처럼 축약하지 않으며 상대 private는 소유 문서에서만 연다.
-
-- 산출물: 핵심 문서는 전체 줄거리를 간명하게 설명한다. `details/`에 반드시 둘 구성 설명서, 시나리오별 jobflow·navigation 설계서, 모든 화면별 layout 설계서의 배치·상세 설명·예외는 [양식 §2](guides/system-design-document-guide.md#2-산출물-배치)를 따른다.
-- 내부 동작: 간명한 **L0 → 실제 객체·모듈·메서드 협력 L1 → 필요한 L2 이하 → 코드 근거**로 내려간다. 시나리오마다 소유 문서에 추적표를 두고 API 요약만으로 내부 분석을 완료하지 않는다. 1~2객체라 그림을 생략한 협력도 내부 추적·근거는 유지한다. 판정은 [양식 §6.4](guides/system-design-document-guide.md#64-내부-추적과-완료-기준)를 따른다.
-- 연속 작업의 품질: AS-IS가 의도와 어긋나면 종속 단계를 멈추고 지침 수정·재분석·재검토를 반복한다. 대표 경로 통과와 전체 AS-IS 확정의 구분은 [결과 적합성 게이트](guides/system-design-document-guide.md#101-결과-적합성-게이트와-지침-개선)를 따른다.
-- 검사: [`design-doc-check.mjs`](guides/tools/design-doc-check.mjs) — 펜스·jobflow·링크·앵커·Mermaid 라벨을 정적으로 검사한다. 스크립트는 가이드 사본의 경로로 부르고, 문서 폴더는 검사할 프로젝트 기준으로 준다. 예: 그 프로젝트 루트에서 `node <가이드 사본>/guides/tools/design-doc-check.mjs docs/design/<DATE>`. `<가이드 사본>`은 이 README가 있는 폴더이고, 위치는 사용자마다 다르다. `--renderer`로 그릴 때의 출력 위치(`--out`)와 렌더링 확인·의미 검토는 [양식 §10](guides/system-design-document-guide.md#10-검증)을 따른다.
+- Job Flow: [Method-R](guides/method-R.md)의 깊이에 따라 시나리오별로 작성하고, [Job Flow 가이드](guides/job-flow-diagram-guide.md)의 문법을 따른다. 다이어그램 아래에는 주요 흐름을 짧게 설명한다.
+- 화면: [Navigation 가이드](guides/navigation-diagram-guide.md)와 [스크린 레이아웃 가이드](guides/screen-layout-guide.md)를 따른다. 두 문서에서 같은 화면 이름을 사용하고 서로 연결한다.
+- 책임·계약·검증: [모듈 경계 가이드](guides/module-boundary-guide.md)를 따른다. 더 자세한 문서 양식이 필요하면 [설계 문서 양식](guides/system-design-document-guide.md)을 참고한다.
+- 검사: [`design-doc-check.mjs`](guides/tools/design-doc-check.mjs)로 펜스·jobflow·링크·앵커·Mermaid 라벨을 정적으로 검사한다. 정적 검사와 실제 렌더링·실행 검증은 구분해 기록한다.
 
 ### 독자 다이어그램 DSL
 
