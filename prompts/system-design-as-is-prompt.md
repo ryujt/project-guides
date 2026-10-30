@@ -46,7 +46,7 @@ Job Flow 산출 범위·형식은 [Job Flow 작성 기준](../guides/system-desi
 
 ## 3. 핵심 문서
 
-기본 경로는 `docs/design/{DATE}/as-is/system-design-as-is.md`이며 기존 문서 위치/사용자 지정을 우선한다([양식 §2](../guides/system-design-document-guide.md#2-산출물-배치)). 작성할 핵심·상세에 해당하는 양식 §3~§7을 먼저 읽는다. 처음 적용하거나 구조가 불명확하면 [양식 §11의 AS-IS 예시](../guides/system-design-document-guide.md#11-예시-산출물) 중 해당 핵심·상세를 확인한다. 예시는 가상 값이며 양식이 우선한다.
+기본 경로는 `docs/design/{DATE}/as-is/system-design-as-is.md`이며 기존 문서 위치/사용자 지정을 우선한다([양식 §2](../guides/system-design-document-guide.md#2-산출물-배치)). 작성할 핵심·상세에 해당하는 양식 §3~§7을 먼저 읽는다.
 
 핵심의 절 번호·제목·표 열·머리 블록은 [양식 §3](../guides/system-design-document-guide.md#3-핵심-문서-골격)의 **AS-IS 기준**을 그대로 따른다. 해당 없는 절도 제목을 남기고 분량 목표는 두지 않는다. AS-IS에서 더 지킬 것:
 
@@ -88,7 +88,7 @@ Job Flow 산출 범위·형식은 [Job Flow 작성 기준](../guides/system-desi
 
 - 원본에 없는 모듈·코드 심볼·흐름·권한·호환성을 날조하지 않았는가?
 - 명목상 구조와 실제 import·공유 상태·쓰기 경로의 차이를 드러냈는가?
-- 내부 그림에서 [실제 호출 사슬과 조율 배선](../guides/job-flow-diagram-guide.md#코드-호출-사슬과-조율-배선의-구분)을 섞지 않았는가? [조건의 출처와 그림 범위](../guides/job-flow-diagram-guide.md#조건의-출처와-그림-적용-범위)에 따라 값 포트의 근거·판단 주체를 대조하고, 중요한 입력에서 생략되는 호출을 공통 필수 경로처럼 그리지 않았는가?
+- 내부 그림에서 [실제 호출 사슬과 조율 배선](../guides/job-flow-diagram-guide.md#코드-호출-사슬과-조율-배선의-구분)을 섞지 않았는가? [조건의 출처와 그림 범위](../guides/job-flow-diagram-guide.md#조건의-출처와-그림-적용-범위)에 따라 결과 이벤트의 발생 조건·판단 주체를 대조하고, 중요한 입력에서 생략되는 호출을 공통 필수 경로처럼 그리지 않았는가?
 - 공개 계약·상태 소유자·오류 책임으로 대표 흐름을 설명할 수 있는가?
 - 핵심 §5 그림이 경계 사이 소통만 담고, 화살표의 출발점이 실제 요청자인가([출발점 규칙](../guides/job-flow-diagram-guide.md#scope-그림의-출발점은-실제-요청자다))?
 - 시나리오를 양식 §4.2의 분할 기준대로 나눴는가?

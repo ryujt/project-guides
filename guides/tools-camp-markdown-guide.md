@@ -25,7 +25,7 @@ AI 작업에는 이 레퍼런스 전체를 기본 첨부하지 않는다. 필요
 |---|---|---|
 | jobflow `master:` | `masterObject`로 파싱하지만 SVG 생성에는 사용하지 않음 | 이 헤더만으로 조율 의미가 시각적으로 드러나지 않음 |
 | jobflow `orchestrator:` / `scope:` | 전용 헤더로 인식하지 않음; 단순 이름 예시에서는 무시되고 관계는 생성됨 | 기존 문서 의미는 유지하고 `Object:` 및 블록 밖 설명으로 조율자/경계를 밝힘 |
-| jobflow ` : 라벨` | 전이 라벨로 분리하지 않고 대상 액션 문자열에 포함 | 분기는 `.true`/`.false`/값 경로, 상세 조건은 본문에 작성 |
+| jobflow ` : 라벨` | 전이 라벨로 분리하지 않고 대상 액션 문자열에 포함 | [이벤트·메서드 표기](job-flow-diagram-guide.md#구성-요소)를 사용하고 조건은 본문에 작성 |
 | navigation/state ` : 라벨` | 양쪽 공백이 있는 마지막 구분자를 기준으로 분리 | jobflow와 구분해 사용 |
 | layout ` V ` / ` > ` | 각각 세로/가로 방향으로 파싱, `H` 연산자는 없음 | `>`를 단순 포함 관계라고 재정의하지 않음 |
 | layout 크기 | 가로는 `flex` 배분 값, 세로는 입력 수치를 사용하지 않음 | 정밀한 픽셀/비율은 제품 화면에서 별도 확인 |
@@ -176,9 +176,9 @@ ClassB.GetList --> ClassC.AddList
 - `master: 이름` — 기존 주(主) 객체 선언(선택). 확인한 스냅샷에서는 파싱 결과에만 저장되며 SVG에 반영되지 않는다.
 - `Object: 이름1, 이름2, ...` — 객체(컬럼) 선언. 콤마로 구분하며 여러 줄이 필요하면 각 줄에 `Object:`를 반복한다. 확인한 스냅샷은 `master:`/`object:`의 대소문자를 구분하지 않지만 헤더 앞 들여쓰기는 제거하지 않으므로 줄 시작에 쓴다.
 - 관계식에 등장한 객체는 자동으로 컬럼에 추가되므로, `Object:` 선언은 **컬럼 순서를 고정**하는 용도다.
-- 다른 `JobFlowToSVG` 사본은 `Object:`의 객체만 열로 만든다 — 객체를 모두 선언한다([렌더러 배치 특성](job-flow-diagram-guide.md#렌더러-배치-특성)).
+- 다른 `JobFlowToSVG` 사본은 `Object:`의 객체만 열로 만든다 — [객체 선언](job-flow-diagram-guide.md#헤더-키워드--orchestrator-vs-scope)에 따라 등장 객체를 모두 적는다.
 
-호출·결과·단독 줄은 [Job Flow 구성 요소](job-flow-diagram-guide.md#구성-요소)를 따른다. 실제 호출자는 [헤더 관점](job-flow-diagram-guide.md#헤더-키워드--orchestrator-vs-scope)으로 판별하며, 점 경로의 중첩·화살표만으로 객체 소유권이나 직접 의존을 추정하지 않는다.
+이벤트·메서드·결과 전달은 [Job Flow 구성 요소](job-flow-diagram-guide.md#구성-요소)를 따른다. 실제 호출자는 [헤더 관점](job-flow-diagram-guide.md#헤더-키워드--orchestrator-vs-scope)으로 판별하며, 점 경로의 중첩·화살표만으로 객체 소유권이나 직접 의존을 추정하지 않는다.
 
 **노드 모양(액션 이름으로 자동 결정)** — `getShapeType` 기준
 - 액션의 **마지막 세그먼트가 `on`으로 시작**(대소문자 무관, 예: `onSuccess`) → 이벤트 모양(연두, 둥근 모서리).

@@ -97,20 +97,20 @@ Orchestrator / Worker / Gateway / Service / Utils는 역할 설명에 쓸 수 �
 3. **이벤트·결과 계약**: 이벤트가 있으면 발행 조건·페이로드·구독 연결 책임·소비자를 적는다. 동기 반환만 있으면 결과·오류 계약을 설명하며 빈 이벤트 표는 만들지 않는다.
 4. **시나리오**: 트리거·전제조건·결과·핵심 실패를 서술한다. 같은 내용을 블록마다 복제하지 않는다.
 
-다음은 저장 요청의 동기 반환 분기 예시다. 실제 데이터·오류 형식은 블록 밖 계약에 둔다.
+다음은 저장 요청의 판정 결과를 이벤트로 표현한 예시다. 실제 데이터·오류 형식과 반환값 판정의 대응은 블록 밖 계약에 둔다([조건의 출처](job-flow-diagram-guide.md#조건의-출처와-그림-적용-범위)).
 
 ```jobflow
 orchestrator: SaveOrder
 Object: SaveOrder, Validator, OrderStore
 
 SaveOrder.Run --> Validator.Check
-Validator.Check.invalid --> SaveOrder.Reject
-Validator.Check.valid --> OrderStore.Save
+Validator.OnInvalid --> SaveOrder.Reject
+Validator.OnValid --> OrderStore.Save
 OrderStore.Save --> SaveOrder.Complete
 ```
 
 - **객체**: SaveOrder가 흐름을 조율하고, Validator는 입력 판정, OrderStore는 저장 경계를 맡는다. Validator와 OrderStore는 다음 단계를 선택하지 않는다.
-- **결과**: `Check`는 `valid` 또는 `invalid`를 반환한다. `Save`의 반환값은 성공 결과이며 저장 오류와 중복 처리 계약은 별도 정의한다. `Complete`와 `Reject`는 `Run` 호출자의 성공·거절 결과를 구성한다. 이 예제에는 이벤트가 없다.
+- **결과**: `Check`의 `valid` 반환은 `OnValid`, `invalid` 반환은 `OnInvalid`에 대응한다. `Save`의 반환값은 성공 결과이며 저장 오류와 중복 처리 계약은 별도 정의한다. `Complete`와 `Reject`는 `Run` 호출자의 성공·거절 결과를 구성한다.
 - **시나리오**: 유효한 입력이면 저장 후 완료한다. 입력이 유효하지 않으면 저장하지 않고 거절한다. 저장 실패 시의 외부 오류·재시도 정책은 실제 PRD에서 빠뜨리지 않는다.
 
 이벤트가 있는 시스템에서는 다음 계약 표를 사용한다. 이벤트 전달 보장은 사용하는 구현의 확인된 능력에 근거해야 한다.

@@ -70,7 +70,7 @@ Job Flow 산출 범위·형식은 [Job Flow 작성 기준](../guides/system-desi
 
 ## 4. 문서와 다이어그램
 
-작성할 핵심·상세에 해당하는 [양식 §3~§7](../guides/system-design-document-guide.md#3-핵심-문서-골격)을 먼저 읽는다. 처음 적용하거나 구조가 불명확하면 [양식 §11의 TO-BE 예시](../guides/system-design-document-guide.md#11-예시-산출물) 중 해당 핵심·상세를 확인한다. 예시의 이름·경로·수치는 가상 값이며 양식이 우선한다.
+작성할 핵심·상세에 해당하는 [양식 §3~§7](../guides/system-design-document-guide.md#3-핵심-문서-골격)을 먼저 읽는다.
 
 기본 핵심 경로는 `docs/design/{DATE}/to-be/system-design-to-be.md`, 경계별 상세는 `to-be/details/<boundary>.md`다([양식 §2](../guides/system-design-document-guide.md#2-산출물-배치)). `DATE`는 한 번 확정한다. AS-IS가 있으면 같은 기준 날짜 또는 명시한 새 날짜를 사용하고, 없으면 설계 기준 날짜를 사용한다. 기존 문서 위치/사용자 지정을 우선한다.
 
