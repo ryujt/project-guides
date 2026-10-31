@@ -27,6 +27,8 @@
 
 다이어그램은 필요한 것만 작성한다. 내부 협력은 [Job Flow](../guides/job-flow-diagram-guide.md), 화면 이동은 [Navigation](../guides/navigation-diagram-guide.md), 상태 변화는 [State](../guides/state-diagram-guide.md), 화면 배치는 [Layout](../guides/screen-layout-guide.md) 문법을 따른다. 각 다이어그램 아래에는 주요 내용을 짧게 설명한다.
 
+다이어그램을 작성·수정한 경우 Markdown을 완성한 뒤 [편집 링크 전달 기준](../guides/diagram-editor-link-guide.md)을 적용한다.
+
 ## 검증과 인계
 
 - 요구사항과 주요 성공·실패 흐름이 설계에 반영됐는지 확인한다.

@@ -71,8 +71,26 @@ test('installs and updates both tools, registers one Claude hook, and removes on
     for (const skills of [claudeSkills, codexSkills]) {
       assert.deepEqual(installedNames(skills), names);
       for (const name of names) assert.ok(existsSync(path.join(skills, name, 'SKILL.md')), `${skills}: ${name}`);
+      const index = readFileSync(path.join(skills, 'project-guides/SKILL.md'), 'utf8');
+      assert.match(index, /Mermaid/);
+      assert.match(index, /jobw flow/);
+      assert.match(index, /\[편집 링크 전달 기준\]\(guides\/diagram-editor-link-guide\.md\)/);
+      for (const name of ['guides/diagram-editor-link-guide.md', 'guides/tools/create-editor-link.py']) {
+        assert.equal(readFileSync(path.join(skills, 'project-guides', name), 'utf8'),
+          readFileSync(path.join(source, name), 'utf8'), `${skills}: missing ${name}`);
+      }
     }
     assert.ok(existsSync(path.join(claudeSkills, 'project-guides/hooks/skill-trigger.sh')));
+    const hook = path.join(claudeSkills, 'project-guides/hooks/skill-trigger.sh');
+    for (const [prompt, target] of [
+      ['Mermaid 다이어그램을 작성해줘', 'tools-camp-markdown'],
+      ['jobw flow 다이어그램을 작성해줘', 'job-flow-diagram'],
+      ['편집 링크를 만들어줘', 'diagram-editor-link'],
+    ]) {
+      const triggered = spawnSync('/bin/sh', [hook], { input: JSON.stringify({ prompt }), encoding: 'utf8' });
+      succeeded(triggered);
+      assert.ok(triggered.stdout.includes(`/project-guides ${target}`), `${prompt}: ${triggered.stdout}`);
+    }
     assert.equal(readFileSync(path.join(codexSkills, 'project-guides/agents/openai.yaml'), 'utf8'),
       'policy:\n  allow_implicit_invocation: true\n');
 

@@ -2,6 +2,8 @@
 
 시스템 수준 AS-IS·TO-BE 문서의 **파일 배치·절 번호·제목·표 열·그림 규칙·ID·검증** 원본이다. 조사·판단은 [AS-IS 프롬프트](../prompts/system-design-as-is-prompt.md)와 [TO-BE 프롬프트](../prompts/system-design-to-be-prompt.md)를 따른다. 같은 절 번호와 표 열로 현재와 목표를 대조한다.
 
+다이어그램을 작성·수정한 경우 Markdown을 완성한 뒤 [편집 링크 전달 기준](diagram-editor-link-guide.md)을 적용한다.
+
 **읽기 지도** — 할 일에 맞는 절만 읽는다.
 
 | 할 일 | 읽을 절 |

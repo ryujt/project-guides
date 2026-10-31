@@ -28,4 +28,6 @@
 
 [Navigation](../guides/navigation-diagram-guide.md)·[State](../guides/state-diagram-guide.md)·[Layout](../guides/screen-layout-guide.md)은 전용 DSL을 따른다. 화면 이동과 내부 상태·협력을 구분하고 각 그림 아래 주요 흐름을 짧게 설명한다.
 
+다이어그램을 작성·수정한 경우 Markdown을 완성한 뒤 [편집 링크 전달 기준](../guides/diagram-editor-link-guide.md)을 적용한다.
+
 적용한 흐름의 성공·주요 실패·만료·복구가 화면과 계약에서 일치하는지, 권위·쓰기·외부 부분 실패의 책임이 명확한지 검토한다. 문법·링크 확인과 실제 렌더링·보안 검증을 구분하고 수행한 것만 기록한다. 핵심 보안·삭제 정책이 미확정이면 구현 준비 미완료로 남긴다. 문서 위치·범위·검증 결과와 한계·남은 결정을 보고한다.

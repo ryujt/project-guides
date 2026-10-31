@@ -79,6 +79,14 @@ test('installs every prompt and shared document with portable skill links and im
       );
     }
     checkSkillLinks(skills, names);
+    const index = readFileSync(path.join(skills, 'project-guides/SKILL.md'), 'utf8');
+    assert.match(index, /Mermaid/);
+    assert.match(index, /jobw flow/);
+    assert.match(index, /\[편집 링크 전달 기준\]\(guides\/diagram-editor-link-guide\.md\)/);
+    for (const name of ['guides/diagram-editor-link-guide.md', 'guides/tools/create-editor-link.py']) {
+      assert.equal(readFileSync(path.join(skills, 'project-guides', name), 'utf8'),
+        readFileSync(path.join(source, name), 'utf8'), `missing editor-link support: ${name}`);
+    }
     for (const name of names) {
       const skill = readFileSync(path.join(skills, name, 'SKILL.md'), 'utf8');
       assert.ok(!skill.includes(temporary), `${name}: embeds installation or source path`);

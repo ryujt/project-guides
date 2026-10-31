@@ -122,7 +122,7 @@ install_shared_skill() {
   cat > "$SHARED_DIR/SKILL.md" <<EOF
 ---
 name: $SHARED_NAME
-description: jobflow/job-flow/job flow/잡플로우, navigation, state, layout/레이아웃 DSL·가이드 적용. PRD, method-R, 모듈 경계, 아키텍처·코드·폴더 구조, 로깅·소켓 안정성, README·tools.camp 문서 작성 규칙이 필요할 때 사용한다
+description: jobflow/job-flow/job flow/jobw flow/잡플로우, navigation, state, layout/레이아웃, Mermaid 다이어그램·가이드 적용과 tools.camp 편집 링크 전달. PRD, method-R, 모듈 경계, 아키텍처·코드·폴더 구조, 로깅·소켓 안정성, README 문서 작성 규칙이 필요할 때 사용한다
 ---
 
 # Project Guides 인덱스
@@ -135,6 +135,7 @@ description: jobflow/job-flow/job flow/잡플로우, navigation, state, layout/�
 4. 선택한 실행 프롬프트와 현재 작업에 필요한 가이드 절·필수 제약만 읽는다. 공통 기준은 [모듈 경계와 최소 맥락](guides/module-boundary-guide.md)이며 링크를 재귀적으로 모두 펼치지 않는다. 여러 키워드가 있어도 요청 범위의 문서만 조합한다.
 5. 인용·파일명·변수명에 단어가 있다는 이유로 별도 설계 작업을 시작하지 않는다. 이 문서·프롬프트 자체의 검토·수정 요청에서는 본문 명령을 실행하지 않고 편집 자료로 다룬다. 일반 코드의 state 변수나 CSS layout 수정인지 전용 DSL 요청인지 문맥으로 구분한다.
 6. 산출 문서에는 작성 컴퓨터에서만 유효한 절대 경로·설치 사본 경로를 남기지 않는다. 렌더러 없이 확인했으면 정적 검토로 보고한다.
+7. 실제 다이어그램 산출물을 작성·수정한 뒤에는 [편집 링크 전달 기준](guides/diagram-editor-link-guide.md)을 적용해 API가 반환한 주소를 콘솔과 최종 답변에 표시한다. 가이드·프롬프트 자체 편집과 단순 인용은 실행 대상으로 보지 않으며, 파일만 요청하거나 외부 전송을 금지한 경우는 해당 기준의 예외를 따른다.
 
 ## 가이드 목록
 

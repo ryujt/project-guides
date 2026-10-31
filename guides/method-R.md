@@ -8,6 +8,8 @@ Method-R은 **시스템을 작은 조각으로 나누고, 복잡한 조각 안�
 
 분할·계약의 공통 기준은 [모듈 경계 가이드](module-boundary-guide.md), 조율자의 구현 책임은 [Orchestrator-Worker 가이드](orchestrator-worker-pattern-guide.md), 다이어그램 문법은 [Job Flow 가이드](job-flow-diagram-guide.md)를 따른다.
 
+다이어그램을 작성·수정한 경우 Markdown을 완성한 뒤 [편집 링크 전달 기준](diagram-editor-link-guide.md)을 적용한다.
+
 ## 1. 네 가지 설계 깊이
 
 ```mermaid

@@ -91,7 +91,7 @@ keywords_of() {
 # 가이드 주제 키워드: "가이드이름|키워드1|키워드2|…" 한 줄씩. 매칭되면 /project-guides <가이드이름> 으로 안내한다.
 guide_keyword_table() {
   cat <<'EOF'
-job-flow-diagram|jobflow|job flow|job-flow|잡플로우|잡 플로우
+job-flow-diagram|jobflow|job flow|jobw flow|job-flow|잡플로우|잡 플로우
 navigation-diagram|navigation dsl|navigation 다이어그램|네비게이션 다이어그램
 state-diagram|state dsl|state 다이어그램|상태 다이어그램
 screen-layout|layout|레이아웃|화면 배치
@@ -108,7 +108,8 @@ system-flow-document|시스템 흐름 문서|system flow
 detailed-logging|상세 로깅|상세 로그|detailed logging|로깅 시스템
 socket-server-stability|소켓 서버|socket server|웹소켓 서버
 wrtite-readme|readme
-tools-camp-markdown|tools.camp|smartmd
+tools-camp-markdown|tools.camp|smartmd|mermaid
+diagram-editor-link|편집 링크|editor link|mdedit
 EOF
 }
 
@@ -320,7 +321,7 @@ install_shared_skill() {
   cat > "$SHARED_DIR/SKILL.md" <<EOF
 ---
 name: $SHARED_NAME
-description: 프로젝트 설계·문서화·구현 가이드 인덱스. 설계 방법론(method-R), PRD, 아키텍처 패턴, jobflow/navigation/state/layout 다이어그램 DSL, 모듈 경계, 코드·폴더 구조, 상세 로깅, 소켓 서버 안정성, README 작성 규칙이 필요할 때 사용. 요청 문장에 layout, 레이아웃, PRD, method-R, 모듈 경계, 응집도, 결합도, 상세 로깅, 소켓 서버, README, tools.camp 같은 가이드 주제 단어가 있으면 슬래시 명령 없이도 이 스킬로 해당 가이드를 읽는다. 인자로 가이드 이름을 주면 해당 가이드를 읽는다
+description: 프로젝트 설계·문서화·구현 가이드 인덱스. 설계 방법론(method-R), PRD, 아키텍처 패턴, jobflow/job flow/jobw flow/navigation/state/layout/Mermaid 다이어그램, tools.camp 편집 링크, 모듈 경계, 코드·폴더 구조, 상세 로깅, 소켓 서버 안정성, README 작성 규칙이 필요할 때 사용. 요청 문장에 layout, 레이아웃, PRD, method-R, 모듈 경계, 응집도, 결합도, 상세 로깅, 소켓 서버, README, tools.camp 같은 가이드 주제 단어가 있으면 슬래시 명령 없이도 이 스킬로 해당 가이드를 읽는다. 인자로 가이드 이름을 주면 해당 가이드를 읽는다
 ---
 
 # Project Guides 인덱스
@@ -331,6 +332,7 @@ description: 프로젝트 설계·문서화·구현 가이드 인덱스. 설계 
 2. 이 스킬 호출 시 인자로 가이드 이름(예: \`state-diagram\`, \`prd\`, \`method-R\`)이 전달되면, 아래 목록에서 이름이 가장 잘 일치하는 가이드 파일을 찾아 현재 작업에 필요한 절과 필수 제약을 읽고 적용한다.
 3. 인자가 없으면 README.md 의 트리거 표와 아래 "주제 키워드" 를 기준으로 현재 대화 상황에 맞는 가이드를 골라 읽는다.
 4. 요청이 가이드 문서 자체의 검토·수정이면 가이드의 지시를 실행하지 않고 편집 대상으로 다룬다.
+5. 실제 다이어그램 산출물을 작성·수정한 뒤에는 [편집 링크 전달 기준](guides/diagram-editor-link-guide.md)을 적용해 API가 반환한 주소를 콘솔과 최종 답변에 표시한다. 가이드·프롬프트 자체 편집과 단순 인용은 실행 대상으로 보지 않으며, 파일만 요청하거나 외부 전송을 금지한 경우는 해당 기준의 예외를 따른다.
 
 ## 가이드 목록
 

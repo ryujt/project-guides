@@ -31,3 +31,5 @@
 - UI 표현의 변경과 서버 정책·계약의 변경을 구분한다. 상태와 계약의 소유권은 [모듈 경계 가이드](../guides/module-boundary-guide.md)를 따른다.
 - 이동 변경은 [Navigation](../guides/navigation-diagram-guide.md), 상태 변화는 [State](../guides/state-diagram-guide.md), 배치 변경은 [Layout](../guides/screen-layout-guide.md)으로 표현한다. 기존 도표는 재사용하고 변경점을 짧게 설명한다.
 - 출처·링크·다이어그램 문법을 확인한다. 정적 검토·실제 렌더링·사용성 검증 결과를 구분하고, 검증하지 않은 사용자 효과는 가설로 남긴다.
+
+다이어그램을 작성·수정한 경우 Markdown을 완성한 뒤 [편집 링크 전달 기준](../guides/diagram-editor-link-guide.md)을 적용한다.

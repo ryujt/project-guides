@@ -62,6 +62,7 @@
 | [detailed-logging-guide](guides/detailed-logging-guide.md) | 상세 로그를 작성·보강하고 7일 지난 기록을 어떻게 자동 삭제할까? |
 | [socket-server-stability-guide](guides/socket-server-stability-guide.md) | 소켓 서버의 연결 수명·전달·역압·복구를 어떤 계약과 검증으로 설계할까? |
 | [tools-camp-markdown-guide](guides/tools-camp-markdown-guide.md) | tools.camp용 Markdown·SmartMD·다이어그램 표기를 어떻게 사용할까? |
+| [diagram-editor-link-guide](guides/diagram-editor-link-guide.md) | 완성한 다이어그램 Markdown을 API로 보내 보기·편집 링크를 어떻게 전달할까? |
 
 `wrtite-readme-guide.md`는 기존 링크 호환성을 위해 현재 파일명을 유지한다.
 
@@ -82,6 +83,8 @@ AS-IS·TO-BE 설계 문서를 쓸 때 함께 보는 자료다. 문서 구성과 
 | 화면 요소를 어떻게 배치하는가? | `layout` | [screen-layout-guide](guides/screen-layout-guide.md) |
 
 각 DSL을 유지하고, 정적 의존·배포·데이터 관계 같은 다른 관점에 Mermaid를 보완한다. 문법을 재정의하거나 DSL에 없는 정책을 새 토큰으로 넣지 않는다. 렌더러가 없는 환경에서는 정적 검토와 실제 렌더링 검증을 구분한다.
+
+다이어그램 작성·수정 결과는 [편집 링크 전달 가이드](guides/diagram-editor-link-guide.md)를 따라 Markdown을 완성한 뒤 tools.camp API로 링크를 생성한다. 반환된 `url`을 콘솔과 최종 답변의 클릭 가능한 링크로 표시하며, 파일만 저장하거나 외부 전송을 금지한 요청에는 적용하지 않는다. 가이드·프롬프트 자체 편집도 전송 대상이 아니다.
 
 ## 함께 유지할 설계 원칙
 

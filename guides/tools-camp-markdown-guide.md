@@ -9,6 +9,8 @@
 
 AI 작업에는 이 레퍼런스 전체를 기본 첨부하지 않는다. 필요한 다이어그램 가이드와 해당 문법 절만 읽고, 기존 토큰을 조합한다. 설명에 필요한 책임·계약·검증 메타데이터는 코드펜스 밖 산문/표에 쓰며 지원 확인 없이 새 DSL 문법을 만들지 않는다.
 
+다이어그램을 작성·수정한 경우 Markdown을 완성한 뒤 [편집 링크 전달 기준](diagram-editor-link-guide.md)을 적용한다.
+
 > 다이어그램의 **작성 문법과 의미는 전용 가이드가 원본**이다. 이 문서의 구현 수용 범위를 새 작성 문법으로 해석하지 않는다.
 > - [`job-flow-diagram-guide.md`](job-flow-diagram-guide.md)
 > - [`navigation-diagram-guide.md`](navigation-diagram-guide.md)

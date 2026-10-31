@@ -4,6 +4,8 @@
 
 **시스템을 이해하는 최소 조각**에서 시작해 동적 흐름과 정적 구성을 함께 설명한다. 프론트엔드·백엔드·워커·외부 시스템·저장소·배치가 섞인 시스템에도 적용하며, 다음 중 필요한 가이드만 읽는다.
 
+다이어그램을 작성·수정한 경우 Markdown을 완성한 뒤 [편집 링크 전달 기준](diagram-editor-link-guide.md)을 적용한다.
+
 - [module-boundary-guide.md](module-boundary-guide.md): 책임·공개 계약·상태 소유권·최소 맥락과 분해 중단 기준
 - [job-flow-diagram-guide.md](job-flow-diagram-guide.md): 객체/모듈 간 메서드 호출·이벤트 흐름
 - [navigation-diagram-guide.md](navigation-diagram-guide.md): 화면/API/프로세스 흐름

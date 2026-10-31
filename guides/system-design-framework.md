@@ -25,6 +25,8 @@ AS-IS·TO-BE 시스템 설계 문서에서 위 8관점이 들어갈 절은 [설�
 
 ## 다이어그램의 문법 기준
 
+다이어그램을 작성·수정한 경우 Markdown을 완성한 뒤 [편집 링크 전달 기준](diagram-editor-link-guide.md)을 적용한다.
+
 독자 DSL을 원본으로 유지한다. `jobflow`를 Mermaid sequence/flowchart로 대체하거나 각 문서에서 문법을 재정의하지 않는다. Mermaid 보조 그림은 추가할 수 있으나 원본 DSL과 의미가 같아야 한다. 렌더러 지원 여부는 해당 가이드의 확인 절차를 따른다.
 
 | 관점 | 표기 | 기준 가이드 |
