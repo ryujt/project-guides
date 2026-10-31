@@ -74,4 +74,4 @@
 
 최종 보고에는 설명서 위치·대상 도표 수·원문/누락 대조 결과·새로 발견한 요구·시나리오 검토 범위·개선안과 선택 이유·원본 확인이 필요한 항목을 적는다.
 
-보충·개선 다이어그램을 새로 작성하거나 수정한 경우 Markdown을 완성한 뒤 [편집 링크 전달 기준](../guides/diagram-editor-link-guide.md)을 적용한다.
+해설 Markdown 문서·보충·개선 다이어그램의 tools.camp 링크 생성 여부 확인과 전달은 [편집 링크 전달 기준](../guides/diagram-editor-link-guide.md)을 따른다.

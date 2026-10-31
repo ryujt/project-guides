@@ -29,7 +29,7 @@
 
 각 다이어그램은 전용 가이드의 문법을 따르고, 바로 아래에 주요 내용을 짧게 설명한다.
 
-다이어그램을 작성·수정한 경우 Markdown을 완성한 뒤 [편집 링크 전달 기준](../guides/diagram-editor-link-guide.md)을 적용한다.
+Markdown 문서·다이어그램의 tools.camp 링크 생성 여부 확인과 전달은 [편집 링크 전달 기준](../guides/diagram-editor-link-guide.md)을 따른다.
 
 ## 작성과 검증 기준
 

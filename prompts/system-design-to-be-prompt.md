@@ -70,4 +70,4 @@ UI나 화면 이동이 없으면 해당 없음과 이유를 기록한다.
 
 UI가 없으면 화면 0개라는 사실과 이유를 기록하고, 가상의 화면을 만들지 않는다.
 
-다이어그램을 작성·수정한 경우 Markdown을 완성한 뒤 [편집 링크 전달 기준](../guides/diagram-editor-link-guide.md)을 적용한다.
+Markdown 문서·다이어그램의 tools.camp 링크 생성 여부 확인과 전달은 [편집 링크 전달 기준](../guides/diagram-editor-link-guide.md)을 따른다.

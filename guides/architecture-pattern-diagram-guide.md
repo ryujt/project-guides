@@ -2,7 +2,7 @@
 
 아키텍처 패턴별로 **무엇을 기준으로 시스템을 나누는지** 정리하고, 그 분해 기준을 문서에서 어떤 다이어그램으로 표현할지 안내한다.
 
-다이어그램을 작성·수정한 경우 Markdown을 완성한 뒤 [편집 링크 전달 기준](diagram-editor-link-guide.md)을 적용한다.
+Markdown 문서·다이어그램의 tools.camp 링크 생성 여부 확인과 전달은 [편집 링크 전달 기준](diagram-editor-link-guide.md)을 따른다.
 
 이 문서는 필요한 설계 관점을 고르고 `jobflow` / `navigation` / Mermaid를 어떤 상황에 쓸지 연결하는 참고서다. 모든 패턴·모든 예시를 읽거나 프로젝트에 적용할 필요는 없다. 책임·계약·데이터 소유권과 분해 중단 기준은 [module-boundary-guide.md](module-boundary-guide.md)를 먼저 적용하고, 현재 문제에 필요한 항목만 선택한다.
 

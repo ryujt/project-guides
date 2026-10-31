@@ -30,4 +30,4 @@
 
 문법·링크 대조와 실제 렌더링을 구분하고 렌더러가 없으면 정적 검토라고 기록한다. 오류·핵심 전이 누락을 수정한 뒤 문서 위치·분석 범위·검증 결과와 한계·발견 이슈를 보고한다.
 
-다이어그램을 작성·수정한 경우 Markdown을 완성한 뒤 [편집 링크 전달 기준](../guides/diagram-editor-link-guide.md)을 적용한다.
+Markdown 문서·다이어그램의 tools.camp 링크 생성 여부 확인과 전달은 [편집 링크 전달 기준](../guides/diagram-editor-link-guide.md)을 따른다.

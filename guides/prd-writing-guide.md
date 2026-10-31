@@ -28,7 +28,7 @@ PRD는 사용자 문제·범위·성공 기준과 설계·검증을 연결한다
 
 ## 2. 다이어그램 정책
 
-다이어그램을 작성·수정한 경우 Markdown을 완성한 뒤 [편집 링크 전달 기준](diagram-editor-link-guide.md)을 적용한다.
+Markdown 문서·다이어그램의 tools.camp 링크 생성 여부 확인과 전달은 [편집 링크 전달 기준](diagram-editor-link-guide.md)을 따른다.
 
 - 관점 선택·DSL 원본은 [다이어그램의 문법 기준](system-design-framework.md#다이어그램의-문법-기준)을 따른다. 지정 DSL을 Mermaid로 대체하거나 새 문법을 추가하지 않는다.
 - 한 그림은 한 질문·한 경계 수준을 설명한다. 필요한 부분만 확대하며 노드 수를 맞추려고 모듈을 만들지 않는다.

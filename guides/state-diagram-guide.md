@@ -4,7 +4,7 @@
 
 객체의 상태 변화와 흐름을 스크립트로 작성한다. 이 문서는 `state`의 작성 문법과 의미를 정의하며, 스크립트는 내부적으로 **Mermaid `graph LR`**로 변환된다.
 
-다이어그램을 작성·수정한 경우 Markdown을 완성한 뒤 [편집 링크 전달 기준](diagram-editor-link-guide.md)을 적용한다.
+Markdown 문서·다이어그램의 tools.camp 링크 생성 여부 확인과 전달은 [편집 링크 전달 기준](diagram-editor-link-guide.md)을 따른다.
 
 ## 범위와 상태 소유권
 
