@@ -1,5 +1,5 @@
 #!/bin/sh
-# project-guides Codex 스킬 설치 프로그램 (install.sh 기반)
+# project-guides Codex 스킬 설치 프로그램
 #
 # guides/·prompts/를 Codex 개인 스킬로 설치한다.
 # 일반 요청의 작업 의도·핵심 단어로 자동 선택하거나 $스킬명으로 호출한다.
@@ -40,7 +40,7 @@ desc_of() {
     frontend-user-design)        echo "회원가입·로그인·세션·계정 복구·탈퇴 등 회원제 프론트엔드의 사용자·인증 흐름을 설계할 때 사용한다" ;;
     frontend-navigation-diagram) echo "navigation/네비게이션/내비게이션 다이어그램 작성·수정. 화면 이동과 판단에 필요한 API·처리를 navigation DSL로 설계할 때 사용한다" ;;
     frontend-state-diagram)      echo "state/상태 전이 다이어그램 작성·수정. 프론트엔드 객체·화면의 상태와 전이 조건을 state DSL로 설계할 때 사용한다" ;;
-    frontend-prototype)          echo "frontend-prototype, 프론트엔드 프로토타입, 화면 흐름 시뮬레이션 구현. 백엔드 없이 가상 데이터·정상 응답으로 웹/데스크톱 설계를 검토할 때 사용한다" ;;
+    frontend-prototype)          echo "frontend-prototype, 프론트엔드 프로토타입, 화면 흐름 시뮬레이션 구현. 실제 제품 같은 웹/데스크톱 화면과 UX/UI 완성도에 집중하고 백엔드 없이 가상 동작으로 사용 흐름을 체험할 때 사용한다" ;;
     jobflow-walkthrough)         echo "jobflow/job-flow/job flow/잡플로우 해설·상세 설명서 작성. 기존 도표를 객체·계약·시나리오와 연결해 설명하고 개선안을 검토할 때 사용한다" ;;
     multi-agent-task)            echo "multi-agent/멀티 에이전트 협업 요청. Architect·Critic·Developer·Tester 등 여러 전문 에이전트가 분업·상호 검토하며 작업할 때 사용한다" ;;
     ux-ui-improvement)           echo "UX/UI 개선 설계, 사용성 분석, 유사 서비스 벤치마킹·오픈소스 리서치로 개선안을 도출할 때 사용한다" ;;

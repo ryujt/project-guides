@@ -4,7 +4,7 @@
 
 - [`guides/`](guides/): 설계 원칙·문서 양식·독자 다이어그램 DSL과 검사 도구(`tools/`). 필요한 주제만 참조한다.
 - [`prompts/`](prompts/): 현재 작업의 목표와 함께 AI에게 전달하는 실행 프롬프트.
-- Claude Code·Codex 설치와 호출 방법은 저장소 루트의 `install.md`를 참조한다. Claude Code는 `installer/claude.sh`로, Codex는 `installer/codex.sh`로 설치하면 `asis`·`tobe`·`jobflow` 등이 들어간 일반 요청의 작업 의도에 맞춰 스킬을 선택할 수 있다. 설치된 문서 사본에서는 재설치가 필요 없다.
+- Claude Code·Codex 설치와 호출 방법은 저장소 루트의 `install.md`를 참조한다. `bash installer/install.sh`로 둘 다 설치하거나, `installer/claude.sh`·`installer/codex.sh`로 각각 설치한다. 설치 후 `asis`·`tobe`·`jobflow` 등이 들어간 일반 요청의 작업 의도에 맞춰 스킬을 선택할 수 있다. 설치된 문서 사본에서는 재설치가 필요 없다.
 
 ## 처음 사용할 때
 
@@ -26,7 +26,7 @@
 | 회원·인증·세션·탈퇴 설계 | [frontend-user-design-prompt](prompts/frontend-user-design-prompt.md) | 채택할 회원 흐름, 보안·데이터 경계 |
 | 화면과 API 이동 흐름 작성 | [frontend-navigation-diagram-prompt](prompts/frontend-navigation-diagram-prompt.md) | navigation, 필요한 화면 구조 |
 | 화면·객체의 상태 전이 작성 | [frontend-state-diagram-prompt](prompts/frontend-state-diagram-prompt.md) | state, 해당 상태의 소유자·전이 조건 |
-| 백엔드 없이 화면·흐름 검토용 프로그램 구현 | [frontend-prototype-prompt](prompts/frontend-prototype-prompt.md) | TO-BE·navigation·layout 등 해당 설계, 웹/데스크톱 실행 환경; 가상 데이터로 정상 흐름 시뮬레이션 |
+| 실제 제품 같은 화면·사용 흐름 체험용 프로토타입 구현 | [frontend-prototype-prompt](prompts/frontend-prototype-prompt.md) | 기존 설계·디자인 기준이 있으면 활용; 웹/데스크톱 환경에서 동작은 가상 데이터로 시뮬레이션하고 UX/UI 완성도에 집중 |
 | jobflow를 실제 시나리오로 해설·검토 | [jobflow-walkthrough-prompt](prompts/jobflow-walkthrough-prompt.md) | jobflow, 등장 객체·계약의 실제 근거; 원문을 보존한 연결·책임 검토와 개선안 |
 | UX/UI 분석과 개선 | [ux-ui-improvement-prompt](prompts/ux-ui-improvement-prompt.md) | 대상 사용자 흐름, 필요한 비교 조사 |
 | 설계서·요구사항으로 구현 | [verify-first-implementation-prompt](prompts/verify-first-implementation-prompt.md) | 설계서의 작업 순서·검증 계획·미확정, 쓸 수 있는 실행 환경과 권한; 작은 단위 검증 → 재사용 단위 확정 → 조립 |
@@ -96,7 +96,7 @@ AS-IS·TO-BE 설계 문서를 쓸 때 함께 보는 자료다. 문서 구성과 
 | 상황 | 진행 순서 |
 | --- | --- |
 | 신규 프로젝트 | 목표·수용 기준 → to-be 신규 설계(AS-IS 없이 시작) → 필요한 설계 관점·PRD → 검증 우선 구현(작은 단위 검증 → 재사용 단위 확정 → 조립) → 계약·통합 검증 |
-| 화면·흐름 설계 검토 | TO-BE·navigation·layout 등 해당 설계 → frontend-prototype → 개발자 피드백·설계 보완 → 실제 구현을 진행하면 검증 우선 구현 |
+| 화면·사용 흐름 체험과 검토 | 대상 과업·화면(기존 설계가 있으면 활용) → frontend-prototype(실제 제품 같은 UX/UI·가상 동작) → 화면 검수·체험 피드백·보완 → 실제 구현을 진행하면 검증 우선 구현 |
 | 기존 기능 변경 | feature-design → 대상 계약·소비자 조사 → 변경·검증(여러 모듈이나 외부 가정이 걸리면 검증 우선 구현); 전체 설계는 영향이 실제로 커질 때 |
 | 구조 개선 | as-is 근거 확인 → to-be 경계·호환성 설계 → 검증 우선 구현으로 단계적 변경 → 소비자 회귀 검증 |
 | 복잡한 협업 작업 | 작업 맥락 패킷 → 독립 조사 → 설계 비판 → 파일 소유권을 나눠 구현 → 독립 검증·재평가 |

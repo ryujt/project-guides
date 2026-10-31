@@ -1,10 +1,20 @@
 # 설치 및 사용 방법
 
-이 저장소의 `guides/`·`prompts/` 문서를 개인 스킬로 설치한다. Claude Code는 `installer/claude.sh`로 `~/.claude/skills`에, Codex는 `installer/codex.sh`로 `~/.agents/skills`에 설치한다. 설치 프로그램은 분리되어 있어 서로의 설치를 변경하지 않는다.
+이 저장소의 `guides/`·`prompts/` 문서를 개인 스킬로 설치한다. `installer/install.sh`는 Claude Code와 Codex를 한 번에 설치한다. 각각 설치하려면 `installer/claude.sh`·`installer/codex.sh`를 사용한다. 기본 설치 경로는 Claude Code가 `~/.claude/skills`, Codex가 `~/.agents/skills`다.
 
 ## 1. 설치
 
-### 방법 A — Claude Code에서 (권장)
+### 방법 A — Claude Code·Codex 통합 설치
+
+```bash
+bash installer/install.sh
+```
+
+`--install`을 지정해도 같은 방식으로 설치·업데이트한다. Claude Code 설치 후 Codex 설치를 순서대로 실행하며, 각 설치 프로그램의 스킬·훅 설정을 그대로 적용한다. `CLAUDE_SKILLS_DIR`·`CLAUDE_SETTINGS_FILE`·`CODEX_SKILLS_DIR` 환경변수도 각 프로그램에 그대로 전달한다.
+
+한쪽 실행이 실패하면 비정상 종료하고 이후 단계는 실행하지 않는다. 앞서 적용한 설치는 되돌리지 않으므로 원인을 해결한 뒤 같은 명령으로 다시 실행한다.
+
+### 방법 B — Claude Code에서
 
 문서가 있는 저장소를 Claude Code로 연 뒤 입력한다.
 
@@ -12,7 +22,7 @@
 /install-guides
 ```
 
-### 방법 B — 터미널에서 Claude Code용 설치
+### 방법 C — 터미널에서 Claude Code용 설치
 
 ```bash
 bash installer/claude.sh
@@ -22,22 +32,20 @@ bash installer/claude.sh
 
 설치가 끝나면 **새 Claude Code 세션부터** 스킬이 인식된다.
 
-`claude.sh`는 `install.sh`와 같은 스킬을 설치하고, 추가로 슬래시 명령 없는 일반 요청에서도 스킬이 선택되게 두 가지를 설정한다.
+`claude.sh`는 스킬을 설치하고, 슬래시 명령 없는 일반 요청에서도 스킬이 선택되게 두 가지를 설정한다. 통합 설치에서도 같은 설정을 적용한다.
 
 1. 각 스킬 `SKILL.md`의 설명(description)에 `asis`·`tobe`·`jobflow`·`layout` 같은 트리거 키워드와 표기 변형을 넣어 Claude Code의 스킬 자동 매칭에 걸리게 한다.
 2. `UserPromptSubmit` 훅 `project-guides/hooks/skill-trigger.sh`를 설치 경로에 두고 설정 파일의 `hooks`에 등록한다. 훅은 요청 문장에서 `hooks/skill-keywords.tsv`의 키워드를 단어 경계로 찾아(`basis`·`October` 같은 부분 문자열은 제외) 일치한 스킬·가이드 목록과 적용 규칙을 Claude에게 컨텍스트로 전달한다. 요청을 차단하거나 바꾸지 않으며, `/`로 시작하는 요청에는 개입하지 않는다.
 
 설정 파일 병합에는 `node` 또는 `python3`가 필요하다. 둘 다 없으면 스킬만 설치하고 `hooks`에 직접 추가할 JSON 조각을 출력한다. 기존 설정은 `settings.json.bak-project-guides`로 백업하며, 다른 훅과 키는 그대로 둔다.
 
-`installer/install.sh`는 스킬만 설치하는 이전 방식이다. 설명에 키워드를 넣지 않고 설정 파일도 건드리지 않으므로 슬래시 명령만 쓰거나 훅을 원하지 않을 때 사용한다. 두 스크립트는 같은 위치에 같은 이름으로 설치하므로 한쪽을 다시 실행하면 다른 쪽 설치를 덮어쓴다. `install.sh`로 덮어쓴 뒤 훅 등록만 남으면 `bash installer/claude.sh --uninstall`로 지운다.
-
-### 방법 C — Codex용 설치
+### 방법 D — Codex용 설치
 
 ```bash
 bash installer/codex.sh
 ```
 
-`install.sh`를 바탕으로 만든 Codex 전용 설치 프로그램이다. 기본 경로는 Codex가 프로젝트와 무관하게 탐색하는 개인 스킬 폴더 `~/.agents/skills`다. 다른 위치를 쓰려면 Codex가 탐색하는 폴더를 `CODEX_SKILLS_DIR`로 지정한다. 예를 들어 프로젝트 범위로 설치할 때는 해당 프로젝트 루트에서 `CODEX_SKILLS_DIR=.agents/skills bash <설치 프로그램 경로>/codex.sh`로 실행한다. `CLAUDE_SKILLS_DIR`는 Codex 설치에 영향을 주지 않는다.
+Codex 전용 설치 프로그램이다. 기본 경로는 Codex가 프로젝트와 무관하게 탐색하는 개인 스킬 폴더 `~/.agents/skills`다. 다른 위치를 쓰려면 Codex가 탐색하는 폴더를 `CODEX_SKILLS_DIR`로 지정한다. 예를 들어 프로젝트 범위로 설치할 때는 해당 프로젝트 루트에서 `CODEX_SKILLS_DIR=.agents/skills bash <설치 프로그램 경로>/codex.sh`로 실행한다. `CLAUDE_SKILLS_DIR`는 Codex 설치에 영향을 주지 않는다.
 
 모든 설치 스킬의 `agents/openai.yaml`에 `policy.allow_implicit_invocation: true`를 설정한다. `SKILL.md`의 설명에 핵심 단어·표기 변형과 적용 상황을 넣어, `$스킬명`을 쓰지 않은 일반 요청에서도 관련 스킬을 선택할 수 있게 한다. 이 방식과 탐색 경로는 [공식 Codex 스킬 문서](https://learn.chatgpt.com/docs/build-skills)를 따른다.
 
@@ -57,7 +65,7 @@ bash installer/codex.sh
 | `/frontend-user-design` | 회원가입·로그인·세션·탈퇴 등 회원제 프론트엔드 설계 |
 | `/frontend-navigation-diagram` | 화면·API 흐름 navigation 다이어그램 작성 |
 | `/frontend-state-diagram` | 상태 전이 state 다이어그램 작성 |
-| `/frontend-prototype` | 백엔드 없이 정상 흐름을 시뮬레이션하는 웹/데스크톱 화면·흐름 검토용 프로토타입 구현 |
+| `/frontend-prototype` | UX/UI 완성도에 집중해 실제 제품 같은 웹/데스크톱 화면을 구현하고, 백엔드 없이 가상 동작으로 사용 흐름을 체험하는 프로토타입 구현 |
 | `/jobflow-walkthrough` | jobflow를 객체·계약·대표 시나리오와 연결해 해설 |
 | `/multi-agent-task` | 여러 전문 에이전트(Architect·Critic·Developer·Tester) 협업 작업 |
 | `/ux-ui-improvement` | 리서치·벤치마킹 기반 UX/UI 개선 설계 |
@@ -113,13 +121,29 @@ bash installer/codex.sh
 
 상세 로깅 문서는 `guides/detailed-logging-guide.md`로 이동했다. 이전 설치 매니페스트에 등록된 `/detailed-logging` 스킬은 업데이트 시 제거하며, 이후 `/project-guides detailed-logging`으로 가이드를 사용한다. 테스트·멀티 에이전트 프롬프트도 이 가이드를 직접 참조한다.
 
+둘 다 업데이트하려면 다음을 실행한다.
+
+```bash
+bash installer/install.sh
+```
+
+Claude Code만 업데이트하려면 다음을 실행한다.
+
 ```
 /install-guides        # 또는 bash installer/claude.sh
 ```
 
-Codex는 `bash installer/codex.sh`를 다시 실행한다. 사용자 지정 설치 경로를 썼으면 같은 `CODEX_SKILLS_DIR`를 지정한다.
+Codex만 업데이트하려면 `bash installer/codex.sh`를 다시 실행한다. 사용자 지정 설치 경로나 설정 파일을 썼으면 설치 때와 같은 환경변수 값을 지정한다.
 
 ## 5. 제거
+
+둘 다 제거하려면 다음을 실행한다. `-u`도 같은 동작이다.
+
+```bash
+bash installer/install.sh --uninstall
+```
+
+Claude Code용 제거:
 
 ```
 /install-guides uninstall        # 또는 bash installer/claude.sh --uninstall
@@ -138,10 +162,10 @@ bash installer/codex.sh --uninstall
 ## 6. 설치 프로그램 검증
 
 ```bash
-node --test installer/codex.test.mjs
+node --test installer/*.test.mjs
 ```
 
-임시 `CODEX_SKILLS_DIR`·`CLAUDE_SKILLS_DIR`에서 설치·업데이트·제거, 다른 스킬과 Claude 설치 보존, 상대 링크와 자동 선택 메타데이터를 검사한다. 사용자 홈에는 설치하지 않는다. 메타데이터 검사는 실제 Codex 대화에서 자동 선택되는지 확인하는 실험과 구분한다.
+임시 `CODEX_SKILLS_DIR`·`CLAUDE_SKILLS_DIR`·`CLAUDE_SETTINGS_FILE`에서 통합 설치·업데이트·제거와 실패 전달을 검사한다. Codex 개별 설치의 다른 스킬과 Claude 설치 보존, 상대 링크와 자동 선택 메타데이터도 확인한다. 사용자 홈에는 설치하지 않는다. 메타데이터 검사는 실제 Codex 대화에서 자동 선택되는지 확인하는 실험과 구분한다.
 
 `claude.sh`는 임시 경로를 환경변수로 주어 수동으로 검증한다. 설치 후 훅에 가짜 이벤트를 넣어 매칭 결과를 확인하고, 제거 후 설정 파일에 다른 키만 남는지 본다.
 

@@ -1,8 +1,8 @@
 #!/bin/sh
 # project-guides 스킬 설치 프로그램 (Claude Code 전용)
 #
-# install.sh 와 같은 방식으로 guides/·prompts/ 를 개인 스킬 디렉토리(~/.claude/skills)에
-# 설치하고, 추가로 다음을 설정해서 슬래시 명령 없이 일반 요청 문장만으로도
+# guides/·prompts/ 를 개인 스킬 디렉토리(~/.claude/skills)에 설치하고,
+# 다음을 설정해서 슬래시 명령 없이 일반 요청 문장만으로도
 # 해당 스킬이 선택·적용되게 한다.
 #
 #   1. 각 스킬의 description 에 트리거 키워드(asis, tobe, jobflow, layout …)를 넣어
@@ -56,7 +56,7 @@ desc_of() {
     frontend-user-design)        echo "회원가입·로그인·세션·계정 복구·탈퇴 등 회원제 프론트엔드 설계 문서를 생성한다" ;;
     frontend-navigation-diagram) echo "화면 이동과 그 판단에 필요한 API·처리를 navigation DSL로 작성한다" ;;
     frontend-state-diagram)      echo "프론트엔드 객체·화면의 상태 전이를 state DSL 다이어그램으로 작성한다" ;;
-    frontend-prototype)          echo "TO-BE·navigation·layout 등 설계 후 백엔드 없이 웹 또는 데스크톱 프론트엔드 프로토타입을 구현한다. 가상 데이터와 정상 응답으로 화면 배치·이동·상태 변화를 시뮬레이션해 개발자가 설계를 검토한다. '화면 흐름 시뮬레이션', '백엔드 없는 프로토타입' 요청 시 사용" ;;
+    frontend-prototype)          echo "실제 제품 같은 웹 또는 데스크톱 프론트엔드 프로토타입을 구현한다. UX/UI 완성도에 집중하고 백엔드 없이 가상 데이터·상태 변화로 사용 흐름을 체험한다. '프론트엔드 프로토타입', '화면 흐름 시뮬레이션', '백엔드 없는 프로토타입' 요청 시 사용" ;;
     jobflow-walkthrough)         echo "이미 작성된 jobflow 를 등장 객체·계약·대표 시나리오와 연결해 해설하고 연결·책임을 검토한다" ;;
     multi-agent-task)            echo "Architect·Critic·Developer·Tester 등 여러 전문 에이전트가 분업·상호 견제하며 작업을 수행한다" ;;
     ux-ui-improvement)           echo "유사 서비스 벤치마킹·오픈소스 리서치를 기반으로 UX/UI 개선 설계안을 도출한다" ;;
