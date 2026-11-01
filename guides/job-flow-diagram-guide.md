@@ -17,7 +17,7 @@ Validator.Check.false --> SaveOrder.Reject
 ```
 
 ```jobflow
-scope: 공개 조회 계약의 협력
+scope: 서비스 간 공개 조회 계약의 협력
 Object: Client, Gateway, Provider
 Client.request --> Gateway.message.QueryRequest
 Gateway.message.QueryRequest --> Provider.message.FetchRequest
@@ -30,7 +30,11 @@ Gateway.message.QueryRequest --> Provider.message.FetchRequest
 | 헤더 | 관점 | 화살표 해석 |
 |---|---|---|
 | `orchestrator: X` | X가 흐름을 조율 | X가 호출·결과 전달·이벤트 구독을 조율 |
-| `scope: X` | X라는 경계 안에서 일어나는 일 | 등장 객체들은 서로 외부 시스템이다 |
+| `scope: X` | X라는 관찰 범위의 협력 | 객체의 경계를 넘는 공개 메시지와 해당 범위에서 여는 처리를 표현 |
+
+### 관찰 수준
+
+매크로뷰의 시스템 경계·외부 객체 선택·한글 명칭은 [Method-R의 매크로 설계 기준](method-R.md#3-매크로-설계-시스템을-하나의-경계로-보기)을 따른다. `scope:`를 사용한다는 사실만으로 매크로뷰가 되지는 않으며, 서비스 간 협력과 내부 확대는 각각 해당 관찰 수준을 밝힌다.
 
 ### Object:
 
@@ -87,10 +91,10 @@ WorkerA.OnNeedHelp.result --> WorkerA.ContinueProcessing
 
 ## 외부 경계의 요청·응답과 알림
 
-외부 시스템끼리는 메시지를 주고받는다. 서로 직접 호출할 수 없는 구조다.
+독립된 경계의 객체는 공개 메시지로 요청·응답·알림을 주고받는다. 상대 내부의 메서드 호출과 구분하며, HTTP·메시지 큐 등 실제 전송 방식은 계약에서 정한다. 매크로뷰에서 어떤 객체를 경계 밖에 둘지는 [매크로 설계 기준](method-R.md#3-매크로-설계-시스템을-하나의-경계로-보기)을 따른다.
 
 ```jobflow
-scope: 공개 조회 계약의 협력
+scope: 서비스 간 공개 조회 계약의 협력
 Object: Client, Gateway, Provider
 Client.OnRequest --> Gateway.message.QueryRequest
 Gateway.message.QueryRequest --> Provider.message.FetchRequest
@@ -100,7 +104,7 @@ Gateway.message.FetchResponse --> Client.message.QueryResponse
 
 ## 내부 확대
 
-메시지를 주고받는 동안 내부에서 일어나는 일을 표현해 시나리오 이해를 돕는다.
+관찰 수준을 낮춰 메시지 처리 중의 내부 협력을 표현한다. 아래는 Gateway의 내부 확대이며, 매크로뷰에서는 이 처리를 시스템 객체 안에 둔다.
 
 ```jobflow
 scope: Gateway 내부의 조회와 응답 가공
