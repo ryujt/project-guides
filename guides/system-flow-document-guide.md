@@ -339,7 +339,7 @@ ApiServer.message.JobCompleted --> Client.message.JobCompleted
 
 ```jobflow
 orchestrator: SystemOrchestrator
-Object: ApiBoundary, SystemOrchestrator, Validator, ContextBuilder, DomainWorker, StorageGateway
+Object: SystemOrchestrator, ApiBoundary, Validator, ContextBuilder, DomainWorker, StorageGateway
 ApiBoundary.HandleCommand --> SystemOrchestrator.HandleCommand
 SystemOrchestrator.HandleCommand --> Validator.Validate
 Validator.Validate --> ContextBuilder.Build

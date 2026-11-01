@@ -40,7 +40,7 @@ Gateway.message.QueryRequest --> Provider.message.FetchRequest
 
 ### Object:
 
-다이어그램에 등장하는 객체를 나열한다. 선언 순서는 객체의 왼쪽→오른쪽 열 배치를 정하므로 [선 교차 줄이기](#선-교차-줄이기)에 따라 해당 그림의 협력 관계에 맞춰 조정한다. 문서 전체의 객체 목록 순서를 모든 그림에 고정하지 않는다.
+다이어그램에 등장하는 객체를 나열한다. 선언 순서는 객체의 왼쪽→오른쪽 열 배치를 정하므로 [선 교차 줄이기](#선-교차-줄이기)에 따라 해당 그림의 협력 관계에 맞춰 조정한다. 문서 전체의 객체 목록 순서를 모든 그림에 고정하지 않는다. `orchestrator:` 헤더가 있으면 그 조율자를 **항상 첫 번째(가장 왼쪽 열)** 로 선언한다. 이벤트로만 시작해 조율자 도형이 없는 그림이라도 빈 열로 남겨, 어느 조율자의 관점인지 그림에서 바로 알 수 있게 한다.
 
 ### 구성 요소
 
@@ -133,7 +133,7 @@ VideoRenderer.OnFrameRequested --> VideoDecoder.GetFrameBitmap
 VideoDecoder.GetFrameBitmap.bitmap --> VideoRenderer.DrawFrame
 ```
 
-VideoPlayer가 `OnFrameRequested`를 구독하고 `GetFrameBitmap`의 반환값을 받아 `DrawFrame`에 넘긴다.
+VideoPlayer가 `OnFrameRequested`를 구독하고 `GetFrameBitmap`의 반환값을 받아 `DrawFrame`에 넘긴다. `FileStream.OnVideoData --> VideoDecoder.Decode` 줄에는 VideoPlayer 도형이 없지만, 구독과 호출은 헤더의 조율자인 VideoPlayer가 실행한다. 이벤트로만 시작하는 그림에서도 조율자는 도형 없이 이 역할을 맡으며, 받은 이벤트를 그대로 넘기기만 하는 조율자 메서드를 따로 그리지 않는다.
 
 이 예제는 호출과 이벤트를 함께 쓴다. `Open`·`Play`처럼 조율자가 시작하고 결과를 이어 쓰는 협력은 메서드 호출과 반환값으로, `OnVideoData`·`OnFrameRequested`처럼 조각에서 독립된 시점에 생기는 입력은 그 조각의 이벤트로 그리고 조율자가 구독한다. 메시지 수신·기한 도래·기록 완료처럼 기다리는 호출자가 없는 입력을 메서드 호출과 `.result`로 그리면, 실제로 없는 응답처와 주기 호출이 생긴다.
 
@@ -143,6 +143,7 @@ VideoPlayer가 `OnFrameRequested`를 구독하고 `GetFrameBitmap`의 반환값�
 
 ### 객체 열 순서 선택
 
+- `orchestrator:` 그림의 첫 열은 조율자로 고정하고, 나머지 열의 순서만 조정한다.
 - 자주 요청·응답하는 객체를 인접하게 놓고, 주요 전달 경로가 다른 객체의 열을 반복해서 가로지르지 않도록 `Object:` 순서를 조정한다. 각 그림의 관계를 기준으로 정하며 시스템 목록·알파벳 순서를 그대로 복사하지 않는다.
 - 중계·분기 객체는 요청자와 후속 대상 사이에 두는 배치와 대상들의 바깥쪽에 두는 배치를 비교한다. **출발 객체를 항상 한쪽 끝에 두는 것은 고정 규칙이 아니다.** 다른 연결을 가로지르는 긴 세로줄기나 우회가 줄어드는지 확인한다.
 - 한 연결만 짧아지고 다른 분기·응답·후속 알림이 더 겹치지는 않는지 그림 전체를 다시 본다. 첫 호출뿐 아니라 뒤에 선언된 독립 진입과 같은 객체로 돌아오는 연결도 확인한다.
