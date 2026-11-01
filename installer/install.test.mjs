@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {
   appendFileSync, cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync,
-  readdirSync, rmSync, writeFileSync,
+  readdirSync, renameSync, rmSync, writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -25,7 +25,7 @@ function withInstallation(check, stubChildren = false) {
       for (const name of ['claude.sh', 'codex.sh']) {
         cpSync(path.join(repository, 'installer', name), path.join(source, 'installer', name));
       }
-      for (const name of ['guides', 'prompts', 'README.md', 'install.md']) {
+      for (const name of ['guides', 'prompts', 'examples', 'README.md', 'install.md']) {
         cpSync(path.join(repository, name), path.join(source, name), { recursive: true });
       }
     }
@@ -40,7 +40,7 @@ function withInstallation(check, stubChildren = false) {
       },
       encoding: 'utf8',
     });
-    check({ source, claudeSkills, codexSkills, settings, log, run });
+    check({ temporary, source, claudeSkills, codexSkills, settings, log, run });
   } finally {
     rmSync(temporary, { recursive: true, force: true });
   }
@@ -64,6 +64,8 @@ test('installs and updates both tools, registers one Claude hook, and removes on
       mkdirSync(path.join(skills, 'unrelated-skill'), { recursive: true });
       writeFileSync(path.join(skills, 'unrelated-skill/SKILL.md'), 'keep unrelated skill');
     }
+    const retiredExample = 'examples/diagram/navigation/retired-example.md';
+    writeFileSync(path.join(source, retiredExample), '# Retired example\n');
 
     succeeded(run());
     const names = ['project-guides', ...readdirSync(path.join(source, 'prompts'))
@@ -79,6 +81,9 @@ test('installs and updates both tools, registers one Claude hook, and removes on
         assert.equal(readFileSync(path.join(skills, 'project-guides', name), 'utf8'),
           readFileSync(path.join(source, name), 'utf8'), `${skills}: missing ${name}`);
       }
+      assert.equal(spawnSync('diff', [
+        '-r', path.join(source, 'examples'), path.join(skills, 'project-guides/examples'),
+      ]).status, 0, `${skills}: examples differ from source`);
     }
     assert.ok(existsSync(path.join(claudeSkills, 'project-guides/hooks/skill-trigger.sh')));
     const hook = path.join(claudeSkills, 'project-guides/hooks/skill-trigger.sh');
@@ -96,10 +101,20 @@ test('installs and updates both tools, registers one Claude hook, and removes on
 
     const prompt = 'prompts/frontend-prototype-prompt.md';
     appendFileSync(path.join(source, prompt), '\nUpdated prototype guidance.\n');
+    const example = 'examples/diagram/navigation/shopping-mall-navigation.md';
+    appendFileSync(path.join(source, example), '\nUpdated example content.\n');
+    rmSync(path.join(source, retiredExample));
+    const addedExample = 'examples/diagram/navigation/added-example.md';
+    writeFileSync(path.join(source, addedExample), '# Added example\n');
     succeeded(run(['--install']));
     for (const skills of [claudeSkills, codexSkills]) {
       assert.equal(readFileSync(path.join(skills, 'project-guides', prompt), 'utf8'),
         readFileSync(path.join(source, prompt), 'utf8'));
+      assert.deepEqual(readFileSync(path.join(skills, 'project-guides', example)),
+        readFileSync(path.join(source, example)));
+      assert.equal(existsSync(path.join(skills, 'project-guides', retiredExample)), false);
+      assert.deepEqual(readFileSync(path.join(skills, 'project-guides', addedExample)),
+        readFileSync(path.join(source, addedExample)));
     }
     const updatedSettings = JSON.parse(readFileSync(settings, 'utf8'));
     assert.equal(updatedSettings.model, originalSettings.model);
@@ -122,6 +137,36 @@ test('installs and updates both tools, registers one Claude hook, and removes on
     succeeded(run());
     succeeded(run(['-u']));
     checkRemoved();
+  });
+});
+
+test('keeps example discovery and scenario links usable after source removal and relocation', () => {
+  withInstallation(({ temporary, source, claudeSkills, codexSkills, run }) => {
+    succeeded(run());
+    rmSync(source, { recursive: true });
+    for (const [number, skills] of [claudeSkills, codexSkills].entries()) {
+      const moved = path.join(temporary, `relocated skills ${number}`);
+      renameSync(skills, moved);
+      const shared = path.join(moved, 'project-guides');
+      const exampleIndex = path.join(shared, 'examples/diagram/README.md');
+      for (const name of installedNames(moved)) {
+        const folder = path.join(moved, name);
+        const skill = readFileSync(path.join(folder, 'SKILL.md'), 'utf8');
+        assert.ok(!skill.includes(temporary), `${name}: embeds installation or source path`);
+        const targets = [...skill.matchAll(/\]\(([^)]+)\)/g)].map(([, target]) => target);
+        for (const target of targets) {
+          assert.ok(!path.isAbsolute(target), `${name}: absolute link ${target}`);
+          assert.ok(existsSync(path.resolve(folder, target.split('#')[0])), `${name}: missing ${target}`);
+        }
+        assert.ok(targets.some(target => path.resolve(folder, target.split('#')[0]) === exampleIndex),
+          `${name}: diagram examples are not discoverable`);
+      }
+      const checked = spawnSync(process.execPath, [
+        path.join(shared, 'guides/tools/design-doc-check.mjs'), '--strict',
+        path.join(shared, 'examples/diagram'),
+      ], { cwd: temporary, encoding: 'utf8' });
+      assert.equal(checked.status, 0, checked.stdout + checked.stderr);
+    }
   });
 });
 

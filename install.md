@@ -1,6 +1,6 @@
 # 설치 및 사용 방법
 
-이 저장소의 `guides/`·`prompts/` 문서를 개인 스킬로 설치한다. `installer/install.sh`는 Claude Code와 Codex를 한 번에 설치한다. 각각 설치하려면 `installer/claude.sh`·`installer/codex.sh`를 사용한다. 기본 설치 경로는 Claude Code가 `~/.claude/skills`, Codex가 `~/.agents/skills`다.
+이 저장소의 `guides/`·`prompts/` 문서와 `examples/` 예제를 개인 스킬과 함께 설치한다. `installer/install.sh`는 Claude Code와 Codex를 한 번에 설치한다. 각각 설치하려면 `installer/claude.sh`·`installer/codex.sh`를 사용한다. 기본 설치 경로는 Claude Code가 `~/.claude/skills`, Codex가 `~/.agents/skills`다.
 
 ## 1. 설치
 
@@ -82,13 +82,15 @@ Codex 전용 설치 프로그램이다. 기본 경로는 Codex가 프로젝트�
 | `/project-guides detailed-logging` | 상세 로깅 작성·보강·보존 가이드 적용 |
 | `/project-guides socket-server-stability` | 소켓 서버 안정성 계약·결함 주입·장시간 검증 가이드 적용 |
 
-설치 경로의 `project-guides/`에 `guides/`·`prompts/`·`README.md` 전체 사본이 함께 설치되며, 각 프롬프트 스킬은 이 사본을 참조한다. Codex 설치에는 `install.md`도 포함하며, 생성되는 스킬의 문서 링크는 스킬 폴더 기준 상대 경로로 유지한다. 가이드 문서(method-R, PRD, 다이어그램 DSL 등)는 별도 명령 없이도 관련 요청에서 인덱스 스킬을 통해 참조할 수 있다.
+설치 경로의 `project-guides/`에 `guides/`·`prompts/`·`examples/`·`README.md` 전체 사본이 함께 설치되며, 각 프롬프트 스킬은 이 사본을 참조한다. Codex 설치에는 `install.md`도 포함하며, 두 설치 프로그램이 생성하는 스킬의 문서·예제 링크는 스킬 폴더 기준 상대 경로로 유지한다. 가이드 문서(method-R, PRD, 다이어그램 DSL 등)는 별도 명령 없이도 관련 요청에서 인덱스 스킬을 통해 참조할 수 있다.
 
 Markdown 문서·다이어그램 작성·수정 결과의 전달은 [편집 링크 가이드](guides/diagram-editor-link-guide.md)를 따른다. 두 설치 프로그램은 공통 가이드와 `guides/tools/create-editor-link.py`를 함께 복사하고 생성 스킬에서 연결한다. 링크 생성 여부를 먼저 묻고 사용자가 요청한 경우에만 완성 Markdown을 API로 전송한다. 이미 링크 생성을 요청했다면 다시 묻지 않는다. 반환된 URL은 콘솔과 최종 답변에 주소 전체를 그대로 표시해 복사하기 쉽게 한다. 도구 실행에는 Python 3가 필요하며, 없으면 가이드의 API 계약으로 다른 HTTP 도구를 사용한다. 링크 생성과 브라우저 렌더링 확인은 구분한다.
 
 ### 문서 읽기 범위
 
 스킬을 호출할 때 목표·대상 모듈·완료 기준을 함께 전달한다. 선택한 프롬프트와 필요한 가이드 절부터 읽고, 링크된 문서를 모두 재귀적으로 펼치지 않는다. 공통 기준은 `guides/module-boundary-guide.md`이며 계약 변경이나 예상 밖 의존이 발견되면 관련 소비자·테스트로 범위를 넓힌다.
+
+공통 인덱스와 개별 프롬프트 스킬은 [다이어그램 예제 인덱스](examples/diagram/README.md)를 연결한다. 예제가 도움이 될 때만 이 목록에서 종류를 고르고, 종류별 목록에서 필요한 시나리오 절과 그 절을 이해하는 데 필요한 전제만 읽는다. 현재는 navigation 예제가 있으며 Job Flow 별도 예제는 아직 없다. 상세 사용 기준과 예제 추가 방법은 인덱스가 원본이다. 예제를 별도 스킬로 만들거나 본문 전체를 매번 스킬 맥락에 넣지 않는다.
 
 이 저장소 문서 자체를 검토할 때는 프롬프트 안의 명령을 실행하지 않는다. 실제 사용자 요청과 대상 프로젝트의 확인된 제약에 맞춰 적용한다.
 
@@ -119,7 +121,7 @@ Markdown 문서·다이어그램 작성·수정 결과의 전달은 [편집 링�
 
 ## 4. 업데이트
 
-가이드·프롬프트를 수정한 뒤 다시 설치하면 된다. 인덱스와 현재 프롬프트 이름의 스킬 디렉터리를 교체하므로 설치 사본에서 직접 수정한 내용도 덮어쓴다. 원본 수정은 이 저장소에서 관리한다.
+가이드·프롬프트·예제를 수정한 뒤 다시 설치하면 된다. 인덱스와 현재 프롬프트 이름의 스킬 디렉터리를 교체하므로 설치 사본에서 직접 수정한 내용도 덮어쓴다. `examples/`의 추가·수정·삭제도 설치 사본에 반영된다. 원본 수정은 이 저장소에서 관리한다.
 
 상세 로깅 문서는 `guides/detailed-logging-guide.md`로 이동했다. 이전 설치 매니페스트에 등록된 `/detailed-logging` 스킬은 업데이트 시 제거하며, 이후 `/project-guides detailed-logging`으로 가이드를 사용한다. 테스트·멀티 에이전트 프롬프트도 이 가이드를 직접 참조한다.
 
@@ -167,7 +169,7 @@ bash installer/codex.sh --uninstall
 node --test installer/*.test.mjs
 ```
 
-임시 `CODEX_SKILLS_DIR`·`CLAUDE_SKILLS_DIR`·`CLAUDE_SETTINGS_FILE`에서 통합 설치·업데이트·제거와 실패 전달을 검사한다. Codex 개별 설치의 다른 스킬과 Claude 설치 보존, 상대 링크와 자동 선택 메타데이터도 확인한다. 사용자 홈에는 설치하지 않는다. 메타데이터 검사는 실제 Codex 대화에서 자동 선택되는지 확인하는 실험과 구분한다.
+임시 `CODEX_SKILLS_DIR`·`CLAUDE_SKILLS_DIR`·`CLAUDE_SETTINGS_FILE`에서 통합 설치·업데이트·제거와 실패 전달을 검사한다. Codex 개별 설치의 다른 스킬과 Claude 설치 보존, 상대 링크와 자동 선택 메타데이터도 확인한다. 예제 원문 복사, 추가·수정·삭제 반영, 원본 없이 설치 사본을 옮긴 뒤 인덱스·시나리오 링크가 이어지는지도 확인한다. 사용자 홈에는 설치하지 않는다. 이 검사는 실제 대화에서 자동 선택되거나 필요한 절만 읽는지 확인하는 실험 및 다이어그램 렌더링 검증과 구분한다.
 
 `claude.sh`는 임시 경로를 환경변수로 주어 수동으로 검증한다. 설치 후 훅에 가짜 이벤트를 넣어 매칭 결과를 확인하고, 제거 후 설정 파일에 다른 키만 남는지 본다.
 

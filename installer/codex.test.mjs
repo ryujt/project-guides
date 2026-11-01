@@ -19,7 +19,7 @@ function withInstallation(check) {
     const claudeSkills = path.join(temporary, 'claude skills');
     mkdirSync(path.join(source, 'installer'), { recursive: true });
     cpSync(path.join(repository, 'installer/codex.sh'), path.join(source, 'installer/codex.sh'));
-    for (const name of ['guides', 'prompts', 'README.md', 'install.md']) {
+    for (const name of ['guides', 'prompts', 'examples', 'README.md', 'install.md']) {
       cpSync(path.join(repository, name), path.join(source, name), { recursive: true });
     }
     mkdirSync(path.join(claudeSkills, 'project-guides'), { recursive: true });
@@ -51,16 +51,20 @@ function installedNames(skills) {
 }
 
 function checkSkillLinks(skills, names) {
+  const exampleIndex = path.join(skills, 'project-guides/examples/diagram/README.md');
   for (const name of names) {
     const folder = path.join(skills, name);
     const skill = readFileSync(path.join(folder, 'SKILL.md'), 'utf8');
     assert.match(skill, new RegExp(`^---\\nname: ${name}\\ndescription: .+\\n---\\n`));
     assert.equal(readFileSync(path.join(folder, 'agents/openai.yaml'), 'utf8'),
       'policy:\n  allow_implicit_invocation: true\n');
-    for (const [, target] of skill.matchAll(/\]\(([^)]+)\)/g)) {
+    const targets = [...skill.matchAll(/\]\(([^)]+)\)/g)].map(([, target]) => target);
+    for (const target of targets) {
       assert.ok(!path.isAbsolute(target), `${name}: absolute link ${target}`);
       assert.ok(existsSync(path.resolve(folder, target.split('#')[0])), `${name}: missing ${target}`);
     }
+    assert.ok(targets.some(target => path.resolve(folder, target.split('#')[0]) === exampleIndex),
+      `${name}: diagram examples are not discoverable`);
   }
 }
 
@@ -72,7 +76,7 @@ test('installs every prompt and shared document with portable skill links and im
     const names = installedNames(skills);
     assert.deepEqual([...names].sort(), expected.sort());
     assert.equal(new Set(names).size, names.length);
-    for (const name of ['guides', 'prompts', 'README.md', 'install.md']) {
+    for (const name of ['guides', 'prompts', 'examples', 'README.md', 'install.md']) {
       assert.deepEqual(
         spawnSync('diff', ['-r', path.join(source, name), path.join(skills, 'project-guides', name)]).status,
         0, `shared copy differs: ${name}`,
@@ -92,8 +96,15 @@ test('installs every prompt and shared document with portable skill links and im
       assert.ok(!skill.includes(temporary), `${name}: embeds installation or source path`);
     }
     const moved = path.join(temporary, 'relocated skills');
+    rmSync(source, { recursive: true });
     renameSync(skills, moved);
     checkSkillLinks(moved, names);
+    const shared = path.join(moved, 'project-guides');
+    const checked = spawnSync(process.execPath, [
+      path.join(shared, 'guides/tools/design-doc-check.mjs'), '--strict',
+      path.join(shared, 'examples/diagram'),
+    ], { cwd: temporary, encoding: 'utf8' });
+    assert.equal(checked.status, 0, checked.stdout + checked.stderr);
   });
 });
 
@@ -102,18 +113,27 @@ test('updates copies, migrates detailed logging, and uninstalls only managed ski
     mkdirSync(path.join(skills, 'unrelated-skill'), { recursive: true });
     const keep = path.join(skills, 'unrelated-skill/SKILL.md');
     writeFileSync(keep, 'keep unrelated skill');
+    const retiredExample = 'examples/diagram/navigation/retired-example.md';
+    writeFileSync(path.join(source, retiredExample), '# Retired example\n');
     install();
+    assert.ok(existsSync(path.join(skills, 'project-guides', retiredExample)));
     const before = installedNames(skills);
     mkdirSync(path.join(skills, 'detailed-logging'));
     writeFileSync(path.join(skills, 'detailed-logging/SKILL.md'), 'old logging skill');
     appendFileSync(path.join(skills, 'project-guides/.installed-skills'), 'detailed-logging\n');
     const prompt = 'prompts/system-design-to-be-prompt.md';
     appendFileSync(path.join(source, prompt), '\nUpdated source content.\n');
+    const example = 'examples/diagram/navigation/shopping-mall-navigation.md';
+    appendFileSync(path.join(source, example), '\nUpdated example content.\n');
+    rmSync(path.join(source, retiredExample));
     install();
     assert.deepEqual(installedNames(skills), before);
     assert.equal(existsSync(path.join(skills, 'detailed-logging')), false);
     assert.equal(readFileSync(path.join(skills, 'project-guides', prompt), 'utf8'),
       readFileSync(path.join(source, prompt), 'utf8'));
+    assert.deepEqual(readFileSync(path.join(skills, 'project-guides', example)),
+      readFileSync(path.join(source, example)));
+    assert.equal(existsSync(path.join(skills, 'project-guides', retiredExample)), false);
 
     mkdirSync(path.join(skills, 'retired-prompt'));
     appendFileSync(path.join(skills, 'project-guides/.installed-skills'),

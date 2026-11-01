@@ -12,6 +12,8 @@ Markdown 문서·다이어그램의 tools.camp 링크 생성 여부 확인과 �
 
 객체·서비스 협력은 [Job Flow 가이드](job-flow-diagram-guide.md), 내부 상태 전이는 [State 가이드](state-diagram-guide.md)로 분리한다. 시간 순서나 정적 구성은 필요한 경우 별도 관점으로 보완한다.
 
+시나리오 구성 예제가 필요할 때만 [Navigation 예제 선택 목록](../examples/diagram/navigation/README.md)에서 해당 절을 선택한다. 필요한 만큼 읽고 현재 계약에 적용하는 기준은 [예제 인덱스](../examples/diagram/README.md#필요한-만큼-읽기)를 따른다.
+
 ## 범위와 계약
 
 한 사용자 과업이나 이번 변경과 연결된 화면만 작성한다. 전체 화면 목록이나 내부 구현을 먼저 읽지 말고, 해당 화면의 진입 조건·이동 결과·직접 사용하는 API 계약에서 시작한다. 다른 화면은 이름과 계약 링크만 참조하고, 변경 영향이 발견될 때 범위를 확장한다. 공통 기준은 [module-boundary-guide.md](module-boundary-guide.md)를 따른다.

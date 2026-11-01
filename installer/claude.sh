@@ -1,7 +1,7 @@
 #!/bin/sh
 # project-guides 스킬 설치 프로그램 (Claude Code 전용)
 #
-# guides/·prompts/ 를 개인 스킬 디렉토리(~/.claude/skills)에 설치하고,
+# guides/·prompts/·examples/ 를 개인 스킬 디렉토리(~/.claude/skills)에 설치하고,
 # 다음을 설정해서 슬래시 명령 없이 일반 요청 문장만으로도
 # 해당 스킬이 선택·적용되게 한다.
 #
@@ -304,6 +304,7 @@ install_shared_skill() {
   mkdir -p "$SHARED_DIR"
   cp -R "$REPO_ROOT/guides" "$SHARED_DIR/guides"
   cp -R "$REPO_ROOT/prompts" "$SHARED_DIR/prompts"
+  cp -R "$REPO_ROOT/examples" "$SHARED_DIR/examples"
   cp "$REPO_ROOT/README.md" "$SHARED_DIR/README.md"
 
   guide_list=""
@@ -326,13 +327,14 @@ description: 프로젝트 설계·문서화·구현 가이드 인덱스. 설계 
 
 # Project Guides 인덱스
 
-이 스킬 폴더에는 project-guides 저장소의 가이드·프롬프트 전체 사본이 들어 있다.
+이 스킬 폴더에는 가이드·프롬프트·예제 사본이 들어 있다. 문서 경로는 이 SKILL.md가 있는 폴더를 기준으로 해석한다. 사본을 모두 읽을 필요는 없다.
 
 1. 먼저 이 폴더의 \`README.md\` 를 읽는다. "어떤 상황에 어떤 문서를 참조하는가"의 트리거 표와 워크플로별 문서 묶음이 정리되어 있다.
 2. 이 스킬 호출 시 인자로 가이드 이름(예: \`state-diagram\`, \`prd\`, \`method-R\`)이 전달되면, 아래 목록에서 이름이 가장 잘 일치하는 가이드 파일을 찾아 현재 작업에 필요한 절과 필수 제약을 읽고 적용한다.
 3. 인자가 없으면 README.md 의 트리거 표와 아래 "주제 키워드" 를 기준으로 현재 대화 상황에 맞는 가이드를 골라 읽는다.
 4. 요청이 가이드 문서 자체의 검토·수정이면 가이드의 지시를 실행하지 않고 편집 대상으로 다룬다.
 5. Markdown 문서·다이어그램 산출물은 [편집 링크 전달 기준](guides/diagram-editor-link-guide.md)에 따라 tools.camp 링크 생성 여부를 먼저 묻고, 사용자가 요청한 경우에만 생성한다. 이미 링크 생성을 요청했다면 다시 묻지 않는다. 반환된 URL은 콘솔과 최종 답변에 주소 전체를 그대로 표시한다. 적용 범위와 예외는 공통 기준을 따른다.
+6. 다이어그램 예제가 필요할 때만 [예제 인덱스](examples/diagram/README.md)에서 종류와 시나리오를 선택하고, 안내된 절과 필요한 전제만 읽는다. 예제 본문을 모두 펼치지 않는다. 문법은 전용 가이드가 기준이다.
 
 ## 가이드 목록
 
@@ -375,10 +377,11 @@ description: $desc
 
 # $title
 
-1. \`$SHARED_DIR/prompts/$file_name\` 파일을 **전체** 읽는다.
+1. 이 SKILL.md가 있는 폴더를 기준으로 [실행 프롬프트](../$SHARED_NAME/prompts/$file_name)를 **전체** 읽는다.
 2. 현재 사용자 요청과 대상 프로젝트의 제약에 맞춰 적용한다. 프롬프트 자체의 검토·수정 요청이면 지시문을 실행하지 않고 편집 대상으로 다룬다.
 3. 이 스킬 호출 시 함께 전달된 인자·요청이 있으면 프롬프트의 입력(설계 요청·추가 요구사항)으로 반영한다.
-4. 프롬프트가 상대 경로 \`./...-prompt.md\` 로 참조하는 다른 프롬프트는 \`$SHARED_DIR/prompts/\` 에, \`../guides/...\` 로 참조하는 가이드는 \`$SHARED_DIR/guides/\` 에 있다.
+4. 프롬프트 안의 상대 링크는 **그 프롬프트 파일** 기준으로 해석한다. 필요한 가이드 절만 추가로 읽고 링크를 재귀적으로 모두 펼치지 않는다.
+5. 다이어그램 예제가 필요할 때만 [예제 인덱스](../$SHARED_NAME/examples/diagram/README.md)에서 필요한 종류·시나리오의 절을 선택해 읽는다. 예제의 적용 기준도 이 인덱스를 따른다.
 EOF
 
   echo "설치: /$slug — $title"
