@@ -2,23 +2,11 @@
 
 요구사항과 제약을 바탕으로 신규 시스템 또는 기존 시스템의 목표 구조를 설계한다. AS-IS 문서는 있는 경우 참고하며, 별도 작성을 선행 조건으로 삼지 않는다. 확인된 현황과 제안·가정·미확정 사항을 구분한다.
 
-책임 분리·공개 계약·시나리오 검증은 [모듈 경계 가이드](../guides/module-boundary-guide.md)를 따른다. 문서 구성과 파일 배치는 이 프롬프트를 기준으로 한다.
+책임 분리·공개 계약·시나리오 검증은 [모듈 경계 가이드](../guides/module-boundary-guide.md)를 따른다. 문서 내용은 이 프롬프트, 파일 배치는 아래 공통 가이드를 기준으로 한다.
 
 ## 파일 저장 위치
 
-문서 생성 일시를 `YYYYMMDD-HHMMSS` 형식으로 기록해 `./docs/design/YYYYMMDD-HHMMSS/to-be/` 폴더를 생성한다.
-
-문서는 다음 구조로 나누어 저장한다.
-
-```text
-to-be/
-├── job-flow/
-├── system-design-to-be.md
-├── navigation.md
-└── screen-layout.md
-```
-
-문서 간 파일 링크는 상대 경로로 작성하고, 작성 컴퓨터에서만 유효한 경로를 남기지 않는다.
+[공통 산출물 배치 가이드](../guides/system-design-output-guide.md#저장-위치와-고정-구조)의 고정 구조를 적용해 `docs/design/{DATE}/to-be/`에 작성한다. 날짜·폴더 재사용·상대 링크·파일 분리 규칙은 이 가이드를 따른다. 아래에서는 각 문서의 내용을 정의한다.
 
 ## system-design-to-be.md
 
@@ -38,7 +26,7 @@ to-be/
 
 ## job-flow 폴더
 
-[Method-R](../guides/method-R.md)의 설계 깊이에 따라 `to-be/job-flow/`에 작성한다. 표기는 [Job Flow 가이드](../guides/job-flow-diagram-guide.md)를 따른다.
+[Method-R](../guides/method-R.md)의 설계 깊이에 따라 `to-be/details/job-flow/`에 작성한다. 표기는 [Job Flow 가이드](../guides/job-flow-diagram-guide.md)를 따른다.
 
 각 파일 안에서 시나리오별로 제목을 나누고, 한 다이어그램에 모든 흐름을 담지 않는다. 예를 들어 회원가입·로그인 시나리오, 장바구니 시나리오처럼 구분한다. 정상 흐름과 주요 실패 흐름을 표현하고, 각 다이어그램 바로 아래에는 주요 흐름을 짧은 문장 목록으로 설명한다.
 
@@ -56,7 +44,7 @@ to-be/
 
 - 시나리오별로 하위 제목을 나누고, 진입 조건·화면 이동·분기·관련 API와 처리·최종 결과를 표현한다.
 - 각 다이어그램 아래에는 주요 흐름을 짧은 문장 목록으로 설명한다.
-- 화면 배치는 `screen-layout.md`의 해당 화면 절로 연결한다. 두 문서에서 같은 화면 이름을 사용한다.
+- 화면 배치는 `screen-layout.md`의 해당 화면 절로 연결하고, 등장하는 모든 화면의 `details/screens/<screen-id>.html`도 링크한다. 화면 이름·식별자·HTML 대응은 [화면별 HTML 규칙](../guides/system-design-output-guide.md#화면별-html)을 따른다.
 
 UI나 화면 이동이 없으면 해당 없음과 이유를 기록한다.
 
@@ -69,5 +57,9 @@ UI나 화면 이동이 없으면 해당 없음과 이유를 기록한다.
 - 같은 화면의 배치 설명은 이 파일의 해당 절을 원본으로 두고, 다른 문서에서는 링크로 참조한다.
 
 UI가 없으면 화면 0개라는 사실과 이유를 기록하고, 가상의 화면을 만들지 않는다.
+
+## details/screens 폴더
+
+[화면별 HTML 규칙](../guides/system-design-output-guide.md#화면별-html)에 따라 목표 화면의 실제 모양을 표현하는 바닐라 HTML을 `to-be/details/screens/`에 생성한다. 전체 화면과 Navigation 등장 화면의 누락·링크·화면 확인은 [공통 검증 기준](../guides/system-design-output-guide.md#검증)으로 확인한다.
 
 Markdown 문서·다이어그램의 tools.camp 링크 생성 여부 확인과 전달은 [편집 링크 전달 기준](../guides/diagram-editor-link-guide.md)을 따른다.

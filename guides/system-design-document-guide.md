@@ -1,6 +1,6 @@
 # 시스템 설계 문서 양식 — AS-IS·TO-BE 공통
 
-시스템 수준 AS-IS·TO-BE 문서의 **파일 배치·절 번호·제목·표 열·그림 규칙·ID·검증** 원본이다. 조사·판단은 [AS-IS 프롬프트](../prompts/system-design-as-is-prompt.md)와 [TO-BE 프롬프트](../prompts/system-design-to-be-prompt.md)를 따른다. 같은 절 번호와 표 열로 현재와 목표를 대조한다.
+시스템 수준 AS-IS·TO-BE 문서에 더 자세한 **절 번호·제목·표 열·그림 규칙·ID·검증**이 필요할 때 선택해 참고하는 양식이다. 문서 내용·파일 분리는 [AS-IS 프롬프트](../prompts/system-design-as-is-prompt.md)와 [TO-BE 프롬프트](../prompts/system-design-to-be-prompt.md), 고정 구조·화면별 HTML은 [공통 산출물 배치 가이드](system-design-output-guide.md)를 우선한다. 이 양식의 상세 파일 예시·필수 목록이 두 프롬프트의 생성·분할 범위를 확대하거나 대체하지 않는다.
 
 Markdown 문서·다이어그램의 tools.camp 링크 생성 여부 확인과 전달은 [편집 링크 전달 기준](diagram-editor-link-guide.md)을 따른다.
 
@@ -8,7 +8,7 @@ Markdown 문서·다이어그램의 tools.camp 링크 생성 여부 확인과 �
 
 | 할 일 | 읽을 절 |
 |---|---|
-| 산출물 폴더·파일과 분석 크기를 정한다 | [§2](#2-산출물-배치)·[큰 분석과 작은 분석](#큰-분석과-작은-분석) |
+| 산출물 폴더·파일을 정하고 상세 양식을 참고한다 | [공통 산출물 배치](system-design-output-guide.md)·[§2](#2-산출물-배치)·[큰 분석과 작은 분석](#큰-분석과-작은-분석) |
 | 핵심 문서를 쓴다 | [§3](#3-핵심-문서-골격) — 번호표 3.1, 머리 블록 3.2, 절별 규칙 3.3(신규 설계는 [빼는 것](#신규-설계에서-빼는-것)) |
 | 시스템·패키지 구성, 시나리오별 설계서와 화면별 레이아웃을 쓴다 | [필수 상세 설계서](#21-필수-상세-설계서)·[§4](#4-흐름-절--경계-수준-jobflow) |
 | 핵심 §5의 대표 흐름과 시나리오 색인을 쓴다 | [§4](#4-흐름-절--경계-수준-jobflow) |
@@ -33,7 +33,8 @@ Markdown 문서·다이어그램의 tools.camp 링크 생성 여부 확인과 �
 | `jobflow` 문법·의미 | [Job Flow 가이드](job-flow-diagram-guide.md) | 경계 수준 그림([§4](#4-흐름-절--경계-수준-jobflow))과 드릴다운([§6](#6-경계-내부-job-flow-드릴다운))에 적용하는 법 |
 | `state`·`navigation`·`layout` 문법 | [State](state-diagram-guide.md)·[Navigation](navigation-diagram-guide.md)·[Layout](screen-layout-guide.md) | 어느 절에 두는가 |
 | 설명용 시스템 흐름 문서 | [시스템 흐름 문서 가이드](system-flow-document-guide.md) | 다루지 않는다. 함께 만들면 흐름 그림의 원본을 한쪽에 두고 다른 쪽은 링크한다 |
-| 파일 배치·절 번호·제목·표 열·ID·근거 브리프·작성 순서·검증·Mermaid 라벨 | 이 가이드 | 전부 |
+| 고정 폴더 구조·화면별 HTML | [공통 산출물 배치 가이드](system-design-output-guide.md) | 상세 양식의 배치 예시는 공통 구조와 각 프롬프트의 파일 분리를 우선한다 |
+| 절 번호·제목·표 열·ID·근거 브리프·작성 순서·검증·Mermaid 라벨 | 이 가이드 | 상세 양식을 선택한 범위에서 참고한다 |
 
 **설계 프레임워크 8관점이 들어가는 절**
 
@@ -64,7 +65,9 @@ Markdown 문서·다이어그램의 tools.camp 링크 생성 여부 확인과 �
 
 ## 2. 산출물 배치
 
-한 분석의 산출물은 `docs/design/{DATE}/` 한 폴더에 둔다. 핵심 문서는 전체 줄거리를 설명하고, `details/`에는 시스템·패키지 구성 설명서, 시나리오별 Job Flow·Navigation 설계서, 화면별 Screen Layout 설계서를 반드시 둔다. 경계별 상세와 큰 분석의 근거 브리프가 이를 보완한다.
+실제 생성할 폴더·파일은 [공통 산출물 배치 가이드](system-design-output-guide.md)와 각 프롬프트를 따른다. 아래와 이후 절의 세분화된 경로·필수 파일 목록은 상세 양식을 별도로 선택할 때의 예시다. 두 프롬프트로 작성할 때는 필요한 내용을 고정 파일 안의 절로 통합하고, 이 예시 때문에 시나리오별 Navigation·화면별 Layout Markdown이나 추가 구성 설명서를 생성하지 않는다. 화면 HTML은 공통 구조의 `details/screens/`에 둔다.
+
+다음은 상세 양식을 별도로 선택했을 때의 배치 예시다. 핵심 문서는 전체 줄거리를 설명하고, 시스템·패키지 구성, 시나리오별 흐름, 화면 배치를 상세로 나눈다. 경계별 상세와 큰 분석의 근거 브리프가 이를 보완한다.
 
 ```text
 docs/design/{DATE}/

@@ -2,17 +2,7 @@
 
 ## 파일 저장 위치
 
-문서 생성 일시를 `YYYYMMDD-HHMMSS` 형식으로 기록해 폴더를 생성한다. 예: `./docs/design/20261014-183025/as-is/`.
-
-문서는 다음 구조로 나누어 저장한다.
-
-```text
-as-is/
-├── job-flow/
-├── system-design-as-is.md
-├── navigation.md
-└── screen-layout.md
-```
+[공통 산출물 배치 가이드](../guides/system-design-output-guide.md#저장-위치와-고정-구조)의 고정 구조를 적용해 `docs/design/{DATE}/as-is/`에 작성한다. 날짜·폴더 재사용·상대 링크·파일 분리 규칙은 이 가이드를 따른다. 아래에서는 각 문서의 내용을 정의한다.
 
 ## system-design-as-is.md
 
@@ -26,7 +16,7 @@ as-is/
 
 ## job-flow 폴더
 
-[Method-R](../guides/method-R.md)의 설계 깊이에 따라 `details/job-flow/`에 작성한다. Job Flow 파일의 배치는 이 절을 우선하며, 표기는 [Job Flow 가이드](../guides/job-flow-diagram-guide.md)를 따른다.
+[Method-R](../guides/method-R.md)의 설계 깊이에 따라 `as-is/details/job-flow/`에 작성한다. 표기는 [Job Flow 가이드](../guides/job-flow-diagram-guide.md)를 따른다.
 
 각 파일 안에서 시나리오별로 제목을 나누고, 한 다이어그램에 모든 흐름을 담지 않는다. 예를 들어 회원가입·로그인 시나리오, 장바구니 시나리오처럼 구분한다. 각 다이어그램 바로 아래에는 주요 흐름을 짧은 문장 목록으로 설명한다.
 
@@ -44,7 +34,7 @@ as-is/
 
 - 시나리오별로 하위 제목을 나누고, 진입 조건·화면 이동·분기·관련 API와 처리·최종 결과를 표현한다.
 - 각 다이어그램 아래에는 주요 흐름을 짧은 문장 목록으로 설명한다.
-- 화면 배치는 `screen-layout.md`의 해당 화면 절로 연결한다. 두 문서에서 같은 화면 이름을 사용한다.
+- 화면 배치는 `screen-layout.md`의 해당 화면 절로 연결하고, 등장하는 모든 화면의 `details/screens/<screen-id>.html`도 링크한다. 화면 이름·식별자·HTML 대응은 [화면별 HTML 규칙](../guides/system-design-output-guide.md#화면별-html)을 따른다.
 
 UI나 화면 이동이 없으면 해당 없음과 이유를 기록한다.
 
@@ -57,5 +47,9 @@ UI나 화면 이동이 없으면 해당 없음과 이유를 기록한다.
 - 같은 화면의 배치 설명은 이 파일의 해당 절을 원본으로 두고, 다른 문서에서는 링크로 참조한다.
 
 UI가 없으면 화면 0개라는 사실과 이유를 기록하고, 가상의 화면을 만들지 않는다.
+
+## details/screens 폴더
+
+[화면별 HTML 규칙](../guides/system-design-output-guide.md#화면별-html)에 따라 현재 화면의 실제 모양을 재현하는 바닐라 HTML을 `as-is/details/screens/`에 생성한다. 전체 화면과 Navigation 등장 화면의 누락·링크·화면 확인은 [공통 검증 기준](../guides/system-design-output-guide.md#검증)으로 확인한다.
 
 Markdown 문서·다이어그램의 tools.camp 링크 생성 여부 확인과 전달은 [편집 링크 전달 기준](../guides/diagram-editor-link-guide.md)을 따른다.
