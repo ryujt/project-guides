@@ -42,15 +42,15 @@
 
 설계한 화면 이동 흐름을 `to-be/navigation.md` 한 파일에 작성한다. 표기는 [Navigation 가이드](../guides/navigation-diagram-guide.md)의 `navigation` 문법을 따른다.
 
-- 시나리오별로 하위 제목을 나누고, 진입 조건·화면 이동·분기·관련 API와 처리·최종 결과를 표현한다.
-- 각 다이어그램 아래에는 주요 흐름을 짧은 문장 목록으로 설명한다.
-- 화면 배치는 `screen-layout.md`의 해당 화면 절로 연결하고, 등장하는 모든 화면의 `details/screens/<screen-id>.html`도 링크한다. 화면 이름·식별자·HTML 대응은 [화면별 HTML 규칙](../guides/system-design-output-guide.md#화면별-html)을 따른다.
+- 설계 범위의 전체 시나리오 색인을 두고, [시나리오별 상세 분석](../guides/navigation-diagram-guide.md#시나리오별-상세-분석)에 따라 과업별 제목·다이어그램·진입 조건·단계와 분기·관련 API/처리·결과와 복귀·근거/가정을 담는다. 유지 시나리오도 포함하며 대표 흐름만으로 대신하지 않는다.
+- 각 다이어그램 아래에는 주요 흐름을 짧은 문장 목록으로 설명하고, 추가 조건·근거·미확인은 같은 시나리오 절에 둔다.
+- 등장 페이지·장면은 `screen-layout.md`의 해당 절과 HTML 장면으로 연결한다. 화면 이름·식별자·파일/장면 대응은 [공통 기준](../guides/system-design-output-guide.md#페이지장면-목록)을 따른다.
 
-UI나 화면 이동이 없으면 해당 없음과 이유를 기록한다.
+UI가 없으면 해당 없음과 이유를 기록한다. UI가 있지만 화면 이동이 없는 과업은 현재 페이지의 동작·결과 장면을 설명하고 Layout·HTML로 연결한다.
 
 ## screen-layout.md
 
-설계 범위의 모든 화면 배치를 `to-be/screen-layout.md` 한 파일에 작성한다. 표기는 [스크린 레이아웃 가이드](../guides/screen-layout-guide.md)의 `layout` 문법을 따른다.
+설계 범위의 모든 화면 배치를 `to-be/screen-layout.md` 한 파일에 작성한다. 처음에 [전체 페이지·장면 목록](../guides/system-design-output-guide.md#페이지장면-목록)을 두고, 표기는 [스크린 레이아웃 가이드](../guides/screen-layout-guide.md)의 `layout` 문법을 따른다.
 
 - 화면별로 하위 제목을 나누고, 각 화면의 목표 영역 배치와 포함 관계를 그린다.
 - 각 다이어그램 아래에는 영역별 역할·입출력·상호작용을 설명한다. 적용되는 로딩·빈값·오류·권한 상태와 반응형 배치 차이도 함께 적는다.

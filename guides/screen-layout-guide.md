@@ -1,6 +1,6 @@
 # Layout Diagram Guide
 
-이 문서는 화면의 영역 배치·포함 관계를 표현하는 `layout`의 작성 문법을 정의한다. 개별 화면 변경 작업은 변경할 화면/영역을 작성한다. AS-IS·TO-BE 시스템 설계의 전체 화면별 필수 설계서와 상세 설명은 [설계 문서 양식](system-design-document-guide.md#21-필수-상세-설계서)을 따른다. 배치 트리가 코드 의존성이나 상태 소유권을 정하지는 않으며, 입력·이벤트·상태 계약은 [모듈 경계 가이드](module-boundary-guide.md)로 연결한다.
+이 문서는 화면의 영역 배치·포함 관계를 표현하는 `layout`의 작성 문법을 정의한다. 개별 화면 변경 작업은 변경할 화면/영역을 작성한다. AS-IS·TO-BE 시스템 설계의 전체 페이지·장면 목록과 HTML 대응은 [공통 산출물 기준](system-design-output-guide.md#페이지장면-목록)을 따르고, 더 자세한 영역별 설명 양식은 [설계 문서 양식](system-design-document-guide.md#21-필수-상세-설계서)을 참고한다. 배치 트리가 코드 의존성이나 상태 소유권을 정하지는 않으며, 입력·이벤트·상태 계약은 [모듈 경계 가이드](module-boundary-guide.md)로 연결한다.
 
 Markdown 문서·다이어그램의 tools.camp 링크 생성 여부 확인과 전달은 [편집 링크 전달 기준](diagram-editor-link-guide.md)을 따른다.
 

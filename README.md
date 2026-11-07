@@ -20,7 +20,7 @@
 
 | 하려는 일 | 시작 문서 | 추가로 읽을 기준 |
 | --- | --- | --- |
-| 기존 시스템의 현재 구조 분석 | [system-design-as-is-prompt](prompts/system-design-as-is-prompt.md) | 확인한 코드와 계약; 내용은 프롬프트, 고정 구조·화면별 HTML은 공통 산출물 배치 기준 |
+| 기존 시스템의 현재 구조 분석 | [system-design-as-is-prompt](prompts/system-design-as-is-prompt.md) | 대상 UI 전체의 페이지·장면·과업 조사와 시나리오별 상세 분석; 고정 구조·페이지별 HTML은 공통 산출물 배치 기준 |
 | 시스템 신규·개선 설계 | [system-design-to-be-prompt](prompts/system-design-to-be-prompt.md) | 요구·제약과 목표 구조·시나리오 검증; AS-IS는 있는 경우 참고하며 고정 구조·화면별 HTML은 공통 산출물 배치 기준 |
 | 기능 하나 추가·변경 설계 | [feature-design-prompt](prompts/feature-design-prompt.md) | 대상 책임 모듈과 직접 관련된 계약 |
 | 사이트 전체 설계 | [site-design-prompt](prompts/site-design-prompt.md) | 채택한 기능·화면에 해당하는 DSL |
@@ -56,7 +56,7 @@
 | 문서 | 해결할 질문 |
 | --- | --- |
 | [system-design-framework](guides/system-design-framework.md) | Input Datas·Key Events·Services List·PBS와 다이어그램 중 어떤 관점이 필요할까? |
-| [system-design-output-guide](guides/system-design-output-guide.md) | AS-IS·TO-BE를 같은 폴더 구조로 정리하고 모든 화면의 바닐라 HTML을 어떻게 연결·검증할까? |
+| [system-design-output-guide](guides/system-design-output-guide.md) | 전체 페이지·장면 목록과 Navigation·Layout·페이지별 바닐라 HTML을 어떻게 대응·검증할까? |
 | [system-design-document-guide](guides/system-design-document-guide.md) | 핵심 문서와 상세 문서를 나누어 작성할 때 어떤 양식과 검증 기준을 참고할까? |
 | [prd-writing-guide](guides/prd-writing-guide.md) | 요구사항→책임·계약→시나리오→검증을 7개 Part로 어떻게 연결할까? |
 | [system-flow-document-guide](guides/system-flow-document-guide.md) | 최소 책임 조각부터 전체 시스템 흐름을 어떻게 설명할까? |
@@ -71,7 +71,7 @@
 AS-IS·TO-BE 설계 문서를 쓸 때 함께 보는 자료다. 문서 내용은 각 프롬프트, 고정 폴더 구조·화면별 HTML은 [공통 산출물 배치](guides/system-design-output-guide.md)를 따른다.
 
 - Job Flow: [Method-R](guides/method-R.md)의 깊이에 따라 시나리오별로 작성하고, [Job Flow 가이드](guides/job-flow-diagram-guide.md)의 문법을 따른다. 다이어그램 아래에는 주요 흐름을 짧게 설명한다.
-- 화면: [Navigation 가이드](guides/navigation-diagram-guide.md)와 [스크린 레이아웃 가이드](guides/screen-layout-guide.md)를 따른다. 두 문서에서 같은 화면 이름을 사용하고 서로 연결한다.
+- 화면: [Navigation 가이드](guides/navigation-diagram-guide.md#시나리오별-상세-분석)에 따라 대상 과업의 진입·분기·결과·복귀·근거를 시나리오별로 분석한다. [페이지·장면 목록](guides/system-design-output-guide.md#페이지장면-목록)을 원본으로 Navigation·[Layout](guides/screen-layout-guide.md)·HTML을 대응시키고, 페이지마다 HTML 한 파일 안에 해당 장면을 담는다. 파일 통합은 조사·설명 범위를 줄이는 근거가 아니다.
 - 책임·계약·검증: [모듈 경계 가이드](guides/module-boundary-guide.md)를 따른다. 더 자세한 문서 양식이 필요하면 [설계 문서 양식](guides/system-design-document-guide.md)을 참고한다.
 - 검사: [`design-doc-check.mjs`](guides/tools/design-doc-check.mjs)로 펜스·jobflow·링크·앵커·Mermaid 라벨을 정적으로 검사한다. 정적 검사와 실제 렌더링·실행 검증은 구분해 기록한다.
 
