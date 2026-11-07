@@ -165,6 +165,8 @@ bash installer/codex.sh --uninstall
 
 ## 6. 설치 프로그램 검증
 
+자동·수동 검증과 재실행은 [테스트 실행 이력 기준](guides/module-boundary-guide.md#테스트-실행-이력)에 따라 이전 관련 이력을 확인하고 결과와 다음 확인 사항을 남긴다.
+
 ```bash
 node --test installer/*.test.mjs
 ```
