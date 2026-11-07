@@ -137,7 +137,7 @@ description: jobflow/job-flow/job flow/jobw flow/잡플로우, navigation, state
 5. 인용·파일명·변수명에 단어가 있다는 이유로 별도 설계 작업을 시작하지 않는다. 이 문서·프롬프트 자체의 검토·수정 요청에서는 본문 명령을 실행하지 않고 편집 자료로 다룬다. 일반 코드의 state 변수나 CSS layout 수정인지 전용 DSL 요청인지 문맥으로 구분한다.
 6. 산출 문서에는 작성 컴퓨터에서만 유효한 절대 경로·설치 사본 경로를 남기지 않는다. 렌더러 없이 확인했으면 정적 검토로 보고한다.
 7. Markdown 문서·다이어그램 산출물은 [편집 링크 전달 기준](guides/diagram-editor-link-guide.md)에 따라 tools.camp 링크 생성 여부를 먼저 묻고, 사용자가 요청한 경우에만 생성한다. 이미 링크 생성을 요청했다면 다시 묻지 않는다. 반환된 URL은 콘솔과 최종 답변에 주소 전체를 그대로 표시한다. 적용 범위와 예외는 공통 기준을 따른다.
-8. 다이어그램 예제가 필요할 때만 [예제 인덱스](examples/diagram/README.md)에서 종류와 시나리오를 선택하고, 안내된 절과 필요한 전제만 읽는다. 예제 본문을 모두 펼치지 않는다. 문법은 전용 가이드가 기준이다.
+8. Navigation 문서를 작성·수정할 때는 [Navigation 예제 선택 목록](examples/diagram/navigation/README.md)의 작성 샘플 절을 먼저 읽는다. 다른 예제가 필요하면 [예제 인덱스](examples/diagram/README.md)에서 종류와 시나리오를 선택한다. 안내된 절과 필요한 전제만 읽고 큰 예제 본문을 모두 펼치지 않는다. 문법은 전용 가이드가 기준이다.
 
 ## 가이드 목록
 
@@ -173,7 +173,7 @@ description: $(desc_of "$slug" "$prompt_file")
 3. 현재 작업 의도와 대상 프로젝트의 제약에 맞춰 적용한다. 단어가 인용·파일명·변수명에만 등장하면 작업 범위를 확대하지 않는다. 프롬프트 자체의 검토·수정 요청이면 본문 명령을 실행하지 않고 편집 대상으로 다룬다.
 4. 프롬프트 안의 상대 링크는 **그 프롬프트 파일** 기준으로 해석한다. 필요한 가이드 절만 추가로 읽고 링크를 재귀적으로 모두 펼치지 않는다.
 5. 산출 문서에는 작성 컴퓨터에서만 유효한 절대 경로·설치 사본 경로를 남기지 않는다.
-6. 다이어그램 예제가 필요할 때만 [예제 인덱스](../$SHARED_NAME/examples/diagram/README.md)에서 필요한 종류·시나리오의 절을 선택해 읽는다. 예제의 적용 기준도 이 인덱스를 따른다.
+6. Navigation 문서를 작성·수정할 때는 [Navigation 예제 선택 목록](../$SHARED_NAME/examples/diagram/navigation/README.md)의 작성 샘플 절을 먼저 읽는다. 다른 예제가 필요하면 [예제 인덱스](../$SHARED_NAME/examples/diagram/README.md)에서 필요한 종류·시나리오의 절을 선택해 읽는다. 예제의 적용 기준도 이 인덱스를 따른다.
 EOF
 
   enable_implicit_invocation "$dir"

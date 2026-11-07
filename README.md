@@ -4,7 +4,7 @@
 
 - [`guides/`](guides/): 설계 원칙·문서 양식·독자 다이어그램 DSL과 검사 도구(`tools/`). 필요한 주제만 참조한다.
 - [`prompts/`](prompts/): 현재 작업의 목표와 함께 AI에게 전달하는 실행 프롬프트.
-- [`examples/diagram/`](examples/diagram/README.md): 다이어그램 구성·시나리오 예제. 인덱스에서 필요한 종류와 절만 선택한다.
+- [`examples/diagram/`](examples/diagram/README.md): 다이어그램 구성·시나리오 예제. Navigation은 작성 샘플과 해당 시나리오를 먼저 확인하고, 나머지는 필요한 종류와 절만 선택한다.
 - Claude Code·Codex 설치와 호출 방법은 저장소 루트의 `install.md`를 참조한다. `bash installer/install.sh`로 둘 다 설치하거나, `installer/claude.sh`·`installer/codex.sh`로 각각 설치한다. 설치 후 `asis`·`tobe`·`jobflow` 등이 들어간 일반 요청의 작업 의도에 맞춰 스킬을 선택할 수 있다. 설치된 문서 사본에서는 재설치가 필요 없다.
 
 ## 처음 사용할 때
@@ -71,7 +71,7 @@
 AS-IS·TO-BE 설계 문서를 쓸 때 함께 보는 자료다. 문서 내용은 각 프롬프트, 고정 폴더 구조·화면별 HTML은 [공통 산출물 배치](guides/system-design-output-guide.md)를 따른다.
 
 - Job Flow: [Method-R](guides/method-R.md)의 깊이에 따라 시나리오별로 작성하고, [Job Flow 가이드](guides/job-flow-diagram-guide.md)의 문법을 따른다. 다이어그램 아래에는 주요 흐름을 짧게 설명한다.
-- 화면: [Navigation 가이드](guides/navigation-diagram-guide.md#시나리오별-상세-분석)에 따라 대상 과업의 진입·분기·결과·복귀·근거를 시나리오별로 분석한다. [페이지·장면 목록](guides/system-design-output-guide.md#페이지장면-목록)을 원본으로 Navigation·[Layout](guides/screen-layout-guide.md)·HTML을 대응시키고, 페이지마다 HTML 한 파일 안에 해당 장면을 담는다. 파일 통합은 조사·설명 범위를 줄이는 근거가 아니다.
+- 화면: [Navigation 가이드](guides/navigation-diagram-guide.md#시나리오별-상세-분석)에 따라 대상 과업의 진입·분기·결과·복귀·근거를 시나리오별로 분석한다. 작성 전 [작성 샘플](examples/diagram/navigation/document-template.md)을 확인하고, 각 시나리오의 `화면 확인 링크` 표에 등장 페이지와 장면의 직접 링크를 항상 표시한다. [페이지·장면 목록](guides/system-design-output-guide.md#페이지장면-목록)을 원본으로 Navigation·[Layout](guides/screen-layout-guide.md)·HTML을 대응시키고, 페이지마다 HTML 한 파일 안에 해당 장면을 담는다. 파일 통합은 조사·설명 범위를 줄이는 근거가 아니다.
 - 책임·계약·검증: [모듈 경계 가이드](guides/module-boundary-guide.md)를 따른다. 더 자세한 문서 양식이 필요하면 [설계 문서 양식](guides/system-design-document-guide.md)을 참고한다.
 - 검사: [`design-doc-check.mjs`](guides/tools/design-doc-check.mjs)로 펜스·jobflow·링크·앵커·Mermaid 라벨을 정적으로 검사한다. 정적 검사와 실제 렌더링·실행 검증은 구분해 기록한다.
 
@@ -90,7 +90,7 @@ Markdown 문서·다이어그램 작성·수정 결과는 [편집 링크 전달 
 
 ### 다이어그램 예제
 
-작성 구조나 시나리오 분리 예제가 필요하면 [예제 인덱스](examples/diagram/README.md)에서 종류를 고른 뒤, 필요한 파일의 해당 절만 읽는다. 현재는 쇼핑몰의 navigation 시나리오가 있으며 Job Flow 별도 예제는 아직 없다. 읽기 범위·전제 확인·적용 기준은 인덱스에서 관리한다. 예제도 스킬과 함께 설치되지만 본문 전체를 기본 맥락에 넣지 않는다.
+Navigation 문서를 작성·수정할 때는 [작성 샘플](examples/diagram/navigation/document-template.md)과 [작은 완성 예제](examples/diagram/navigation/document-sample/navigation.md)의 해당 시나리오를 먼저 확인한다. 많은 시나리오를 모은 구조는 [큰 AS-IS 예제 안내](examples/as-is/README.md)를 참고한다. 추가 쇼핑몰 시나리오나 다른 종류는 [예제 인덱스](examples/diagram/README.md)에서 필요한 절만 고른다. Job Flow 별도 예제는 아직 없다. 읽기 범위·전제 확인·적용 기준은 인덱스에서 관리한다. 예제도 스킬과 함께 설치되지만 본문 전체를 기본 맥락에 넣지 않는다.
 
 ## 함께 유지할 설계 원칙
 
