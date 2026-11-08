@@ -72,7 +72,7 @@
 
 AS-IS·TO-BE 설계 문서를 쓸 때 함께 보는 자료다. 문서 내용은 각 프롬프트, 고정 폴더 구조·화면별 HTML은 [공통 산출물 배치](guides/system-design-output-guide.md)를 따른다.
 
-- Job Flow: [Method-R](guides/method-R.md)의 깊이에 따라 시나리오별로 작성하고, [Job Flow 가이드](guides/job-flow-diagram-guide.md)의 문법을 따른다. 물건 등의 전달로 상대 객체에게 발생한 사건은 [실물 전달 이벤트](guides/job-flow-diagram-guide.md#실물-전달로-발생하는-이벤트)로 표현하고, 실제 데이터·메시지 수신과 구분한다. 다이어그램 아래에는 주요 흐름을 짧게 설명한다.
+- Job Flow: [Method-R](guides/method-R.md)의 깊이에 따라 시나리오별로 작성하고, [Job Flow 가이드](guides/job-flow-diagram-guide.md)의 문법을 따른다. 물건 등의 전달로 상대 객체에게 발생한 사건은 [실물 전달 이벤트](guides/job-flow-diagram-guide.md#실물-전달로-발생하는-이벤트)로 표현하고, 실제 데이터·메시지 수신과 구분한다. 그림 아래에는 [화살표별 설명](guides/job-flow-diagram-guide.md#다이어그램-하단-설명)을 둔다.
 - 화면: [Navigation 가이드](guides/navigation-diagram-guide.md#시나리오별-상세-분석)에 따라 대상 과업의 진입·분기·결과·복귀·근거를 시나리오별로 분석한다. 작성 전 [작성 샘플](examples/diagram/navigation/document-template.md)을 확인하고, 각 시나리오의 `화면 확인 링크` 표에 등장 페이지와 장면의 직접 링크를 항상 표시한다. [페이지·장면 목록](guides/system-design-output-guide.md#페이지장면-목록)을 원본으로 Navigation·[Layout](guides/screen-layout-guide.md)·HTML을 대응시키고, 페이지마다 HTML 한 파일 안에 해당 장면을 담는다. 파일 통합은 조사·설명 범위를 줄이는 근거가 아니다.
 - 책임·계약·검증: [모듈 경계 가이드](guides/module-boundary-guide.md)를 따른다. 더 자세한 문서 양식이 필요하면 [설계 문서 양식](guides/system-design-document-guide.md)을 참고한다.
 - 검사: [`design-doc-check.mjs`](guides/tools/design-doc-check.mjs)로 펜스·jobflow·링크·앵커·Mermaid 라벨을 정적으로 검사한다. 정적 검사와 실제 렌더링·실행 검증은 구분해 기록한다.
