@@ -195,11 +195,22 @@ Home --> (/identity/logout) : 로그아웃
 
 ```navigation
 Register --> (/register) : 가입 제출
-(/register) --> Register(Validation) : 입력 또는 비밀번호 오류
-(/register) --> RegisterResult : 등록정책별 결과
+(/register) --> RegisterResult - Disabled : Disabled · 가입 불가 안내
+(/register) --> RegisterResult - AlreadyRegistered : 이미 등록된 고객 안내
+(/register) --> Register - Validation : 입력·비밀번호 검증 또는 저장 실패
+(/register) --> RegisterResult - Standard : Standard · 가입 성공 후 자동 로그인
+(/register) --> RegisterResult - EmailValidation : EmailValidation · 확인 메일 발송 후 인증 대기
+(/register) --> RegisterResult - AdminApproval : AdminApproval · 관리자 승인 대기
 ```
 
-회원가입 Disabled는 결과 화면, 이미 등록된 고객도 결과 메시지로 이동한다. 비밀번호 검증·UserManager 저장 실패는 같은 입력 폼을 재표시한다. 실패 시 일부 고객 필드를 이전 값으로 되돌리는 처리가 있다. 성공 후 Standard는 로그인과 결과, EmailValidation은 확인 메일과 대기, AdminApproval은 승인 대기로 나뉜다.
+하이픈 뒤 이름은 같은 페이지의 결과 장면을 구분한다. 모든 `RegisterResult - 결과명`은 `/registerresult`의 안내이며, `Register - Validation`은 `/register` 가입 폼에 오류를 표시하는 장면이다.
+
+- `Standard`: 가입 즉시 계정을 활성화하고 자동 로그인한 뒤 가입 완료를 안내한다. 추가 승인은 필요하지 않다.
+- `EmailValidation`: 계정은 비활성 상태로 등록하고 확인 메일을 발송한다. 사용자가 메일 링크로 계정을 활성화해야 한다.
+- `AdminApproval`: 계정은 비활성 상태로 등록하고 관리자 승인 대기를 안내한다.
+- `Disabled`: 가입을 처리하지 않고 가입 불가를 안내한다. GET `/register` 직접 진입도 같은 결과로 이동한다.
+- `AlreadyRegistered`: 이미 등록된 고객의 가입 제출은 별도 가입 처리 없이 안내 메시지로 이동한다. 등록정책이 아니라 고객 상태에 따른 분기이며, `Disabled` 검사가 먼저 적용된다.
+- `Validation`: 입력·비밀번호 검증 또는 UserManager 저장 실패는 가입 폼을 다시 표시한다. 저장 실패 시 일부 고객 필드를 이전 값으로 되돌리는 처리가 있다.
 
 - 진입·결과: 위 조건을 실제 요청/반환 경로와 대조했다. 데이터·역할·외부 응답을 바꾼 실행 검증은 미수행이다.
 - 화면·장면: [회원가입 배치](screen-layout.md#register) · [HTML](details/screens/register.html#default), [가입 결과 배치](screen-layout.md#register-result) · [HTML](details/screens/register-result.html#default).
