@@ -44,7 +44,7 @@ desc_of() {
     jobflow-walkthrough)         echo "jobflow/job-flow/job flow/잡플로우 해설·상세 설명서 작성. 기존 도표를 객체·계약·시나리오와 연결해 설명하고 개선안을 검토할 때 사용한다" ;;
     multi-agent-task)            echo "multi-agent/멀티 에이전트 협업 요청. Architect·Critic·Developer·Tester 등 여러 전문 에이전트가 분업·상호 검토하며 작업할 때 사용한다" ;;
     ux-ui-improvement)           echo "UX/UI 개선 설계, 사용성 분석, 유사 서비스 벤치마킹·오픈소스 리서치로 개선안을 도출할 때 사용한다" ;;
-    comprehensive-test)          echo "종합 테스트·품질 검증·결함 수정 요청. 변경 위험에 맞는 계측·테스트·진단으로 검증하고 필요한 검증이 통과하면 끝낸다" ;;
+    comprehensive-test)          echo "심층 테스트·종합 테스트·품질 검증·결함 수정 요청. 변경 위험에 맞는 계측·테스트·진단으로 검증하고 필요한 검증이 통과하면 끝낸다" ;;
     site-design)                 echo "사이트 설계, 웹 서비스 전체 설계 문서를 작성할 때 사용한다" ;;
     verify-first-implementation) echo "설계서 구현·요구사항 구현·검증 우선 구현 요청. 작은 단위와 설계 가정을 먼저 검증하고 재사용 단위로 확정해 조립한다. 외부 가정이 없는 한 모듈의 작은 수정에는 쓰지 않는다" ;;
     *)                           title_of "$2" ;;

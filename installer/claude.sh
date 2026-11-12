@@ -81,7 +81,7 @@ keywords_of() {
     jobflow-walkthrough)         echo "jobflow|job flow|job-flow|잡플로우|잡 플로우|walkthrough|워크스루" ;;
     multi-agent-task)            echo "멀티 에이전트|멀티에이전트|multi-agent|multi agent|multiagent" ;;
     ux-ui-improvement)           echo "ux 개선|ui 개선|ux/ui|ux·ui|벤치마킹" ;;
-    comprehensive-test)          echo "통합 테스트|종합 테스트|e2e|comprehensive test" ;;
+    comprehensive-test)          echo "심층 테스트|통합 테스트|종합 테스트|e2e|comprehensive test" ;;
     site-design)                 echo "사이트 설계|site design|site-design|서비스 전체 설계" ;;
     verify-first-implementation) echo "설계서 구현|설계서를 구현|설계서대로 구현|검증 우선|verify-first|verify first" ;;
     *)                           echo "" ;;

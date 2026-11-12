@@ -31,7 +31,7 @@
 | jobflow를 실제 시나리오로 해설·검토 | [jobflow-walkthrough-prompt](prompts/jobflow-walkthrough-prompt.md) | jobflow, 등장 객체·계약의 실제 근거; 원문을 보존한 연결·책임 검토와 개선안 |
 | UX/UI 분석과 개선 | [ux-ui-improvement-prompt](prompts/ux-ui-improvement-prompt.md) | 대상 사용자 흐름, 필요한 비교 조사 |
 | 설계서·요구사항으로 구현 | [verify-first-implementation-prompt](prompts/verify-first-implementation-prompt.md) | 설계서의 작업 순서·검증 계획·미확정, 쓸 수 있는 실행 환경과 권한; 작은 단위 검증 → 재사용 단위 확정 → 조립 |
-| 테스트와 결함 수정 | [comprehensive-test-prompt](prompts/comprehensive-test-prompt.md) | 변경 위험과 실제 실행 가능한 검증, 이전 실행 이력 확인과 매 실행 기록 |
+| 심층 테스트·종합 테스트와 결함 수정 | [comprehensive-test-prompt](prompts/comprehensive-test-prompt.md) | 변경 위험과 실제 실행 가능한 검증, 이전 실행 이력 확인과 매 실행 기록 |
 | 여러 에이전트의 설계·비판·구현·평가 | [multi-agent-task-prompt](prompts/multi-agent-task-prompt.md) | 독립 작업 범위, 공유 계약, 역할별 모델·비용 |
 
 멀티 에이전트 프롬프트는 Architect·Critic·Developer·Tester의 상호 검토와 용도별 모델 배정을 지원한다. 상위·중위·하위 등급은 작업 난이도와 도구의 실제 지원을 기준으로 정하고, 모델 선택이 불가능한 환경에서는 가능한 역할 분리와 검토를 수행한다.

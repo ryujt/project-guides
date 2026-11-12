@@ -70,7 +70,7 @@ Codex 전용 설치 프로그램이다. 기본 경로는 Codex가 프로젝트�
 | `/multi-agent-task` | 여러 전문 에이전트(Architect·Critic·Developer·Tester) 협업 작업 |
 | `/ux-ui-improvement` | 리서치·벤치마킹 기반 UX/UI 개선 설계 |
 | `/verify-first-implementation` | 설계서·요구사항 구현(작은 단위·설계 가정 검증 → 재사용 단위 확정 → 조립) |
-| `/comprehensive-test` | 위험에 맞는 검증·진단·결함 수정 |
+| `/comprehensive-test` | “심층 테스트”, “종합 테스트” 요청 시 위험에 맞는 검증·진단·결함 수정 |
 | `/site-design` | 사이트 전체 설계 문서 생성 |
 
 ### 가이드 인덱스
