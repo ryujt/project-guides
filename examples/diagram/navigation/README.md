@@ -5,7 +5,7 @@ Navigation 문서를 작성·수정할 때는 아래 작성 샘플 절을 먼저
 ## 작성 샘플
 
 1. [문서 작성 샘플](document-template.md)의 골격과 이동 없는 과업의 적용 기준을 확인한다. 시나리오별 고정 구성과 `화면 확인 링크` 표를 유지한다.
-2. [작은 완성 예제](document-sample/navigation.md)에서 범위·색인·페이지 대응을 확인하고 현재 과업에 해당하는 시나리오만 읽는다. 연결된 [Layout·장면 목록](document-sample/screen-layout.md)과 HTML로 직접 이동해 문서와 화면의 대응을 살펴본다.
+2. [작은 완성 예제](document-sample/navigation.md)에서 범위와 간소화 구성을 확인하고 현재 과업에 해당하는 시나리오만 읽는다. 연결된 [Layout·장면 목록](document-sample/screen-layout.md)과 HTML로 직접 이동해 문서와 화면의 대응을 살펴본다.
 3. 더 많은 시나리오를 한 파일에 모은 구성이 필요할 때만 [큰 AS-IS 예제 안내](../../as-is/README.md)를 확인한다. 원본 코드 링크와 과거 검증 기록을 현재 작업의 근거로 옮기지 않는다.
 
 샘플의 과업·화면 수·데이터·정책을 현재 대상에 강제하지 않는다. Navigation 문법과 화면 확인 링크의 필수/예외 기준은 [전용 가이드](../../../guides/navigation-diagram-guide.md#문서-구성과-화면-확인-링크)가 원본이다.
