@@ -18,7 +18,9 @@ function withInstallation(check) {
     const skills = path.join(temporary, 'codex skills');
     const claudeSkills = path.join(temporary, 'claude skills');
     mkdirSync(path.join(source, 'installer'), { recursive: true });
-    cpSync(path.join(repository, 'installer/codex.sh'), path.join(source, 'installer/codex.sh'));
+    for (const name of ['codex.sh', 'agent-skills.sh']) {
+      cpSync(path.join(repository, 'installer', name), path.join(source, 'installer', name));
+    }
     for (const name of ['guides', 'prompts', 'examples', 'README.md', 'install.md']) {
       cpSync(path.join(repository, name), path.join(source, name), { recursive: true });
     }
@@ -30,7 +32,7 @@ function withInstallation(check) {
       '/bin/sh', [path.join(source, 'installer/codex.sh'), ...args],
       {
         cwd: temporary,
-        env: { ...process.env, CODEX_SKILLS_DIR: destination, CLAUDE_SKILLS_DIR: claudeSkills },
+        env: { ...process.env, HOME: path.join(temporary, 'home'), CODEX_SKILLS_DIR: destination, CLAUDE_SKILLS_DIR: claudeSkills },
         encoding: 'utf8',
       },
     );

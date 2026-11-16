@@ -1,16 +1,16 @@
 # 설치 및 사용 방법
 
-이 저장소의 `guides/`·`prompts/` 문서와 `examples/` 예제를 개인 스킬과 함께 설치한다. `installer/install.sh`는 Claude Code와 Codex를 한 번에 설치한다. 각각 설치하려면 `installer/claude.sh`·`installer/codex.sh`를 사용한다. 기본 설치 경로는 Claude Code가 `~/.claude/skills`, Codex가 `~/.agents/skills`다.
+이 저장소의 `guides/`·`prompts/` 문서와 `examples/` 예제를 개인 스킬과 함께 설치한다. `installer/install.sh`는 Claude Code·Codex·Gemini CLI를 한 번에 설치한다. 각각 설치하려면 `installer/claude.sh`·`installer/codex.sh`·`installer/gemini.sh`를 사용한다. 기본 설치 경로는 Claude Code가 `~/.claude/skills`, Codex가 `~/.agents/skills`, Gemini CLI가 `~/.gemini/skills`다. Codex·Gemini CLI용 스킬은 공통 생성기 `installer/agent-skills.sh`가 같은 내용으로 만든다.
 
 ## 1. 설치
 
-### 방법 A — Claude Code·Codex 통합 설치
+### 방법 A — Claude Code·Codex·Gemini CLI 통합 설치
 
 ```bash
 bash installer/install.sh
 ```
 
-`--install`을 지정해도 같은 방식으로 설치·업데이트한다. Claude Code 설치 후 Codex 설치를 순서대로 실행하며, 각 설치 프로그램의 스킬·훅 설정을 그대로 적용한다. `CLAUDE_SKILLS_DIR`·`CLAUDE_SETTINGS_FILE`·`CODEX_SKILLS_DIR` 환경변수도 각 프로그램에 그대로 전달한다.
+`--install`을 지정해도 같은 방식으로 설치·업데이트한다. Claude Code, Codex, Gemini CLI 순서로 설치하며, 각 설치 프로그램의 스킬·훅 설정을 그대로 적용한다. `CLAUDE_SKILLS_DIR`·`CLAUDE_SETTINGS_FILE`·`CODEX_SKILLS_DIR`·`GEMINI_SKILLS_DIR` 환경변수도 각 프로그램에 그대로 전달한다. 기본 경로로 Codex를 설치했다면 Gemini CLI가 그 사본을 함께 쓰므로 Gemini CLI 단계는 중복 설치를 건너뛴다([방법 E](#방법-e--gemini-cli용-설치) 참고).
 
 한쪽 실행이 실패하면 비정상 종료하고 이후 단계는 실행하지 않는다. 앞서 적용한 설치는 되돌리지 않으므로 원인을 해결한 뒤 같은 명령으로 다시 실행한다.
 
@@ -51,11 +51,23 @@ Codex 전용 설치 프로그램이다. 기본 경로는 Codex가 프로젝트�
 
 자동 선택은 단어를 감지하는 강제 실행 훅이 아니라 **스킬 설명과 요청 의도를 바탕으로 한 모델의 판단**이다. 단어가 인용·파일명·변수명에만 등장하면 작업을 확대하지 않으며, 프롬프트 문서 자체의 수정 요청은 편집으로 처리한다. 스킬이 보이지 않으면 Codex를 재시작한다. 확실히 지정하려면 `$system-design-to-be`처럼 명시한다.
 
+### 방법 E — Gemini CLI용 설치
+
+```bash
+bash installer/gemini.sh
+```
+
+Gemini CLI 전용 설치 프로그램이다. 기본 경로는 Gemini CLI의 개인 스킬 폴더 `~/.gemini/skills`이며, 다른 위치는 `GEMINI_SKILLS_DIR`로 지정한다. 생성하는 `SKILL.md`는 Codex용과 같고, Codex 전용 메타데이터 `agents/openai.yaml`만 만들지 않는다. Gemini CLI는 `SKILL.md`의 이름·설명을 보고 요청에 맞는 스킬을 활성화하므로 일반 문장으로 요청하거나 `system-design-to-be 스킬로 설계해줘`처럼 이름을 명시한다. 탐색 경로와 우선순위는 [공식 Gemini CLI 스킬 문서](https://geminicli.com/docs/cli/skills/)를 따른다.
+
+Gemini CLI는 `~/.gemini/skills`와 함께 별칭 경로 `~/.agents/skills`(Codex 기본 경로)도 탐색한다. 같은 이름의 스킬이 두 곳에 있으면 별칭 쪽을 쓰고 세션마다 충돌 경고를 띄운다. 그래서 설치 위치가 기본값 `~/.gemini/skills`이고 `~/.agents/skills`에 이 묶음이 이미 설치되어 있으면 `gemini.sh`는 설치를 건너뛰고, 이전에 `~/.gemini/skills`에 설치한 사본이 있으면 제거한다. 이때 Gemini CLI는 `~/.agents/skills` 사본을 그대로 사용하므로, 그 사본은 `CODEX_SKILLS_DIR` 없이 `codex.sh`를 실행해 갱신한다. `CODEX_SKILLS_DIR`로 Codex를 다른 위치에 설치하면서 예전 기본 경로 설치를 남겨 두면 Gemini CLI는 그 옛 사본을 계속 쓰므로, 기본 경로 설치를 `codex.sh --uninstall`로 제거한 뒤 `gemini.sh`를 실행한다. 나중에 Codex 설치를 제거했다면 `gemini.sh`를 다시 실행한다. 반대로 Gemini CLI 설치 뒤 `codex.sh`만 실행했다면 `gemini.sh`를 한 번 더 실행해 중복을 정리한다. `GEMINI_SKILLS_DIR`를 기본값이 아닌 경로로 지정하면 이 확인 없이 그 경로에 설치한다.
+
+스킬이 보이지 않으면 Gemini CLI를 재시작하거나 `/skills reload`를 실행하고 `/skills list`로 확인한다.
+
 ## 2. 설치되는 스킬
 
 ### 실행 프롬프트 (어느 프로젝트에서나 사용)
 
-아래 명령은 Claude Code 표기다. Codex에는 같은 이름으로 설치되며 `/system-design-as-is` 대신 `$system-design-as-is`처럼 호출하거나 일반 문장으로 요청한다.
+아래 명령은 Claude Code 표기다. Codex·Gemini CLI에는 같은 이름으로 설치된다. Codex에서는 `/system-design-as-is` 대신 `$system-design-as-is`처럼 호출하고, Gemini CLI에서는 스킬 이름을 문장에 적거나 일반 문장으로 요청한다.
 
 | 명령 | 하는 일 |
 |---|---|
@@ -82,9 +94,9 @@ Codex 전용 설치 프로그램이다. 기본 경로는 Codex가 프로젝트�
 | `/project-guides detailed-logging` | 상세 로깅 작성·보강·보존 가이드 적용 |
 | `/project-guides socket-server-stability` | 소켓 서버 안정성 계약·결함 주입·장시간 검증 가이드 적용 |
 
-설치 경로의 `project-guides/`에 `guides/`·`prompts/`·`examples/`·`README.md` 전체 사본이 함께 설치되며, 각 프롬프트 스킬은 이 사본을 참조한다. Codex 설치에는 `install.md`도 포함하며, 두 설치 프로그램이 생성하는 스킬의 문서·예제 링크는 스킬 폴더 기준 상대 경로로 유지한다. 가이드 문서(method-R, PRD, 다이어그램 DSL 등)는 별도 명령 없이도 관련 요청에서 인덱스 스킬을 통해 참조할 수 있다.
+설치 경로의 `project-guides/`에 `guides/`·`prompts/`·`examples/`·`README.md` 전체 사본이 함께 설치되며, 각 프롬프트 스킬은 이 사본을 참조한다. Codex·Gemini CLI 설치에는 `install.md`도 포함하며, 각 설치 프로그램이 생성하는 스킬의 문서·예제 링크는 스킬 폴더 기준 상대 경로로 유지한다. 가이드 문서(method-R, PRD, 다이어그램 DSL 등)는 별도 명령 없이도 관련 요청에서 인덱스 스킬을 통해 참조할 수 있다.
 
-Markdown 문서·다이어그램 작성·수정 결과의 전달은 [편집 링크 가이드](guides/diagram-editor-link-guide.md)를 따른다. 두 설치 프로그램은 공통 가이드와 `guides/tools/create-editor-link.py`를 함께 복사하고 생성 스킬에서 연결한다. 링크 생성 여부를 먼저 묻고 사용자가 요청한 경우에만 완성 Markdown을 API로 전송한다. 이미 링크 생성을 요청했다면 다시 묻지 않는다. 반환된 URL은 콘솔과 최종 답변에 주소 전체를 그대로 표시해 복사하기 쉽게 한다. 도구 실행에는 Python 3가 필요하며, 없으면 가이드의 API 계약으로 다른 HTTP 도구를 사용한다. 링크 생성과 브라우저 렌더링 확인은 구분한다.
+Markdown 문서·다이어그램 작성·수정 결과의 전달은 [편집 링크 가이드](guides/diagram-editor-link-guide.md)를 따른다. 각 설치 프로그램은 공통 가이드와 `guides/tools/create-editor-link.py`를 함께 복사하고 생성 스킬에서 연결한다. 링크 생성 여부를 먼저 묻고 사용자가 요청한 경우에만 완성 Markdown을 API로 전송한다. 이미 링크 생성을 요청했다면 다시 묻지 않는다. 반환된 URL은 콘솔과 최종 답변에 주소 전체를 그대로 표시해 복사하기 쉽게 한다. 도구 실행에는 Python 3가 필요하며, 없으면 가이드의 API 계약으로 다른 HTTP 도구를 사용한다. 링크 생성과 브라우저 렌더링 확인은 구분한다.
 
 ### 문서 읽기 범위
 
@@ -105,7 +117,7 @@ Markdown 문서·다이어그램 작성·수정 결과의 전달은 [편집 링�
 
 프롬프트 뒤에 붙인 텍스트는 해당 프롬프트의 입력(설계 요청·추가 요구사항)으로 전달된다.
 
-일반 요청의 선택 기준(Claude Code는 `claude.sh` 설치 시, Codex는 설명 기반 자동 선택):
+일반 요청의 선택 기준(Claude Code는 `claude.sh` 설치 시, Codex·Gemini CLI는 설명 기반 자동 선택):
 
 | 요청 의도·핵심 단어 | 적용할 스킬·문서 |
 |---|---|
@@ -125,7 +137,7 @@ Markdown 문서·다이어그램 작성·수정 결과의 전달은 [편집 링�
 
 상세 로깅 문서는 `guides/detailed-logging-guide.md`로 이동했다. 이전 설치 매니페스트에 등록된 `/detailed-logging` 스킬은 업데이트 시 제거하며, 이후 `/project-guides detailed-logging`으로 가이드를 사용한다. 테스트·멀티 에이전트 프롬프트도 이 가이드를 직접 참조한다.
 
-둘 다 업데이트하려면 다음을 실행한다.
+모두 업데이트하려면 다음을 실행한다.
 
 ```bash
 bash installer/install.sh
@@ -137,11 +149,11 @@ Claude Code만 업데이트하려면 다음을 실행한다.
 /install-guides        # 또는 bash installer/claude.sh
 ```
 
-Codex만 업데이트하려면 `bash installer/codex.sh`를 다시 실행한다. 사용자 지정 설치 경로나 설정 파일을 썼으면 설치 때와 같은 환경변수 값을 지정한다.
+Codex만 업데이트하려면 `bash installer/codex.sh`, Gemini CLI만 업데이트하려면 `bash installer/gemini.sh`를 다시 실행한다. 사용자 지정 설치 경로나 설정 파일을 썼으면 설치 때와 같은 환경변수 값을 지정한다.
 
 ## 5. 제거
 
-둘 다 제거하려면 다음을 실행한다. `-u`도 같은 동작이다.
+모두 제거하려면 다음을 실행한다. `-u`도 같은 동작이다.
 
 ```bash
 bash installer/install.sh --uninstall
@@ -161,6 +173,14 @@ Codex용 제거:
 bash installer/codex.sh --uninstall
 ```
 
+Gemini CLI용 제거:
+
+```bash
+bash installer/gemini.sh --uninstall
+```
+
+`gemini.sh --uninstall`은 `GEMINI_SKILLS_DIR`(기본 `~/.gemini/skills`)의 사본만 제거한다. Gemini CLI가 함께 쓰던 `~/.agents/skills` 사본은 Codex 설치이므로 `codex.sh --uninstall`로 제거한다.
+
 제거 스크립트는 해당 설치 경로의 `project-guides/.installed-skills` 매니페스트에 적힌 스킬과 현재 `prompts/`에서 계산한 스킬 이름의 디렉터리, `project-guides` 인덱스를 제거한다. 이름이 같은 다른 스킬과 설치 위치를 공유하지 않는다. 사용자 지정 경로를 썼으면 설치 때와 같은 환경변수 값을 사용한다. 삭제 동작은 각 설치 프로그램이 기준이며, 문서만 검토하는 작업에서 설치·제거를 실행하지 않는다.
 
 ## 6. 설치 프로그램 검증
@@ -171,7 +191,7 @@ bash installer/codex.sh --uninstall
 node --test installer/*.test.mjs
 ```
 
-임시 `CODEX_SKILLS_DIR`·`CLAUDE_SKILLS_DIR`·`CLAUDE_SETTINGS_FILE`에서 통합 설치·업데이트·제거와 실패 전달을 검사한다. Codex 개별 설치의 다른 스킬과 Claude 설치 보존, 상대 링크와 자동 선택 메타데이터도 확인한다. 예제 원문 복사, 추가·수정·삭제 반영, 원본 없이 설치 사본을 옮긴 뒤 인덱스·시나리오 링크가 이어지는지도 확인한다. 사용자 홈에는 설치하지 않는다. 이 검사는 실제 대화에서 자동 선택되거나 필요한 절만 읽는지 확인하는 실험 및 다이어그램 렌더링 검증과 구분한다.
+임시 `HOME`·`CODEX_SKILLS_DIR`·`GEMINI_SKILLS_DIR`·`CLAUDE_SKILLS_DIR`·`CLAUDE_SETTINGS_FILE`에서 통합 설치·업데이트·제거와 실패 전달을 검사한다. Codex·Gemini CLI 개별 설치의 다른 스킬과 Claude 설치 보존, Gemini CLI가 `~/.agents/skills` 사본이 있을 때 중복 설치를 건너뛰는지, 상대 링크와 자동 선택 메타데이터도 확인한다. 예제 원문 복사, 추가·수정·삭제 반영, 원본 없이 설치 사본을 옮긴 뒤 인덱스·시나리오 링크가 이어지는지도 확인한다. 사용자 홈에는 설치하지 않는다. 이 검사는 실제 대화에서 자동 선택되거나 필요한 절만 읽는지 확인하는 실험 및 다이어그램 렌더링 검증과 구분한다.
 
 `claude.sh`는 임시 경로를 환경변수로 주어 수동으로 검증한다. 설치 후 훅에 가짜 이벤트를 넣어 매칭 결과를 확인하고, 제거 후 설정 파일에 다른 키만 남는지 본다.
 

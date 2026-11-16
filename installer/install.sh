@@ -1,5 +1,5 @@
 #!/bin/sh
-# Claude Code·Codex 스킬 통합 설치 프로그램.
+# Claude Code·Codex·Gemini CLI 스킬 통합 설치 프로그램.
 # 사용법: bash installer/install.sh [--install|--uninstall|-u]
 # 설치 위치와 Claude 설정은 각 설치 프로그램의 환경변수를 그대로 사용한다.
 
@@ -27,4 +27,7 @@ printf 'Claude Code %s\n' "$operation"
 sh "$INSTALLER_DIR/claude.sh" "$action"
 printf 'Codex %s\n' "$operation"
 sh "$INSTALLER_DIR/codex.sh" "$action"
-printf '완료: Claude Code·Codex %s\n' "$operation"
+# Codex 설치가 Gemini CLI의 ~/.agents/skills 별칭에 있으면 gemini.sh가 중복 설치를 건너뛴다.
+printf 'Gemini CLI %s\n' "$operation"
+sh "$INSTALLER_DIR/gemini.sh" "$action"
+printf '완료: Claude Code·Codex·Gemini CLI %s\n' "$operation"

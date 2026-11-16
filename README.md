@@ -5,7 +5,7 @@
 - [`guides/`](guides/): 설계 원칙·문서 양식·독자 다이어그램 DSL과 검사 도구(`tools/`). 필요한 주제만 참조한다.
 - [`prompts/`](prompts/): 현재 작업의 목표와 함께 AI에게 전달하는 실행 프롬프트.
 - [`examples/diagram/`](examples/diagram/README.md): 다이어그램 구성·시나리오 예제. Navigation은 작성 샘플과 해당 시나리오를 먼저 확인하고, 나머지는 필요한 종류와 절만 선택한다.
-- Claude Code·Codex 설치와 호출 방법은 저장소 루트의 `install.md`를 참조한다. `bash installer/install.sh`로 둘 다 설치하거나, `installer/claude.sh`·`installer/codex.sh`로 각각 설치한다. 설치 후 `asis`·`tobe`·`jobflow` 등이 들어간 일반 요청의 작업 의도에 맞춰 스킬을 선택할 수 있다. 설치된 문서 사본에서는 재설치가 필요 없다.
+- Claude Code·Codex·Gemini CLI 설치와 호출 방법은 저장소 루트의 `install.md`를 참조한다. `bash installer/install.sh`로 모두 설치하거나, `installer/claude.sh`·`installer/codex.sh`·`installer/gemini.sh`로 각각 설치한다. 설치 후 `asis`·`tobe`·`jobflow` 등이 들어간 일반 요청의 작업 의도에 맞춰 스킬을 선택할 수 있다. 설치된 문서 사본에서는 재설치가 필요 없다.
 
 ## 처음 사용할 때
 

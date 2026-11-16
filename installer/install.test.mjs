@@ -17,12 +17,13 @@ function withInstallation(check, stubChildren = false) {
     const source = path.join(temporary, 'source with spaces');
     const claudeSkills = path.join(temporary, 'claude skills');
     const codexSkills = path.join(temporary, 'codex skills');
+    const geminiSkills = path.join(temporary, 'gemini skills');
     const settings = path.join(temporary, 'settings with spaces.json');
     const log = path.join(temporary, 'children.log');
     mkdirSync(path.join(source, 'installer'), { recursive: true });
     cpSync(path.join(repository, 'installer/install.sh'), path.join(source, 'installer/install.sh'));
     if (!stubChildren) {
-      for (const name of ['claude.sh', 'codex.sh']) {
+      for (const name of ['claude.sh', 'codex.sh', 'gemini.sh', 'agent-skills.sh']) {
         cpSync(path.join(repository, 'installer', name), path.join(source, 'installer', name));
       }
       for (const name of ['guides', 'prompts', 'examples', 'README.md', 'install.md']) {
@@ -35,12 +36,14 @@ function withInstallation(check, stubChildren = false) {
         ...process.env,
         CLAUDE_SKILLS_DIR: claudeSkills,
         CLAUDE_SETTINGS_FILE: settings,
+        HOME: path.join(temporary, 'home'),
         CODEX_SKILLS_DIR: codexSkills,
+        GEMINI_SKILLS_DIR: geminiSkills,
         INSTALL_TEST_LOG: log,
       },
       encoding: 'utf8',
     });
-    check({ temporary, source, claudeSkills, codexSkills, settings, log, run });
+    check({ temporary, source, claudeSkills, codexSkills, geminiSkills, settings, log, run });
   } finally {
     rmSync(temporary, { recursive: true, force: true });
   }
@@ -55,12 +58,12 @@ function installedNames(skills) {
     .trim().split('\n').sort();
 }
 
-test('installs and updates both tools, registers one Claude hook, and removes only managed content', () => {
-  withInstallation(({ source, claudeSkills, codexSkills, settings, run }) => {
+test('installs and updates every tool, registers one Claude hook, and removes only managed content', () => {
+  withInstallation(({ source, claudeSkills, codexSkills, geminiSkills, settings, run }) => {
     const unrelatedHook = { hooks: [{ type: 'command', command: 'keep-other-hook' }] };
     const originalSettings = { model: 'preserve-model', hooks: { UserPromptSubmit: [unrelatedHook] } };
     writeFileSync(settings, JSON.stringify(originalSettings));
-    for (const skills of [claudeSkills, codexSkills]) {
+    for (const skills of [claudeSkills, codexSkills, geminiSkills]) {
       mkdirSync(path.join(skills, 'unrelated-skill'), { recursive: true });
       writeFileSync(path.join(skills, 'unrelated-skill/SKILL.md'), 'keep unrelated skill');
     }
@@ -70,7 +73,7 @@ test('installs and updates both tools, registers one Claude hook, and removes on
     succeeded(run());
     const names = ['project-guides', ...readdirSync(path.join(source, 'prompts'))
       .filter(name => name.endsWith('.md')).map(name => name.replace(/-prompt\.md$/, ''))].sort();
-    for (const skills of [claudeSkills, codexSkills]) {
+    for (const skills of [claudeSkills, codexSkills, geminiSkills]) {
       assert.deepEqual(installedNames(skills), names);
       for (const name of names) assert.ok(existsSync(path.join(skills, name, 'SKILL.md')), `${skills}: ${name}`);
       const index = readFileSync(path.join(skills, 'project-guides/SKILL.md'), 'utf8');
@@ -98,6 +101,7 @@ test('installs and updates both tools, registers one Claude hook, and removes on
     }
     assert.equal(readFileSync(path.join(codexSkills, 'project-guides/agents/openai.yaml'), 'utf8'),
       'policy:\n  allow_implicit_invocation: true\n');
+    assert.equal(existsSync(path.join(geminiSkills, 'project-guides/agents')), false);
 
     const prompt = 'prompts/frontend-prototype-prompt.md';
     appendFileSync(path.join(source, prompt), '\nUpdated prototype guidance.\n');
@@ -107,7 +111,7 @@ test('installs and updates both tools, registers one Claude hook, and removes on
     const addedExample = 'examples/diagram/navigation/added-example.md';
     writeFileSync(path.join(source, addedExample), '# Added example\n');
     succeeded(run(['--install']));
-    for (const skills of [claudeSkills, codexSkills]) {
+    for (const skills of [claudeSkills, codexSkills, geminiSkills]) {
       assert.equal(readFileSync(path.join(skills, 'project-guides', prompt), 'utf8'),
         readFileSync(path.join(source, prompt), 'utf8'));
       assert.deepEqual(readFileSync(path.join(skills, 'project-guides', example)),
@@ -126,7 +130,7 @@ test('installs and updates both tools, registers one Claude hook, and removes on
       `"${path.join(claudeSkills, 'project-guides/hooks/skill-trigger.sh')}"`);
 
     const checkRemoved = () => {
-      for (const skills of [claudeSkills, codexSkills]) {
+      for (const skills of [claudeSkills, codexSkills, geminiSkills]) {
         for (const name of names) assert.equal(existsSync(path.join(skills, name)), false, `${skills}: ${name}`);
         assert.equal(readFileSync(path.join(skills, 'unrelated-skill/SKILL.md'), 'utf8'), 'keep unrelated skill');
       }
@@ -141,10 +145,10 @@ test('installs and updates both tools, registers one Claude hook, and removes on
 });
 
 test('keeps example discovery and scenario links usable after source removal and relocation', () => {
-  withInstallation(({ temporary, source, claudeSkills, codexSkills, run }) => {
+  withInstallation(({ temporary, source, claudeSkills, codexSkills, geminiSkills, run }) => {
     succeeded(run());
     rmSync(source, { recursive: true });
-    for (const [number, skills] of [claudeSkills, codexSkills].entries()) {
+    for (const [number, skills] of [claudeSkills, codexSkills, geminiSkills].entries()) {
       const moved = path.join(temporary, `relocated skills ${number}`);
       renameSync(skills, moved);
       const shared = path.join(moved, 'project-guides');
@@ -170,16 +174,16 @@ test('keeps example discovery and scenario links usable after source removal and
   });
 });
 
-test('rejects unknown and extra arguments before either installer runs', () => {
-  withInstallation(({ source, claudeSkills, codexSkills, settings, log, run }) => {
-    for (const name of ['claude.sh', 'codex.sh']) {
+test('rejects unknown and extra arguments before any installer runs', () => {
+  withInstallation(({ source, claudeSkills, codexSkills, geminiSkills, settings, log, run }) => {
+    for (const name of ['claude.sh', 'codex.sh', 'gemini.sh']) {
       writeFileSync(path.join(source, 'installer', name), '#!/bin/sh\nprintf "called\\n" >> "$INSTALL_TEST_LOG"\n');
     }
     for (const args of [[''], ['--unknown'], ['--install', 'extra'], ['--uninstall', '--install']]) {
       assert.equal(run(args).status, 1, args.join(' '));
       assert.equal(existsSync(log), false, 'invalid arguments must not reach an installer');
     }
-    for (const file of [claudeSkills, codexSkills, settings]) assert.equal(existsSync(file), false);
+    for (const file of [claudeSkills, codexSkills, geminiSkills, settings]) assert.equal(existsSync(file), false);
   }, true);
 });
 
@@ -191,6 +195,7 @@ test('propagates child failures and stops before the next installer', () => {
     };
     child('claude', 23);
     child('codex', 0);
+    child('gemini', 0);
     assert.equal(run(['--install']).status, 23);
     assert.equal(readFileSync(log, 'utf8'), 'claude\n');
 
@@ -199,5 +204,11 @@ test('propagates child failures and stops before the next installer', () => {
     child('codex', 31);
     assert.equal(run(['--install']).status, 31);
     assert.equal(readFileSync(log, 'utf8'), 'claude\ncodex\n');
+
+    rmSync(log);
+    child('codex', 0);
+    child('gemini', 37);
+    assert.equal(run(['--install']).status, 37);
+    assert.equal(readFileSync(log, 'utf8'), 'claude\ncodex\ngemini\n');
   }, true);
 });
