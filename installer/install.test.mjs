@@ -81,6 +81,7 @@ test('installs and updates every tool, registers one Claude hook, and removes on
       assert.match(index, /jobw flow/);
       const jobflowRules = [
         'guides/method-R.md#33-매크로-시나리오-작성과-검토',
+        'guides/method-R.md#시스템뷰의-작성과-검토',
         'guides/method-R.md#25-처리-결과의-분기로-메시지를-보내는-이유를-드러낸다',
         'guides/job-flow-diagram-guide.md#다이어그램-하단-설명',
       ];
@@ -94,6 +95,13 @@ test('installs and updates every tool, registers one Claude hook, and removes on
         assert.ok(skillText.includes(`(../project-guides/${prompt})`), `${name}: missing prompt link`);
         for (const rule of jobflowRules) {
           assert.ok(promptText.includes(`(../${rule})`), `${prompt}: missing ${rule}`);
+        }
+      }
+      for (const name of ['scenario-state-analysis', 'system-design-as-is', 'system-design-to-be']) {
+        const prompt = readFileSync(path.join(skills, 'project-guides/prompts', `${name}-prompt.md`), 'utf8');
+        for (const section of ['참여자별-시도와-독립-사건', '시스템-검증용-사례의-깊이']) {
+          assert.ok(prompt.includes(`(../guides/scenario-state-analysis-guide.md#${section})`),
+            `${name}: missing ${section}`);
         }
       }
       assert.match(index, /\[편집 링크 전달 기준\]\(guides\/diagram-editor-link-guide\.md\)/);

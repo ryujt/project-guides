@@ -24,7 +24,7 @@
 | --- | --- | --- |
 | 기존 시스템의 현재 구조 분석 | [system-design-as-is-prompt](prompts/system-design-as-is-prompt.md) | 대상 UI 전체의 페이지·장면·과업 조사와 시나리오별 상세 분석, 현재 업무의 시나리오 기반 상태 전이 분석서 |
 | 시스템 신규·개선 설계 | [system-design-to-be-prompt](prompts/system-design-to-be-prompt.md) | 요구·제약과 목표 구조·시나리오 검증, 목표 업무의 시나리오 기반 상태 전이 분석서. AS-IS는 있는 경우 참고 |
-| 시나리오 기반 상태 전이 분석서만 작성 | [scenario-state-analysis-prompt](prompts/scenario-state-analysis-prompt.md) | 사용자가 겪을 수 있는 상황을 폭넓게 찾아 E2E 테스트 후보와 설계 개선점 정리 |
+| 시나리오 기반 상태 전이 분석서만 작성 | [scenario-state-analysis-prompt](prompts/scenario-state-analysis-prompt.md) | 이용자·운영자·연동 주체별 시도와 경합, 허용·금지 전이 및 E2E 판정 증적 정리 |
 | 기능 하나 추가·변경 설계 | [feature-design-prompt](prompts/feature-design-prompt.md) | 대상 책임 모듈과 직접 관련된 계약 |
 | 사이트 전체 설계 | [site-design-prompt](prompts/site-design-prompt.md) | 채택한 기능·화면에 해당하는 DSL |
 | 회원·인증·세션·탈퇴 설계 | [frontend-user-design-prompt](prompts/frontend-user-design-prompt.md) | 채택할 회원 흐름, 보안·데이터 경계 |
@@ -76,7 +76,7 @@
 
 AS-IS·TO-BE 설계 문서를 쓸 때 함께 보는 자료다. 문서 내용은 각 프롬프트, 고정 폴더 구조·화면별 HTML은 [공통 산출물 배치](guides/system-design-output-guide.md)를 따른다.
 
-- Job Flow의 관찰 수준은 [Method-R](guides/method-R.md)에서 선택한다. 시스템 전체와 외부 주체의 협력은 [매크로 시나리오 작성과 검토](guides/method-R.md#33-매크로-시나리오-작성과-검토)를 따른다. 도표를 읽거나 작성할 때는 [수신 객체의 판단과 결과 분기](guides/method-R.md#25-처리-결과의-분기로-메시지를-보내는-이유를-드러낸다)와 [화살표 양 끝을 표시하는 설명](guides/job-flow-diagram-guide.md#다이어그램-하단-설명)을 함께 본다.
+- Job Flow의 관찰 수준은 [Method-R](guides/method-R.md)에서 선택한다. 시스템 전체와 외부 주체의 협력은 [매크로 시나리오 작성과 검토](guides/method-R.md#33-매크로-시나리오-작성과-검토)를 따른다. 매크로의 시스템을 내부 서비스로 확대할 때는 [시스템뷰의 작성과 검토](guides/method-R.md#시스템뷰의-작성과-검토)를 따른다. 도표를 읽거나 작성할 때는 [수신 객체의 판단과 결과 분기](guides/method-R.md#25-처리-결과의-분기로-메시지를-보내는-이유를-드러낸다)와 [화살표 양 끝을 표시하는 설명](guides/job-flow-diagram-guide.md#다이어그램-하단-설명)을 함께 본다.
 - 화면: [Navigation 가이드](guides/navigation-diagram-guide.md#시나리오별-상세-분석)에 따라 대상 과업의 진입·분기·결과·복귀를 조사·설계하고, 과업별 다이어그램·짧은 흐름 설명·화면 확인 링크로 정리한다. 각 시나리오의 `화면 확인 링크` 표에서 페이지별 한 행에 기본 화면과 사용하는 장면의 직접 링크를 모은다. 조사 근거·미확인은 분석서·설계서에 기록한다. [페이지·장면 목록](guides/system-design-output-guide.md#페이지장면-목록)을 원본으로 Navigation·[Layout](guides/screen-layout-guide.md)·HTML을 대응시키고, 페이지마다 HTML 한 파일 안에 해당 장면을 담는다. 파일 통합은 조사·설명 범위를 줄이는 근거가 아니다.
 - 책임·계약·검증: [모듈 경계 가이드](guides/module-boundary-guide.md)를 따른다. 더 자세한 문서 양식이 필요하면 [설계 문서 양식](guides/system-design-document-guide.md)을 참고한다.
 - 검사: [`design-doc-check.mjs`](guides/tools/design-doc-check.mjs)로 펜스·jobflow·링크·앵커·Mermaid 라벨을 정적으로 검사한다. 정적 검사와 실제 렌더링·실행 검증은 구분해 기록한다.

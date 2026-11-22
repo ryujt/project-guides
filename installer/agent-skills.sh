@@ -52,7 +52,7 @@ desc_of() {
     frontend-user-design)        echo "회원가입·로그인·세션·계정 복구·탈퇴 등 회원제 프론트엔드의 사용자·인증 흐름을 설계할 때 사용한다" ;;
     frontend-navigation-diagram) echo "navigation/네비게이션/내비게이션 다이어그램 작성·수정. 화면 이동과 판단에 필요한 API·처리를 navigation DSL로 설계할 때 사용한다" ;;
     frontend-state-diagram)      echo "state/상태 전이 다이어그램 작성·수정. 프론트엔드 객체·화면의 상태와 전이 조건을 state DSL로 설계할 때 사용한다" ;;
-    scenario-state-analysis)     echo "시나리오 기반 상태 전이 분석서 작성. 사용자가 겪을 상황을 폭넓게 찾아 행동, 관찰 가능한 결과, 관련 객체의 상태 변화를 기록하고 E2E 테스트 설계와 사용자 경험 개선의 근거를 마련한다" ;;
+    scenario-state-analysis)     echo "시나리오 기반 상태 전이 분석서 작성. 이용자·운영자·외부 주체의 시도와 경합, 관련 객체의 상태 변화와 판정 증적을 기록해 E2E 테스트 및 설계 검토에 사용한다" ;;
     frontend-prototype)          echo "frontend-prototype, 프론트엔드 프로토타입, 화면 흐름 시뮬레이션 구현. 실제 제품 같은 웹/데스크톱 화면과 UX/UI 완성도에 집중하고 백엔드 없이 가상 동작으로 사용 흐름을 체험할 때 사용한다" ;;
     jobflow-walkthrough)         echo "jobflow/job-flow/job flow/잡플로우 해설·상세 설명서 작성. 기존 도표를 객체·계약·시나리오와 연결해 설명하고 개선안을 검토할 때 사용한다" ;;
     multi-agent-task)            echo "multi-agent/멀티 에이전트 협업 요청. Architect·Critic·Developer·Tester 등 여러 전문 에이전트가 분업·상호 검토하며 작업할 때 사용한다" ;;
@@ -156,7 +156,7 @@ description: jobflow/job-flow/job flow/jobw flow/잡플로우와 매크로뷰, n
 6. 산출 문서에는 작성 컴퓨터에서만 유효한 절대 경로·설치 사본 경로를 남기지 않는다. 렌더러 없이 확인했으면 정적 검토로 보고한다.
 7. Markdown 문서·다이어그램 산출물은 [편집 링크 전달 기준](guides/diagram-editor-link-guide.md)에 따라 tools.camp 링크 생성 여부를 먼저 묻고, 사용자가 요청한 경우에만 생성한다. 이미 링크 생성을 요청했다면 다시 묻지 않는다. 반환된 URL은 콘솔과 최종 답변에 주소 전체를 그대로 표시한다. 적용 범위와 예외는 공통 기준을 따른다.
 8. Job Flow의 각 화살표 설명에는 [굵은 출발점 → 도착점 표제](guides/job-flow-diagram-guide.md#다이어그램-하단-설명)를 붙인다. 매크로뷰·서비스뷰에서 수신자의 판단에 따라 후속 메시지가 달라지면 [처리 결과별 분기](guides/method-R.md#25-처리-결과의-분기로-메시지를-보내는-이유를-드러낸다)를 적용한다.
-9. 매크로뷰 Job Flow를 작성·검토할 때는 [매크로 시나리오 작성과 검토](guides/method-R.md#33-매크로-시나리오-작성과-검토)를 적용한다.
+9. Job Flow의 관찰 수준에 따라 [매크로 시나리오 작성과 검토](guides/method-R.md#33-매크로-시나리오-작성과-검토) 및 [시스템뷰의 작성과 검토](guides/method-R.md#시스템뷰의-작성과-검토)를 적용한다.
 
 ## 가이드 목록
 

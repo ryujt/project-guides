@@ -75,7 +75,7 @@ Gemini CLI는 `~/.gemini/skills`와 함께 별칭 경로 `~/.agents/skills`(Code
 |---|---|
 | `/system-design-as-is` | 기존 코드베이스를 분석해 AS-IS 설계 분석 문서 생성 |
 | `/system-design-to-be` | 요구·제약으로 신규·개선 TO-BE 설계 문서 생성(AS-IS 없이 시작 가능) |
-| `/scenario-state-analysis` | 사용자 시나리오별 상태 변화와 E2E 테스트 후보, 설계 검토 항목을 분석서 한 파일로 생성. AS-IS·TO-BE 설계에도 포함 |
+| `/scenario-state-analysis` | 참여자별 시도·외부 사건·상태 변화와 E2E 판정 기준 작성. 검증 범위가 넓으면 색인에서 업무별·복합 사례를 연결. AS-IS·TO-BE 설계에도 포함 |
 | `/feature-design` | 특정 요구사항 하나를 영향 범위로 한정한 기능 설계 문서 생성 |
 | `/frontend-user-design` | 회원가입·로그인·세션·탈퇴 등 회원제 프론트엔드 설계 |
 | `/frontend-navigation-diagram` | 화면·API 흐름 navigation 다이어그램 작성 |

@@ -27,7 +27,7 @@
 - 각 요구사항이 어느 설계와 검증 방법에 반영됐는지 알 수 있게 작성한다. 부분 반영과 보류는 이유를 적는다.
 - 기존 소비자나 저장 데이터에 영향이 있으면 호환성·이행·복구 방법을 포함한다.
 
-다이어그램은 필요한 것만 작성한다. 업무 주체 간 협력이나 내부 협력은 [Job Flow](../guides/job-flow-diagram-guide.md), 화면 이동은 [Navigation](../guides/navigation-diagram-guide.md), 상태 변화는 [State](../guides/state-diagram-guide.md), 화면 배치는 [Layout](../guides/screen-layout-guide.md) 문법을 따른다. 기능 변경이 시스템과 외부 주체의 협력에 미치는 영향을 매크로뷰로 그릴 때는 [매크로 시나리오 작성과 검토](../guides/method-R.md#33-매크로-시나리오-작성과-검토)를 적용한다. 매크로뷰·서비스뷰에서는 기능 변경이 영향을 주는 [수신 객체의 판단과 결과별 후속 메시지](../guides/method-R.md#25-처리-결과의-분기로-메시지를-보내는-이유를-드러낸다)를 연결한다. 각 Job Flow 아래에 [화살표별 굵은 표제와 설명](../guides/job-flow-diagram-guide.md#다이어그램-하단-설명)을 적고 다른 다이어그램 아래에는 주요 내용을 짧게 설명한다.
+다이어그램은 필요한 것만 작성한다. 업무 주체 간 협력이나 내부 협력은 [Job Flow](../guides/job-flow-diagram-guide.md), 화면 이동은 [Navigation](../guides/navigation-diagram-guide.md), 상태 변화는 [State](../guides/state-diagram-guide.md), 화면 배치는 [Layout](../guides/screen-layout-guide.md) 문법을 따른다. 기능 변경이 시스템과 외부 주체의 협력에 미치는 영향을 매크로뷰로 그릴 때는 [매크로 시나리오 작성과 검토](../guides/method-R.md#33-매크로-시나리오-작성과-검토)를 적용한다. 서비스 사이의 변경을 그릴 때는 [시스템뷰의 작성과 검토](../guides/method-R.md#시스템뷰의-작성과-검토)를 적용한다. 매크로뷰·서비스뷰에서는 기능 변경이 영향을 주는 [수신 객체의 판단과 결과별 후속 메시지](../guides/method-R.md#25-처리-결과의-분기로-메시지를-보내는-이유를-드러낸다)를 연결한다. 각 Job Flow 아래에 [화살표별 굵은 표제와 설명](../guides/job-flow-diagram-guide.md#다이어그램-하단-설명)을 적고 다른 다이어그램 아래에는 주요 내용을 짧게 설명한다.
 
 Markdown 문서·다이어그램의 tools.camp 링크 생성 여부 확인과 전달은 [편집 링크 전달 기준](../guides/diagram-editor-link-guide.md)을 따른다.
 
