@@ -30,7 +30,7 @@
 
 ## scenario-state-analysis.md
 
-**시나리오 기반 상태 전이 분석서**를 작성하고 `system-design-as-is.md`의 관련 기능에서 해당 시나리오 절로 연결한다. [공통 작성 가이드](../guides/scenario-state-analysis-guide.md)의 AS-IS 기준을 적용해 UI 유무와 관계없이 현재 업무에서 확인한 상태 변화와 미확인 경로를 구분한다.
+**시나리오 기반 상태 전이 분석서**를 작성하고 `system-design-as-is.md`의 관련 기능에서 해당 시나리오 절로 연결한다. UI 유무와 관계없이 사용자가 겪을 수 있는 상황을 폭넓게 찾는다. 각 상황을 재현하는 방법, 현재 확인된 결과와 상태 변화, 미확인 경로를 기록해 E2E 테스트와 설계 검토의 근거로 삼는다. [공통 작성 가이드의 AS-IS 기준](../guides/scenario-state-analysis-guide.md)
 
 ## job-flow 폴더
 

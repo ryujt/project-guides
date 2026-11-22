@@ -37,6 +37,10 @@
 | 영상 데이터가 도착하는 시점과 화면이 프레임을 요청하는 시점은 어떻게 연결되는가 | [재생기의 협력](job-flow/implementation.md#모듈뷰--재생기의-협력) · [영상 패킷을 프레임 큐에 넣기](job-flow/implementation.md#상세뷰--한-영상-패킷을-프레임-큐에-넣기) |
 | 요청 콜백에서 값을 돌려받은 뒤 어느 객체가 작업을 이어가는가 | [상품 라벨의 표시 이름 조회](job-flow/implementation.md#상세뷰--표시-이름을-요청하는-동기-콜백) |
 
+## State 시나리오 기반 상태 전이 분석서
+
+[일반 쇼핑몰 분석서](state/shopping-mall-scenario-state-analysis.md)는 고객과 운영자가 겪는 사건을 상태 전이와 연결한다. [결제 결과 확인](state/shopping-mall-scenario-state-analysis.md#b2-결제창을-열고-돌아와-같은-거래의-결과를-확인한다)에서는 결제창을 닫았거나 승인 응답이 늦을 때 고객이 어디에서 결과를 다시 확인하는지 볼 수 있다. [업무를 가로지르는 경로](state/shopping-mall-scenario-state-analysis.md#업무를-가로질러-확인할-경로)에서는 주문·배송·환불을 같은 주문 데이터로 이어서 검증하는 E2E 후보를 찾을 수 있다.
+
 ## 필요한 만큼 읽기
 
 현재 설계와 관련된 절의 시작 사건, `jobflow` 코드와 화살표별 설명을 함께 읽는다. 사례의 참여자와 절차는 해당 업무의 가정이다. 실제 대상의 관찰 근거나 설계 결정에 맞게 적용한다. 관찰 수준별 기준은 Method-R의 [매크로 시나리오](../../guides/method-R.md#33-매크로-시나리오-작성과-검토), [서비스 간 협력](../../guides/method-R.md#44-서비스-간-협력-그림-수신-처리와-결과-분기), [모듈 설계](../../guides/method-R.md#5-모듈-설계-공개-계약-안을-확대하기), [상세 설계](../../guides/method-R.md#6-상세-설계-불확실한-부분만-더-확대하기)에서 확인한다. 표기는 [Job Flow 가이드](../../guides/job-flow-diagram-guide.md)를 따른다.

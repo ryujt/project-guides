@@ -28,7 +28,7 @@
 
 ## scenario-state-analysis.md
 
-**시나리오 기반 상태 전이 분석서**를 작성하고 `system-design-to-be.md`의 관련 기능에서 해당 시나리오 절로 연결한다. [공통 작성 가이드](../guides/scenario-state-analysis-guide.md)의 TO-BE 기준을 적용해 목표 업무의 전이 조건과 결과를 요구사항·설계 결정에 연결한다. AS-IS 자료 없이도 작성할 수 있다.
+**시나리오 기반 상태 전이 분석서**를 작성하고 `system-design-to-be.md`의 관련 기능에서 해당 시나리오 절로 연결한다. 사용자가 겪을 수 있는 상황을 폭넓게 찾아 요구사항·설계 결정에 따른 상태 변화와 사용자가 확인할 기대 결과를 E2E 테스트 후보로 정리한다. 결과나 다음 행동이 정해지지 않은 상황은 설계 검토 항목에 남긴다. AS-IS 자료 없이도 작성할 수 있다. [공통 작성 가이드의 TO-BE 기준](../guides/scenario-state-analysis-guide.md)
 
 ## job-flow 폴더
 
