@@ -115,7 +115,7 @@ test('updates copies, migrates detailed logging, and uninstalls only managed ski
     mkdirSync(path.join(skills, 'unrelated-skill'), { recursive: true });
     const keep = path.join(skills, 'unrelated-skill/SKILL.md');
     writeFileSync(keep, 'keep unrelated skill');
-    const retiredExample = 'examples/diagram/navigation/retired-example.md';
+    const retiredExample = 'examples/diagram/retired-example.md';
     writeFileSync(path.join(source, retiredExample), '# Retired example\n');
     install();
     assert.ok(existsSync(path.join(skills, 'project-guides', retiredExample)));
@@ -125,7 +125,7 @@ test('updates copies, migrates detailed logging, and uninstalls only managed ski
     appendFileSync(path.join(skills, 'project-guides/.installed-skills'), 'detailed-logging\n');
     const prompt = 'prompts/system-design-to-be-prompt.md';
     appendFileSync(path.join(source, prompt), '\nUpdated source content.\n');
-    const example = 'examples/diagram/navigation/shopping-mall-navigation.md';
+    const example = 'examples/diagram/job-flow/macro.md';
     appendFileSync(path.join(source, example), '\nUpdated example content.\n');
     rmSync(path.join(source, retiredExample));
     install();

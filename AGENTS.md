@@ -12,7 +12,7 @@
 
 ## 독자 표기와 일관성
 
-- `jobflow`, `navigation`, `state`, `layout`은 각 전용 가이드가 문법 기준이다. DSL 문법은 유지하고 최종 Markdown에는 설치된 `guides/diagram-output-guide.md`의 출력 형식을 적용한다.
+- `jobflow`, `navigation`, `state`, `layout`은 각 전용 가이드가 문법 기준이다. 이 저장소의 `examples/`에는 SmartMD 코드 펜스를 원본으로 둔다. 스킬이 생성하는 문서는 설치된 `guides/diagram-output-guide.md`의 출력 형식을 따른다.
 - 파서·렌더러가 없으면 정적 검토라고 보고한다. 렌더링 성공을 추정하지 않는다.
 - 변경 시 README의 문서 안내, 실제 문서 링크, 다른 가이드·프롬프트의 같은 규칙을 확인한다.
 - `wrtite-readme-guide.md` 등 기존 경로는 별도 이전 이유가 없으면 유지한다.

@@ -10,7 +10,7 @@ Navigation·State·Job Flow의 최종 문서 표기는 [설치된 출력 형식]
 
 ## 작성 내용
 
-작성 전에 [Navigation 작성 샘플](../examples/diagram/navigation/document-template.md)과 [작은 완성 예제](../examples/diagram/navigation/document-sample/navigation.md)의 해당 시나리오를 확인한다. [고정 구성과 화면 확인 링크](../guides/navigation-diagram-guide.md#문서-구성과-화면-확인-링크)를 적용하고, 예제의 페이지·계약·정책을 현재 코드에 맞게 바꾼다.
+[문서 구성과 화면 확인 링크](../guides/navigation-diagram-guide.md#문서-구성과-화면-확인-링크)를 적용한다. 참고할 Navigation 예제가 [다이어그램 예제 인덱스](../examples/diagram/README.md)에 있으면 필요한 시나리오만 확인한다.
 
 - 라우트 맵: 실제 경로·페이지/진입점·접근 조건·근거 파일/심볼
 - 전체 요약: 페이지 간 이동과 짧은 트리거를 먼저 보여 주고 API·처리 노드는 생략한다. 너무 크면 사용자 목적별로 나눈다.

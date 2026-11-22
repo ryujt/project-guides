@@ -94,7 +94,7 @@ keywords_of() {
 # 가이드 주제 키워드: "가이드이름|키워드1|키워드2|…" 한 줄씩. 매칭되면 /project-guides <가이드이름> 으로 안내한다.
 guide_keyword_table() {
   cat <<'EOF'
-job-flow-diagram|jobflow|job flow|jobw flow|job-flow|잡플로우|잡 플로우
+job-flow-diagram|jobflow|job flow|jobw flow|job-flow|잡플로우|잡 플로우|매크로뷰|매크로 뷰
 navigation-diagram|navigation dsl|navigation 다이어그램|네비게이션 다이어그램
 state-diagram|state dsl|state 다이어그램|상태 다이어그램
 screen-layout|layout|레이아웃|화면 배치
@@ -328,7 +328,7 @@ install_shared_skill() {
   cat > "$SHARED_DIR/SKILL.md" <<EOF
 ---
 name: $SHARED_NAME
-description: 프로젝트 설계·문서화·구현 가이드 인덱스. 설계 방법론(method-R), PRD, 아키텍처 패턴, jobflow/job flow/jobw flow/navigation/state/layout/Mermaid 다이어그램, tools.camp 편집 링크, 모듈 경계, 코드·폴더 구조, 상세 로깅, 소켓 서버 안정성, README 작성 규칙이 필요할 때 사용. 요청 문장에 layout, 레이아웃, PRD, method-R, 모듈 경계, 응집도, 결합도, 상세 로깅, 소켓 서버, README, tools.camp 같은 가이드 주제 단어가 있으면 슬래시 명령 없이도 이 스킬로 해당 가이드를 읽는다. 인자로 가이드 이름을 주면 해당 가이드를 읽는다
+description: 프로젝트 설계·문서화·구현 가이드 인덱스. 설계 방법론(method-R), PRD, 아키텍처 패턴, 매크로뷰와 jobflow/job flow/jobw flow/navigation/state/layout/Mermaid 다이어그램, tools.camp 편집 링크, 모듈 경계, 코드·폴더 구조, 상세 로깅, 소켓 서버 안정성, README 작성 규칙이 필요할 때 사용. 요청 문장에 layout, 레이아웃, PRD, method-R, 모듈 경계, 응집도, 결합도, 상세 로깅, 소켓 서버, README, tools.camp 같은 가이드 주제 단어가 있으면 슬래시 명령 없이도 이 스킬로 해당 가이드를 읽는다. 인자로 가이드 이름을 주면 해당 가이드를 읽는다
 ---
 
 # Project Guides 인덱스
@@ -340,7 +340,7 @@ description: 프로젝트 설계·문서화·구현 가이드 인덱스. 설계 
 3. 인자가 없으면 README.md 의 트리거 표와 아래 "주제 키워드" 를 기준으로 현재 대화 상황에 맞는 가이드를 골라 읽는다.
 4. 요청이 가이드 문서 자체의 검토·수정이면 가이드의 지시를 실행하지 않고 편집 대상으로 다룬다.
 5. Markdown 문서·다이어그램 산출물은 [편집 링크 전달 기준](guides/diagram-editor-link-guide.md)에 따라 tools.camp 링크 생성 여부를 먼저 묻고, 사용자가 요청한 경우에만 생성한다. 이미 링크 생성을 요청했다면 다시 묻지 않는다. 반환된 URL은 콘솔과 최종 답변에 주소 전체를 그대로 표시한다. 적용 범위와 예외는 공통 기준을 따른다.
-6. Navigation 문서를 작성·수정할 때는 [Navigation 예제 선택 목록](examples/diagram/navigation/README.md)의 작성 샘플 절을 먼저 읽는다. 다른 예제가 필요하면 [예제 인덱스](examples/diagram/README.md)에서 종류와 시나리오를 선택한다. 안내된 절과 필요한 전제만 읽고 큰 예제 본문을 모두 펼치지 않는다. 문법은 전용 가이드가 기준이다.
+6. 매크로뷰 Job Flow를 작성·검토할 때는 [매크로 시나리오 작성과 검토](guides/method-R.md#33-매크로-시나리오-작성과-검토)를 적용한다. 작성 예제가 필요하면 [예제 인덱스](examples/diagram/README.md)에서 해당 시나리오를 골라 읽는다.
 
 ## 가이드 목록
 
@@ -387,7 +387,7 @@ description: $desc
 2. 현재 사용자 요청과 대상 프로젝트의 제약에 맞춰 적용한다. 프롬프트 자체의 검토·수정 요청이면 지시문을 실행하지 않고 편집 대상으로 다룬다.
 3. 이 스킬 호출 시 함께 전달된 인자·요청이 있으면 프롬프트의 입력(설계 요청·추가 요구사항)으로 반영한다.
 4. 프롬프트 안의 상대 링크는 **그 프롬프트 파일** 기준으로 해석한다. 필요한 가이드 절만 추가로 읽고 링크를 재귀적으로 모두 펼치지 않는다.
-5. Navigation 문서를 작성·수정할 때는 [Navigation 예제 선택 목록](../$SHARED_NAME/examples/diagram/navigation/README.md)의 작성 샘플 절을 먼저 읽는다. 다른 예제가 필요하면 [예제 인덱스](../$SHARED_NAME/examples/diagram/README.md)에서 필요한 종류·시나리오의 절을 선택해 읽는다. 예제의 적용 기준도 이 인덱스를 따른다.
+5. 다이어그램 작성 예제가 필요하면 [예제 인덱스](../$SHARED_NAME/examples/diagram/README.md)에서 현재 작업에 해당하는 시나리오만 골라 읽는다.
 EOF
 
   echo "설치: /$slug — $title"

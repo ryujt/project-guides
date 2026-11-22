@@ -67,7 +67,7 @@ test('installs and updates every tool, registers one Claude hook, and removes on
       mkdirSync(path.join(skills, 'unrelated-skill'), { recursive: true });
       writeFileSync(path.join(skills, 'unrelated-skill/SKILL.md'), 'keep unrelated skill');
     }
-    const retiredExample = 'examples/diagram/navigation/retired-example.md';
+    const retiredExample = 'examples/diagram/retired-example.md';
     writeFileSync(path.join(source, retiredExample), '# Retired example\n');
 
     succeeded(run());
@@ -79,6 +79,15 @@ test('installs and updates every tool, registers one Claude hook, and removes on
       const index = readFileSync(path.join(skills, 'project-guides/SKILL.md'), 'utf8');
       assert.match(index, /Mermaid/);
       assert.match(index, /jobw flow/);
+      const macroRule = 'guides/method-R.md#33-매크로-시나리오-작성과-검토';
+      assert.ok(index.includes(`(${macroRule})`), 'shared skill must link to the macro workflow');
+      for (const name of ['system-design-as-is', 'system-design-to-be', 'jobflow-walkthrough']) {
+        const prompt = `prompts/${name}-prompt.md`;
+        const skillText = readFileSync(path.join(skills, name, 'SKILL.md'), 'utf8');
+        const promptText = readFileSync(path.join(skills, 'project-guides', prompt), 'utf8');
+        assert.ok(skillText.includes(`(../project-guides/${prompt})`), `${name}: missing prompt link`);
+        assert.ok(promptText.includes(`(../${macroRule})`), `${prompt}: missing macro workflow`);
+      }
       assert.match(index, /\[편집 링크 전달 기준\]\(guides\/diagram-editor-link-guide\.md\)/);
       for (const name of ['guides/diagram-editor-link-guide.md', 'guides/tools/create-editor-link.py']) {
         assert.equal(readFileSync(path.join(skills, 'project-guides', name), 'utf8'),
@@ -93,6 +102,7 @@ test('installs and updates every tool, registers one Claude hook, and removes on
     for (const [prompt, target] of [
       ['Mermaid 다이어그램을 작성해줘', 'tools-camp-markdown'],
       ['jobw flow 다이어그램을 작성해줘', 'job-flow-diagram'],
+      ['배송 매크로 뷰를 작성해줘', 'job-flow-diagram'],
       ['편집 링크를 만들어줘', 'diagram-editor-link'],
     ]) {
       const triggered = spawnSync('/bin/sh', [hook], { input: JSON.stringify({ prompt }), encoding: 'utf8' });
@@ -105,10 +115,10 @@ test('installs and updates every tool, registers one Claude hook, and removes on
 
     const prompt = 'prompts/frontend-prototype-prompt.md';
     appendFileSync(path.join(source, prompt), '\nUpdated prototype guidance.\n');
-    const example = 'examples/diagram/navigation/shopping-mall-navigation.md';
+    const example = 'examples/diagram/job-flow/macro.md';
     appendFileSync(path.join(source, example), '\nUpdated example content.\n');
     rmSync(path.join(source, retiredExample));
-    const addedExample = 'examples/diagram/navigation/added-example.md';
+    const addedExample = 'examples/diagram/added-example.md';
     writeFileSync(path.join(source, addedExample), '# Added example\n');
     succeeded(run(['--install']));
     for (const skills of [claudeSkills, codexSkills, geminiSkills]) {
@@ -167,6 +177,7 @@ test('keeps example discovery and scenario links usable after source removal and
       }
       const checked = spawnSync(process.execPath, [
         path.join(shared, 'guides/tools/design-doc-check.mjs'), '--strict',
+        path.join(shared, 'SKILL.md'),
         path.join(shared, 'examples/diagram'),
       ], { cwd: temporary, encoding: 'utf8' });
       assert.equal(checked.status, 0, checked.stdout + checked.stderr);
@@ -223,8 +234,18 @@ test('switches the installed output guide on all three tools across reinstalls',
       succeeded(run(args));
       for (const skills of [claudeSkills, codexSkills, geminiSkills]) {
         const guides = path.join(skills, 'project-guides/guides');
-        assert.equal(readFileSync(path.join(guides, 'diagram-output-guide.md'), 'utf8'),
-          readFileSync(path.join(source, 'guides', profile), 'utf8'));
+        const outputGuide = readFileSync(path.join(guides, 'diagram-output-guide.md'), 'utf8');
+        assert.equal(outputGuide, readFileSync(path.join(source, 'guides', profile), 'utf8'));
+        if (profile === 'diagram-output-guide.md') {
+          assert.match(outputGuide, /\| Job Flow[^|\n]*\|[^\n]*SVG/);
+          for (const kind of ['Navigation', 'State']) {
+            assert.match(outputGuide, new RegExp(`\\| ${kind} \\|[^\\n]*mermaid`, 'i'));
+          }
+        } else {
+          for (const kind of ['navigation', 'state', 'jobflow']) assert.ok(outputGuide.includes(`\`${kind}\``));
+        }
+        const macroExample = readFileSync(path.join(skills, 'project-guides/examples/diagram/job-flow/macro.md'), 'utf8');
+        assert.match(macroExample, /^```jobflow$/m);
         for (const [kind, input, expected] of [
           ['navigation', 'Catalog --> (/list) : 조회', /N0 -->\|"조회"\| N1/],
           ['state', '<S> --> Ready', /A\(\( \)\)/],

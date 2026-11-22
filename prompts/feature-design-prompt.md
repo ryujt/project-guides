@@ -27,7 +27,7 @@ Navigation·State·Job Flow의 최종 문서 표기는 [설치된 출력 형식]
 - 각 요구사항이 어느 설계와 검증 방법에 반영됐는지 알 수 있게 작성한다. 부분 반영과 보류는 이유를 적는다.
 - 기존 소비자나 저장 데이터에 영향이 있으면 호환성·이행·복구 방법을 포함한다.
 
-다이어그램은 필요한 것만 작성한다. 내부 협력은 [Job Flow](../guides/job-flow-diagram-guide.md), 화면 이동은 [Navigation](../guides/navigation-diagram-guide.md), 상태 변화는 [State](../guides/state-diagram-guide.md), 화면 배치는 [Layout](../guides/screen-layout-guide.md) 문법을 따른다. Job Flow 그림 아래는 [Job Flow 하단 설명](../guides/job-flow-diagram-guide.md#다이어그램-하단-설명) 기준을 따르고, 다른 다이어그램 아래에는 주요 내용을 짧게 설명한다.
+다이어그램은 필요한 것만 작성한다. 업무 주체 간 협력이나 내부 협력은 [Job Flow](../guides/job-flow-diagram-guide.md), 화면 이동은 [Navigation](../guides/navigation-diagram-guide.md), 상태 변화는 [State](../guides/state-diagram-guide.md), 화면 배치는 [Layout](../guides/screen-layout-guide.md) 문법을 따른다. 기능 변경이 시스템과 외부 주체의 협력에 미치는 영향을 매크로뷰로 그릴 때는 [매크로 시나리오 작성과 검토](../guides/method-R.md#33-매크로-시나리오-작성과-검토)를 적용한다. Job Flow 그림 아래는 [Job Flow 하단 설명](../guides/job-flow-diagram-guide.md#다이어그램-하단-설명) 기준을 따르고, 다른 다이어그램 아래에는 주요 내용을 짧게 설명한다.
 
 Markdown 문서·다이어그램의 tools.camp 링크 생성 여부 확인과 전달은 [편집 링크 전달 기준](../guides/diagram-editor-link-guide.md)을 따른다.
 

@@ -14,7 +14,7 @@ Markdown 문서·다이어그램의 tools.camp 링크 생성 여부 확인과 �
 
 객체·서비스 협력은 [Job Flow 가이드](job-flow-diagram-guide.md), 내부 상태 전이는 [State 가이드](state-diagram-guide.md)로 분리한다. 시간 순서나 정적 구성은 필요한 경우 별도 관점으로 보완한다.
 
-Navigation 문서를 작성·수정하기 전에 [작성 샘플](../examples/diagram/navigation/document-template.md)과 [작은 완성 예제](../examples/diagram/navigation/document-sample/navigation.md)의 해당 시나리오를 확인한다. 고정 구성과 화면 확인 링크 형식을 현재 범위에 적용하되, 예제의 과업·화면·API·정책을 복사하지 않는다. 추가 시나리오 예제는 [Navigation 예제 선택 목록](../examples/diagram/navigation/README.md)에서 필요한 절만 고른다. 전체 예제·다른 종류의 문서를 모두 읽지 않으며 [예제 적용 기준](../examples/diagram/README.md#필요한-만큼-읽기)을 따른다.
+Navigation 문서를 작성·수정할 때는 [시나리오별 상세 분석](#시나리오별-상세-분석)으로 실제 과업의 진입·분기·복귀를 확인하고, [문서 구성과 화면 확인 링크](#문서-구성과-화면-확인-링크)에 따라 작성한다. 직접 링크에서 시작하는 경우처럼 표기 예시가 필요하면 [직접 진입](#직접-진입url-접속-표현) 등 해당 절을 참고한다.
 
 ## 범위와 계약
 

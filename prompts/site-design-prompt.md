@@ -27,7 +27,7 @@ Navigation·State·Job Flow의 최종 문서 표기는 [설치된 출력 형식]
 | [Navigation](../guides/navigation-diagram-guide.md) | 전체 화면 이동을 간략히 그리고, 사용자 목적별로 필요한 상세를 추가한다. 이동을 결정하는 API와 판단을 포함한다. |
 | [Layout](../guides/screen-layout-guide.md) | 새로 설계하거나 변경하는 화면의 배치를 그린다. 공통 배치는 재사용하고 화면별 차이를 설명한다. |
 | [State](../guides/state-diagram-guide.md) | 상태 소유자별로 로딩·입력·제출·오류·복구를 표현한다. 상태 변화가 없는 화면은 생략한다. |
-| [Job Flow](../guides/job-flow-diagram-guide.md) | 화면 흐름과 구분해 설명할 내부 협력이 있을 때 작성한다. |
+| [Job Flow](../guides/job-flow-diagram-guide.md) | 사이트와 외부 주체가 함께 수행하는 업무를 그릴 때는 [매크로 시나리오 작성과 검토](../guides/method-R.md#33-매크로-시나리오-작성과-검토)를 따른다. 화면 흐름과 별도로 설명할 내부 협력이 있으면 해당 내부 수준에서 그린다. |
 
 각 다이어그램은 전용 가이드의 문법을 따르고, 바로 아래에 주요 내용을 짧게 설명한다.
 

@@ -6,7 +6,7 @@
 
 - [`guides/`](guides/): 설계 원칙·문서 양식·독자 다이어그램 DSL과 검사 도구(`tools/`). 필요한 주제만 참조한다.
 - [`prompts/`](prompts/): 현재 작업의 목표와 함께 AI에게 전달하는 실행 프롬프트.
-- [`examples/diagram/`](examples/diagram/README.md): 다이어그램 구성·시나리오 예제. Navigation은 작성 샘플과 해당 시나리오를 먼저 확인하고, 나머지는 필요한 종류와 절만 선택한다.
+- [`examples/diagram/`](examples/diagram/README.md)에서 필요한 작성 예제와 시나리오 절을 찾는다.
 - Claude Code·Codex·Gemini CLI 설치와 호출 방법은 저장소 루트의 `install.md`를 참조한다. `bash installer/install.sh`로 모두 설치하거나, `installer/claude.sh`·`installer/codex.sh`·`installer/gemini.sh`로 각각 설치한다. 설치 후 `asis`·`tobe`·`jobflow` 등이 들어간 일반 요청의 작업 의도에 맞춰 스킬을 선택할 수 있다. 설치된 문서 사본에서는 재설치가 필요 없다.
 
 ## 처음 사용할 때
@@ -76,8 +76,8 @@
 
 AS-IS·TO-BE 설계 문서를 쓸 때 함께 보는 자료다. 문서 내용은 각 프롬프트, 고정 폴더 구조·화면별 HTML은 [공통 산출물 배치](guides/system-design-output-guide.md)를 따른다.
 
-- Job Flow: [Method-R](guides/method-R.md)의 깊이에 따라 시나리오별로 작성하고, [Job Flow 가이드](guides/job-flow-diagram-guide.md)의 문법을 따른다. 물건 등의 전달로 상대 객체에게 발생한 사건은 [실물 전달 이벤트](guides/job-flow-diagram-guide.md#실물-전달로-발생하는-이벤트)로 표현하고, 실제 데이터·메시지 수신과 구분한다. 그림 아래에는 [화살표별 설명](guides/job-flow-diagram-guide.md#다이어그램-하단-설명)을 둔다.
-- 화면: [Navigation 가이드](guides/navigation-diagram-guide.md#시나리오별-상세-분석)에 따라 대상 과업의 진입·분기·결과·복귀를 조사·설계하고, 과업별 다이어그램·짧은 흐름 설명·화면 확인 링크로 정리한다. 작성 전 [작성 샘플](examples/diagram/navigation/document-template.md)을 확인하고, 각 시나리오의 `화면 확인 링크` 표에서 페이지별 한 행에 기본 화면과 사용하는 장면의 직접 링크를 모은다. 조사 근거·미확인은 분석서·설계서에 기록한다. [페이지·장면 목록](guides/system-design-output-guide.md#페이지장면-목록)을 원본으로 Navigation·[Layout](guides/screen-layout-guide.md)·HTML을 대응시키고, 페이지마다 HTML 한 파일 안에 해당 장면을 담는다. 파일 통합은 조사·설명 범위를 줄이는 근거가 아니다.
+- Job Flow의 관찰 수준은 [Method-R](guides/method-R.md)에서 선택한다. 시스템 전체와 외부 주체의 협력은 [매크로 시나리오 작성과 검토](guides/method-R.md#33-매크로-시나리오-작성과-검토)에 따라 그린다. [Job Flow 가이드](guides/job-flow-diagram-guide.md)는 문법과 화살표별 설명의 기준이다.
+- 화면: [Navigation 가이드](guides/navigation-diagram-guide.md#시나리오별-상세-분석)에 따라 대상 과업의 진입·분기·결과·복귀를 조사·설계하고, 과업별 다이어그램·짧은 흐름 설명·화면 확인 링크로 정리한다. 각 시나리오의 `화면 확인 링크` 표에서 페이지별 한 행에 기본 화면과 사용하는 장면의 직접 링크를 모은다. 조사 근거·미확인은 분석서·설계서에 기록한다. [페이지·장면 목록](guides/system-design-output-guide.md#페이지장면-목록)을 원본으로 Navigation·[Layout](guides/screen-layout-guide.md)·HTML을 대응시키고, 페이지마다 HTML 한 파일 안에 해당 장면을 담는다. 파일 통합은 조사·설명 범위를 줄이는 근거가 아니다.
 - 책임·계약·검증: [모듈 경계 가이드](guides/module-boundary-guide.md)를 따른다. 더 자세한 문서 양식이 필요하면 [설계 문서 양식](guides/system-design-document-guide.md)을 참고한다.
 - 검사: [`design-doc-check.mjs`](guides/tools/design-doc-check.mjs)로 펜스·jobflow·링크·앵커·Mermaid 라벨을 정적으로 검사한다. 정적 검사와 실제 렌더링·실행 검증은 구분해 기록한다.
 
@@ -96,7 +96,7 @@ Markdown 문서·다이어그램 작성·수정 결과는 [편집 링크 전달 
 
 ### 다이어그램 예제
 
-Navigation 문서를 작성·수정할 때는 [작성 샘플](examples/diagram/navigation/document-template.md)과 [작은 완성 예제](examples/diagram/navigation/document-sample/navigation.md)의 해당 시나리오를 먼저 확인한다. 많은 시나리오를 모은 구조는 [큰 AS-IS 예제 안내](examples/as-is/README.md)를 참고한다. 추가 쇼핑몰 시나리오나 다른 종류는 [예제 인덱스](examples/diagram/README.md)에서 필요한 절만 고른다. Job Flow 별도 예제는 아직 없다. 읽기 범위·전제 확인·적용 기준은 인덱스에서 관리한다. 예제도 스킬과 함께 설치되지만 본문 전체를 기본 맥락에 넣지 않는다.
+공개한 예제와 참고할 절은 [다이어그램 예제 인덱스](examples/diagram/README.md)에서 관리한다. 쇼핑몰 매크로뷰에서는 운영자의 배송 준비, 택배사의 운송장 회신, 고객의 실물 수령과 완료 통지를 한 시나리오에서 따라갈 수 있다.
 
 ## 함께 유지할 설계 원칙
 
