@@ -1,6 +1,6 @@
 # 프론트엔드 사용자·회원 시스템 설계 생성 프롬프트
 
-Navigation·State·Job Flow의 최종 문서 표기는 [설치된 출력 형식](../guides/diagram-output-guide.md)을 따른다. 아래 DSL과 예제는 작성·검토에 사용한다.
+다이어그램을 작성하거나 수정할 때 [예제 폴더](../examples/)의 현재 목차와 문서 제목을 살펴 비슷한 조건을 다룬 절을 먼저 참고한다. 해당 예제가 없으면 전용 가이드와 대상 자료로 진행한다. Navigation·State·Job Flow의 최종 문서 표기는 [설치된 출력 형식](../guides/diagram-output-guide.md)을 따른다.
 
 회원 영역의 화면 흐름과 인증·API·데이터 계약을 설계한다. **UI는 상호작용, 인증 서비스는 신원·세션, 회원 모듈은 프로필·서비스 계정 상태를 소유**한다. 코드 변경은 포함하지 않으며 부분 변경은 [기능 설계 프롬프트](./feature-design-prompt.md)를 따른다.
 

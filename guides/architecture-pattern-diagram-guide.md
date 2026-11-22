@@ -1,5 +1,7 @@
 # Architecture Pattern Diagram Guide
 
+작성 전에 [예제 폴더](../examples/)에서 현재 그림과 조건이 비슷한 절을 찾아 참고한다.
+
 Navigation·State·Job Flow의 최종 문서 표기는 [설치된 출력 형식](diagram-output-guide.md)을 따른다. 아래 DSL과 예제는 작성·검토에 사용한다.
 
 아키텍처 패턴별로 **무엇을 기준으로 시스템을 나누는지** 정리하고, 그 분해 기준을 문서에서 어떤 다이어그램으로 표현할지 안내한다.

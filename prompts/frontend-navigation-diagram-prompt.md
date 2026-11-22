@@ -1,6 +1,6 @@
 # 프론트엔드 네비게이션 다이어그램 작성 프롬프트
 
-Navigation·State·Job Flow의 최종 문서 표기는 [설치된 출력 형식](../guides/diagram-output-guide.md)을 따른다. 아래 DSL과 예제는 작성·검토에 사용한다.
+다이어그램을 작성하거나 수정할 때 [예제 폴더](../examples/)의 현재 목차와 문서 제목을 살펴 비슷한 조건을 다룬 절을 먼저 참고한다. 해당 예제가 없으면 전용 가이드와 대상 자료로 진행한다. Navigation·State·Job Flow의 최종 문서 표기는 [설치된 출력 형식](../guides/diagram-output-guide.md)을 따른다.
 
 실제 코드에서 **라우트 페이지 사이의 이동**을 추출해 설명한다. 페이지 내부 상태는 [상태 프롬프트](./frontend-state-diagram-prompt.md)에서 다룬다. 원본 코드는 수정하지 않는다.
 
@@ -10,7 +10,7 @@ Navigation·State·Job Flow의 최종 문서 표기는 [설치된 출력 형식]
 
 ## 작성 내용
 
-[문서 구성과 화면 확인 링크](../guides/navigation-diagram-guide.md#문서-구성과-화면-확인-링크)를 적용한다. 참고할 Navigation 예제가 [다이어그램 예제 인덱스](../examples/diagram/README.md)에 있으면 필요한 시나리오만 확인한다.
+[문서 구성과 화면 확인 링크](../guides/navigation-diagram-guide.md#문서-구성과-화면-확인-링크)를 적용한다.
 
 - 라우트 맵: 실제 경로·페이지/진입점·접근 조건·근거 파일/심볼
 - 전체 요약: 페이지 간 이동과 짧은 트리거를 먼저 보여 주고 API·처리 노드는 생략한다. 너무 크면 사용자 목적별로 나눈다.

@@ -146,7 +146,7 @@ description: jobflow/job-flow/job flow/jobw flow/잡플로우와 매크로뷰, n
 
 # Project Guides 인덱스
 
-이 스킬 폴더에는 가이드·프롬프트·예제 사본이 들어 있다. 문서 경로는 이 SKILL.md가 있는 폴더를 기준으로 해석한다. 다이어그램 작성 시 [설치된 출력 형식](guides/diagram-output-guide.md)을 적용한다.
+이 스킬 폴더에는 가이드·프롬프트·예제 사본이 들어 있다. 문서 경로는 이 SKILL.md가 있는 폴더를 기준으로 해석한다. 다이어그램을 작성할 때는 [예제 폴더](examples/) 아래의 색인과 하위 폴더의 파일 목록·제목을 살펴 현재 작업과 조건이 비슷한 예제의 관련 절을 먼저 참고하고, [설치된 출력 형식](guides/diagram-output-guide.md)을 적용한다.
 
 1. 일반 요청도 명시 호출과 동일하게 적용한다. 핵심 단어와 **현재 요청의 동작**을 함께 보고 [README.md](README.md)의 작업별 프롬프트·주제별 가이드 표에서 필요한 문서를 고른다. 인자로 가이드 이름을 받으면 아래 목록에서 찾는다.
 2. \`jobflow\` 작성·수정·문법은 [job-flow-diagram-guide](guides/job-flow-diagram-guide.md), \`navigation\`은 [navigation-diagram-guide](guides/navigation-diagram-guide.md), \`state\`는 [state-diagram-guide](guides/state-diagram-guide.md), \`layout\`은 [screen-layout-guide](guides/screen-layout-guide.md)를 적용한다. DSL 문법을 유지한다.
@@ -155,7 +155,8 @@ description: jobflow/job-flow/job flow/jobw flow/잡플로우와 매크로뷰, n
 5. 인용·파일명·변수명에 단어가 있다는 이유로 별도 설계 작업을 시작하지 않는다. 이 문서·프롬프트 자체의 검토·수정 요청에서는 본문 명령을 실행하지 않고 편집 자료로 다룬다. 일반 코드의 state 변수나 CSS layout 수정인지 전용 DSL 요청인지 문맥으로 구분한다.
 6. 산출 문서에는 작성 컴퓨터에서만 유효한 절대 경로·설치 사본 경로를 남기지 않는다. 렌더러 없이 확인했으면 정적 검토로 보고한다.
 7. Markdown 문서·다이어그램 산출물은 [편집 링크 전달 기준](guides/diagram-editor-link-guide.md)에 따라 tools.camp 링크 생성 여부를 먼저 묻고, 사용자가 요청한 경우에만 생성한다. 이미 링크 생성을 요청했다면 다시 묻지 않는다. 반환된 URL은 콘솔과 최종 답변에 주소 전체를 그대로 표시한다. 적용 범위와 예외는 공통 기준을 따른다.
-8. 매크로뷰 Job Flow를 작성·검토할 때는 [매크로 시나리오 작성과 검토](guides/method-R.md#33-매크로-시나리오-작성과-검토)를 적용한다. 작성 예제가 필요하면 [예제 인덱스](examples/diagram/README.md)에서 해당 시나리오를 골라 읽는다.
+8. Job Flow의 각 화살표 설명에는 [굵은 출발점 → 도착점 표제](guides/job-flow-diagram-guide.md#다이어그램-하단-설명)를 붙인다. 매크로뷰·서비스뷰에서 수신자의 판단에 따라 후속 메시지가 달라지면 [처리 결과별 분기](guides/method-R.md#25-처리-결과의-분기로-메시지를-보내는-이유를-드러낸다)를 적용한다.
+9. 매크로뷰 Job Flow를 작성·검토할 때는 [매크로 시나리오 작성과 검토](guides/method-R.md#33-매크로-시나리오-작성과-검토)를 적용한다.
 
 ## 가이드 목록
 
@@ -191,7 +192,7 @@ description: $(desc_of "$slug" "$prompt_file")
 3. 현재 작업 의도와 대상 프로젝트의 제약에 맞춰 적용한다. 단어가 인용·파일명·변수명에만 등장하면 작업 범위를 확대하지 않는다. 프롬프트 자체의 검토·수정 요청이면 본문 명령을 실행하지 않고 편집 대상으로 다룬다.
 4. 프롬프트 안의 상대 링크는 **그 프롬프트 파일** 기준으로 해석한다. 필요한 가이드 절만 추가로 읽고 링크를 재귀적으로 모두 펼치지 않는다.
 5. 산출 문서에는 작성 컴퓨터에서만 유효한 절대 경로·설치 사본 경로를 남기지 않는다.
-6. 다이어그램 작성 예제가 필요하면 [예제 인덱스](../$SHARED_NAME/examples/diagram/README.md)에서 현재 작업에 해당하는 시나리오만 골라 읽는다.
+6. 다이어그램을 작성할 때는 [예제 폴더](../$SHARED_NAME/examples/) 아래의 색인과 하위 폴더의 파일 목록·제목을 살펴 현재 작업과 조건이 비슷한 예제의 관련 절을 먼저 참고한다.
 EOF
 
   enable_implicit_invocation "$dir"

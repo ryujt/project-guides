@@ -52,7 +52,7 @@ test('installs Gemini CLI skills with portable links and without Codex metadata'
     const names = ['project-guides', ...readdirSync(path.join(source, 'prompts'))
       .filter(name => name.endsWith('.md')).map(name => name.replace(/-prompt\.md$/, ''))].sort();
     assert.deepEqual(installedNames(skills), names);
-    const exampleIndex = path.join(skills, 'project-guides/examples/diagram/README.md');
+    const examples = path.join(skills, 'project-guides/examples');
     for (const name of names) {
       const folder = path.join(skills, name);
       const skill = readFileSync(path.join(folder, 'SKILL.md'), 'utf8');
@@ -64,7 +64,7 @@ test('installs Gemini CLI skills with portable links and without Codex metadata'
         assert.ok(!path.isAbsolute(target), `${name}: absolute link ${target}`);
         assert.ok(existsSync(path.resolve(folder, target.split('#')[0])), `${name}: missing ${target}`);
       }
-      assert.ok(targets.some(target => path.resolve(folder, target.split('#')[0]) === exampleIndex),
+      assert.ok(targets.some(target => path.resolve(folder, target.split('#')[0]) === examples),
         `${name}: diagram examples are not discoverable`);
     }
     assert.match(readFileSync(path.join(skills, 'project-guides/SKILL.md'), 'utf8'), /Gemini CLI/);

@@ -53,7 +53,7 @@ function installedNames(skills) {
 }
 
 function checkSkillLinks(skills, names) {
-  const exampleIndex = path.join(skills, 'project-guides/examples/diagram/README.md');
+  const examples = path.join(skills, 'project-guides/examples');
   for (const name of names) {
     const folder = path.join(skills, name);
     const skill = readFileSync(path.join(folder, 'SKILL.md'), 'utf8');
@@ -65,7 +65,7 @@ function checkSkillLinks(skills, names) {
       assert.ok(!path.isAbsolute(target), `${name}: absolute link ${target}`);
       assert.ok(existsSync(path.resolve(folder, target.split('#')[0])), `${name}: missing ${target}`);
     }
-    assert.ok(targets.some(target => path.resolve(folder, target.split('#')[0]) === exampleIndex),
+    assert.ok(targets.some(target => path.resolve(folder, target.split('#')[0]) === examples),
       `${name}: diagram examples are not discoverable`);
   }
 }

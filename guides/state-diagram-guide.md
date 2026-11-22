@@ -1,5 +1,7 @@
 # State Diagram Guide
 
+작성 전에 [예제 폴더](../examples/)에서 현재 그림과 조건이 비슷한 절을 찾아 참고한다.
+
 Navigation·State·Job Flow의 최종 문서 표기는 [설치된 출력 형식](diagram-output-guide.md)을 따른다. 아래 DSL과 예제는 작성·검토에 사용한다.
 
 ## 목적

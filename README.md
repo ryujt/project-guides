@@ -76,7 +76,7 @@
 
 AS-IS·TO-BE 설계 문서를 쓸 때 함께 보는 자료다. 문서 내용은 각 프롬프트, 고정 폴더 구조·화면별 HTML은 [공통 산출물 배치](guides/system-design-output-guide.md)를 따른다.
 
-- Job Flow의 관찰 수준은 [Method-R](guides/method-R.md)에서 선택한다. 시스템 전체와 외부 주체의 협력은 [매크로 시나리오 작성과 검토](guides/method-R.md#33-매크로-시나리오-작성과-검토)에 따라 그린다. [Job Flow 가이드](guides/job-flow-diagram-guide.md)는 문법과 화살표별 설명의 기준이다.
+- Job Flow의 관찰 수준은 [Method-R](guides/method-R.md)에서 선택한다. 시스템 전체와 외부 주체의 협력은 [매크로 시나리오 작성과 검토](guides/method-R.md#33-매크로-시나리오-작성과-검토)를 따른다. 도표를 읽거나 작성할 때는 [수신 객체의 판단과 결과 분기](guides/method-R.md#25-처리-결과의-분기로-메시지를-보내는-이유를-드러낸다)와 [화살표 양 끝을 표시하는 설명](guides/job-flow-diagram-guide.md#다이어그램-하단-설명)을 함께 본다.
 - 화면: [Navigation 가이드](guides/navigation-diagram-guide.md#시나리오별-상세-분석)에 따라 대상 과업의 진입·분기·결과·복귀를 조사·설계하고, 과업별 다이어그램·짧은 흐름 설명·화면 확인 링크로 정리한다. 각 시나리오의 `화면 확인 링크` 표에서 페이지별 한 행에 기본 화면과 사용하는 장면의 직접 링크를 모은다. 조사 근거·미확인은 분석서·설계서에 기록한다. [페이지·장면 목록](guides/system-design-output-guide.md#페이지장면-목록)을 원본으로 Navigation·[Layout](guides/screen-layout-guide.md)·HTML을 대응시키고, 페이지마다 HTML 한 파일 안에 해당 장면을 담는다. 파일 통합은 조사·설명 범위를 줄이는 근거가 아니다.
 - 책임·계약·검증: [모듈 경계 가이드](guides/module-boundary-guide.md)를 따른다. 더 자세한 문서 양식이 필요하면 [설계 문서 양식](guides/system-design-document-guide.md)을 참고한다.
 - 검사: [`design-doc-check.mjs`](guides/tools/design-doc-check.mjs)로 펜스·jobflow·링크·앵커·Mermaid 라벨을 정적으로 검사한다. 정적 검사와 실제 렌더링·실행 검증은 구분해 기록한다.
@@ -96,7 +96,7 @@ Markdown 문서·다이어그램 작성·수정 결과는 [편집 링크 전달 
 
 ### 다이어그램 예제
 
-공개한 예제와 참고할 절은 [다이어그램 예제 인덱스](examples/diagram/README.md)에서 관리한다. 쇼핑몰 매크로뷰에서는 운영자의 배송 준비, 택배사의 운송장 회신, 고객의 실물 수령과 완료 통지를 한 시나리오에서 따라갈 수 있다.
+다이어그램을 작성할 때는 [예제 폴더](examples/)에서 종류·관찰 범위·업무 조건이 비슷한 사례를 골라 해당 절을 먼저 읽는다.
 
 ## 함께 유지할 설계 원칙
 

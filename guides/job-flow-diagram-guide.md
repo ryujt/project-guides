@@ -1,5 +1,7 @@
 # Job Flow Diagram Guide
 
+작성 전에 [예제 폴더](../examples/)에서 현재 그림과 조건이 비슷한 절을 찾아 참고한다.
+
 Navigation·State·Job Flow의 최종 문서 표기는 [설치된 출력 형식](diagram-output-guide.md)을 따른다. 아래 DSL과 예제는 작성·검토에 사용한다.
 
 Job Flow는 시스템을 여러 조각으로 나눴을 때 각 조각(이하 객체) 사이의 관계를 표현한다.
@@ -29,9 +31,10 @@ Gateway.message.QueryRequest --> Provider.message.FetchRequest
 
 ### 다이어그램 하단 설명
 
-- `jobflow` 블록 바로 아래에 화살표 하나당 짧은 문장 하나를 불릿으로 적는다. 블록의 관계 선언 순서를 따라가며, 시작점이나 도착점이 같아도 화살표마다 항목을 따로 둔다.
+- 완성된 도표(SVG 또는 SmartMD) 바로 아래에 원문의 관계 선언 순서대로 불릿을 둔다. 각 항목은 `- **출발 객체 · 도형명 → 도착 객체 · 도형명** — 설명`으로 쓴다. 양 끝의 객체가 같을 때도 두 번 표기한다.
+- 표제에는 그림에서 읽을 수 있는 이름을 쓴다. `On사건`은 **사건**, `message.수신명`은 **수신명**, `처리명.결과`는 **처리명 [결과]**로 적는다. 요청 콜백의 반환도 **사건 [result]**처럼 어느 사건의 값인지 밝힌다. 같은 판단의 각 결과와 같은 결과에서 나가는 여러 화살표는 각각 해당 도착점과 짝짓는다.
 - 메서드에서 결과로 들어가는 연결은 설명 목록에서 제외한다. 결과에서 분기나 후속 동작으로 이어지는 연결은 포함하고, 어떤 결과일 때 무엇이 일어나는지 적는다. `Validator.Check.true --> OrderStore.Save`처럼 반환값을 출발점에 적은 분기도 포함한다.
-- 코드 이름을 그대로 읽어 주기보다 누가 무엇을 하고 다음에 무슨 일이 일어나는지 비전문가도 이해할 말로 쓴다. 조율자가 맡는 호출과 결과 전달은 실제 주체가 드러나게 쓴다.
+- 표제 뒤에는 누가 무엇을 받아 어떤 일을 하는지 짧게 설명한다. 조율자가 연결한 호출이면 호출 주체를 밝힌다. 매크로뷰·서비스뷰에서는 설명과 그림의 [수신 처리 및 결과 분기](method-R.md#25-처리-결과의-분기로-메시지를-보내는-이유를-드러낸다)를 대조한다.
 
 ### 헤더 키워드 — `orchestrator:` vs `scope:`
 
@@ -59,8 +62,8 @@ Object: 검색, 알림
 알림.On발행물공개 --> 알림.구독자통지
 ```
 
-- 발행 서비스가 발행물 공개를 알리면 검색 서비스는 색인을 갱신한다.
-- 같은 이벤트를 받은 알림 서비스는 구독자에게 공개 소식을 보낸다.
+- **검색 · 발행물공개 → 검색 · 색인갱신** — 발행 서비스가 발행물 공개를 알리면 검색 서비스는 색인을 갱신한다.
+- **알림 · 발행물공개 → 알림 · 구독자통지** — 같은 이벤트를 받은 알림 서비스는 구독자에게 공개 소식을 보낸다.
 
 수신처가 여럿이면 확인된 구독마다 흐름을 시작한다. 구독자 사이에 처리 순서가 보장된다면 그 조건을 이벤트 계약에 적는다. 발행만 확인되면 발행 주체·사건명·발행 조건을 해당 흐름의 설명에 남긴다. 직접 주고받는 요청·응답의 표기는 [외부 경계의 요청·응답과 알림](#외부-경계의-요청응답과-알림)을 따른다.
 
@@ -102,9 +105,9 @@ Validator.Check.true --> OrderStore.Save
 Validator.Check.false --> SaveOrder.Reject
 ```
 
-- 주문 저장을 시작하면 저장 담당이 검증 담당에게 주문 확인을 요청한다.
-- 주문이 검증을 통과하면 저장 담당이 주문 보관소에 저장을 요청한다.
-- 주문이 검증을 통과하지 못하면 저장 담당이 요청을 거절한다.
+- **SaveOrder · Run → Validator · Check** — 주문 저장을 시작하면 저장 담당이 검증 담당에게 주문 확인을 요청한다.
+- **Validator · Check [true] → OrderStore · Save** — 주문이 검증을 통과하면 저장 담당이 주문 보관소에 저장을 요청한다.
+- **Validator · Check [false] → SaveOrder · Reject** — 주문이 검증을 통과하지 못하면 저장 담당이 요청을 거절한다.
 
 ## 이벤트가 반환값을 갖는 경우
 
@@ -119,9 +122,9 @@ WorkerB.ProvideHelp --> WorkerA.OnNeedHelp.result
 WorkerA.OnNeedHelp.result --> WorkerA.ContinueProcessing
 ```
 
-- 요청을 받은 조율자가 첫 번째 작업자에게 처리를 맡긴다.
-- 첫 번째 작업자가 도움을 요청하면 조율자가 두 번째 작업자에게 지원을 요청한다.
-- 첫 번째 작업자는 도움 요청의 결과를 받아 작업을 이어 간다.
+- **Orchestrator · ProcessRequest → WorkerA · ProcessRequest** — 요청을 받은 조율자가 첫 번째 작업자에게 처리를 맡긴다.
+- **WorkerA · NeedHelp → WorkerB · ProvideHelp** — 첫 번째 작업자가 도움을 요청하면 조율자가 두 번째 작업자에게 지원을 요청한다.
+- **WorkerA · NeedHelp [result] → WorkerA · ContinueProcessing** — 첫 번째 작업자는 도움 요청의 결과를 받아 작업을 이어 간다.
 
 ## 외부 경계의 요청·응답과 알림
 
@@ -136,10 +139,10 @@ Provider.message.FetchRequest --> Gateway.message.FetchResponse
 Gateway.message.FetchResponse --> Client.message.QueryResponse
 ```
 
-- 조회 요청이 시작되면 요청자가 중계 서비스에 조회를 요청한다.
-- 중계 서비스는 데이터 제공 서비스에 필요한 정보를 요청한다.
-- 데이터 제공 서비스는 중계 서비스에 조회 결과를 보낸다.
-- 중계 서비스는 요청자에게 조회 결과를 보낸다.
+- **Client · Request → Gateway · QueryRequest** — 조회 요청이 시작되면 요청자가 중계 서비스에 조회를 요청한다.
+- **Gateway · QueryRequest → Provider · FetchRequest** — 중계 서비스는 데이터 제공 서비스에 필요한 정보를 요청한다.
+- **Provider · FetchRequest → Gateway · FetchResponse** — 데이터 제공 서비스는 중계 서비스에 조회 결과를 보낸다.
+- **Gateway · FetchResponse → Client · QueryResponse** — 중계 서비스는 요청자에게 조회 결과를 보낸다.
 
 ## 실물 전달로 발생하는 이벤트
 
@@ -158,9 +161,9 @@ Object: 전달자, 검사자, 접수시스템
 접수시스템.message.검사접수요청 --> 검사자.message.검사접수결과
 ```
 
-- 전달자가 시료를 건네면 검사자가 시료를 인수한다.
-- 검사자가 별도로 접수 등록을 시작하면 접수 시스템에 검사 접수를 요청한다.
-- 접수 시스템은 검사자에게 접수 결과를 보낸다.
+- **전달자 · 시료인계 → 검사자 · 시료인수** — 전달자가 시료를 건네면 검사자가 시료를 인수한다.
+- **검사자 · 접수등록 → 접수시스템 · 검사접수요청** — 검사자가 별도로 접수 등록을 시작하면 접수 시스템에 검사 접수를 요청한다.
+- **접수시스템 · 검사접수요청 → 검사자 · 검사접수결과** — 접수 시스템은 검사자에게 접수 결과를 보낸다.
 
 ## 내부 확대
 
@@ -176,11 +179,11 @@ Gateway.message.FetchResponse --> Gateway.buildResponse
 Gateway.buildResponse --> Client.message.QueryResponse
 ```
 
-- 중계 서비스는 조회를 처리하기 위해 데이터 제공 서비스에 요청할 준비를 한다.
-- 중계 서비스는 데이터 제공 서비스에 필요한 정보를 요청한다.
-- 데이터 제공 서비스는 중계 서비스에 조회 결과를 보낸다.
-- 중계 서비스는 받은 결과로 요청자에게 보낼 응답을 만든다.
-- 중계 서비스는 완성한 응답을 요청자에게 보낸다.
+- **Gateway · handleQuery → Gateway · callProvider** — 중계 서비스는 조회를 처리하기 위해 데이터 제공 서비스에 요청할 준비를 한다.
+- **Gateway · callProvider → Provider · FetchRequest** — 중계 서비스는 데이터 제공 서비스에 필요한 정보를 요청한다.
+- **Provider · FetchRequest → Gateway · FetchResponse** — 데이터 제공 서비스는 중계 서비스에 조회 결과를 보낸다.
+- **Gateway · FetchResponse → Gateway · buildResponse** — 중계 서비스는 받은 결과로 요청자에게 보낼 응답을 만든다.
+- **Gateway · buildResponse → Client · QueryResponse** — 중계 서비스는 완성한 응답을 요청자에게 보낸다.
 
 ## 다이어그램 예제
 
@@ -197,14 +200,14 @@ VideoRenderer.OnFrameRequested --> VideoDecoder.GetFrameBitmap
 VideoDecoder.GetFrameBitmap.bitmap --> VideoRenderer.DrawFrame
 ```
 
-- 파일 열기를 시작하면 재생기가 영상 처리기를 준비시킨다.
-- 파일 열기를 시작하면 재생기가 음성 처리기를 준비시킨다.
-- 파일 열기를 시작하면 재생기가 파일 읽기 도구에 파일을 열도록 요청한다.
-- 재생을 시작하면 재생기가 파일 읽기 도구에 읽기를 시작하도록 요청한다.
-- 파일에서 영상 데이터가 들어오면 재생기가 영상 처리기에 해석을 맡긴다.
-- 파일에서 음성 데이터가 들어오면 재생기가 음성 처리기에 해석을 맡긴다.
-- 화면 표시 장치가 다음 장면을 요청하면 재생기가 영상 처리기에 그 장면의 이미지를 요청한다.
-- 이미지가 준비되면 재생기가 화면 표시 장치에 전달해 화면에 그리게 한다.
+- **VideoPlayer · Open → VideoDecoder · Initialize** — 파일 열기를 시작하면 재생기가 영상 처리기를 준비시킨다.
+- **VideoPlayer · Open → AudioDecoder · Initialize** — 파일 열기를 시작하면 재생기가 음성 처리기를 준비시킨다.
+- **VideoPlayer · Open → FileStream · Open** — 파일 열기를 시작하면 재생기가 파일 읽기 도구에 파일을 열도록 요청한다.
+- **VideoPlayer · Play → FileStream · StartReading** — 재생을 시작하면 재생기가 파일 읽기 도구에 읽기를 시작하도록 요청한다.
+- **FileStream · VideoData → VideoDecoder · Decode** — 파일에서 영상 데이터가 들어오면 재생기가 영상 처리기에 해석을 맡긴다.
+- **FileStream · AudioData → AudioDecoder · Decode** — 파일에서 음성 데이터가 들어오면 재생기가 음성 처리기에 해석을 맡긴다.
+- **VideoRenderer · FrameRequested → VideoDecoder · GetFrameBitmap** — 화면 표시 장치가 다음 장면을 요청하면 재생기가 영상 처리기에 그 장면의 이미지를 요청한다.
+- **VideoDecoder · GetFrameBitmap [bitmap] → VideoRenderer · DrawFrame** — 이미지가 준비되면 재생기가 화면 표시 장치에 전달해 화면에 그리게 한다.
 
 이벤트로만 시작하는 그림에서도 조율자는 도형 없이 구독과 호출을 맡으며, 받은 이벤트를 그대로 넘기기만 하는 조율자 메서드를 따로 그리지 않는다.
 

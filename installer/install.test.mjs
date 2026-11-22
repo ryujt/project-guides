@@ -79,14 +79,22 @@ test('installs and updates every tool, registers one Claude hook, and removes on
       const index = readFileSync(path.join(skills, 'project-guides/SKILL.md'), 'utf8');
       assert.match(index, /Mermaid/);
       assert.match(index, /jobw flow/);
-      const macroRule = 'guides/method-R.md#33-매크로-시나리오-작성과-검토';
-      assert.ok(index.includes(`(${macroRule})`), 'shared skill must link to the macro workflow');
-      for (const name of ['system-design-as-is', 'system-design-to-be', 'jobflow-walkthrough']) {
+      const jobflowRules = [
+        'guides/method-R.md#33-매크로-시나리오-작성과-검토',
+        'guides/method-R.md#25-처리-결과의-분기로-메시지를-보내는-이유를-드러낸다',
+        'guides/job-flow-diagram-guide.md#다이어그램-하단-설명',
+      ];
+      for (const rule of jobflowRules) {
+        assert.ok(index.includes(`(${rule})`), `shared skill: missing ${rule}`);
+      }
+      for (const name of ['system-design-as-is', 'system-design-to-be', 'jobflow-walkthrough', 'feature-design']) {
         const prompt = `prompts/${name}-prompt.md`;
         const skillText = readFileSync(path.join(skills, name, 'SKILL.md'), 'utf8');
         const promptText = readFileSync(path.join(skills, 'project-guides', prompt), 'utf8');
         assert.ok(skillText.includes(`(../project-guides/${prompt})`), `${name}: missing prompt link`);
-        assert.ok(promptText.includes(`(../${macroRule})`), `${prompt}: missing macro workflow`);
+        for (const rule of jobflowRules) {
+          assert.ok(promptText.includes(`(../${rule})`), `${prompt}: missing ${rule}`);
+        }
       }
       assert.match(index, /\[편집 링크 전달 기준\]\(guides\/diagram-editor-link-guide\.md\)/);
       for (const name of ['guides/diagram-editor-link-guide.md', 'guides/tools/create-editor-link.py']) {
@@ -118,7 +126,8 @@ test('installs and updates every tool, registers one Claude hook, and removes on
     const example = 'examples/diagram/job-flow/macro.md';
     appendFileSync(path.join(source, example), '\nUpdated example content.\n');
     rmSync(path.join(source, retiredExample));
-    const addedExample = 'examples/diagram/added-example.md';
+    const addedExample = 'examples/new-scenarios/added-example.md';
+    mkdirSync(path.dirname(path.join(source, addedExample)), { recursive: true });
     writeFileSync(path.join(source, addedExample), '# Added example\n');
     succeeded(run(['--install']));
     for (const skills of [claudeSkills, codexSkills, geminiSkills]) {
@@ -162,7 +171,7 @@ test('keeps example discovery and scenario links usable after source removal and
       const moved = path.join(temporary, `relocated skills ${number}`);
       renameSync(skills, moved);
       const shared = path.join(moved, 'project-guides');
-      const exampleIndex = path.join(shared, 'examples/diagram/README.md');
+      const examples = path.join(shared, 'examples');
       for (const name of installedNames(moved)) {
         const folder = path.join(moved, name);
         const skill = readFileSync(path.join(folder, 'SKILL.md'), 'utf8');
@@ -172,8 +181,8 @@ test('keeps example discovery and scenario links usable after source removal and
           assert.ok(!path.isAbsolute(target), `${name}: absolute link ${target}`);
           assert.ok(existsSync(path.resolve(folder, target.split('#')[0])), `${name}: missing ${target}`);
         }
-        assert.ok(targets.some(target => path.resolve(folder, target.split('#')[0]) === exampleIndex),
-          `${name}: diagram examples are not discoverable`);
+        assert.ok(targets.some(target => path.resolve(folder, target) === examples),
+          `${name}: installed examples are not discoverable`);
       }
       const checked = spawnSync(process.execPath, [
         path.join(shared, 'guides/tools/design-doc-check.mjs'), '--strict',
