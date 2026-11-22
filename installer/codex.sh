@@ -14,7 +14,7 @@
 
 set -eu
 
-[ "$#" -le 1 ] || { echo "사용법: codex.sh [--install|--uninstall]" >&2; exit 1; }
+[ "$#" -le 1 ] || { echo "사용법: codex.sh [--install|--smartmd|--uninstall]" >&2; exit 1; }
 INSTALLER_DIR="$(CDPATH= cd "$(dirname "$0")" && pwd)"
 SKILLS_DIR="${CODEX_SKILLS_DIR:-$HOME/.agents/skills}"
 sh "$INSTALLER_DIR/agent-skills.sh" codex "$SKILLS_DIR" "$@"

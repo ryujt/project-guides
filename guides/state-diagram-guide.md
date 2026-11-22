@@ -1,5 +1,7 @@
 # State Diagram Guide
 
+Navigation·State·Job Flow의 최종 문서 표기는 [설치된 출력 형식](diagram-output-guide.md)을 따른다. 아래 DSL과 예제는 작성·검토에 사용한다.
+
 ## 목적
 
 객체의 상태 변화와 흐름을 스크립트로 작성한다. 이 문서는 `state`의 작성 문법과 의미를 정의하며, 스크립트는 내부적으로 **Mermaid `graph LR`**로 변환된다.

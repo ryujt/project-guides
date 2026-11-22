@@ -1,5 +1,7 @@
 # Architecture Pattern Diagram Guide
 
+Navigation·State·Job Flow의 최종 문서 표기는 [설치된 출력 형식](diagram-output-guide.md)을 따른다. 아래 DSL과 예제는 작성·검토에 사용한다.
+
 아키텍처 패턴별로 **무엇을 기준으로 시스템을 나누는지** 정리하고, 그 분해 기준을 문서에서 어떤 다이어그램으로 표현할지 안내한다.
 
 Markdown 문서·다이어그램의 tools.camp 링크 생성 여부 확인과 전달은 [편집 링크 전달 기준](diagram-editor-link-guide.md)을 따른다.

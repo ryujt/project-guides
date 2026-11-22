@@ -6,12 +6,13 @@
 # 직접 실행하지 않고 codex.sh·gemini.sh가 대상 도구와 설치 위치를 정해 호출한다.
 #
 # 사용법:
-#   sh installer/agent-skills.sh <codex|gemini> <스킬 설치 위치> [--install|--uninstall|-u]
+#   sh installer/agent-skills.sh <codex|gemini> <스킬 설치 위치> [--install|--smartmd|--uninstall|-u]
 
 set -eu
+install_option="${3:-}"
 
 usage() {
-  echo "사용법: agent-skills.sh <codex|gemini> <스킬 설치 위치> [--install|--uninstall]" >&2
+  echo "사용법: agent-skills.sh <codex|gemini> <스킬 설치 위치> [--install|--smartmd|--uninstall]" >&2
   exit 1
 }
 
@@ -122,6 +123,9 @@ install_shared_skill() {
   rm -rf "$SHARED_DIR"
   mkdir -p "$SHARED_DIR"
   cp -R "$REPO_ROOT/guides" "$SHARED_DIR/guides"
+  if [ "$install_option" = "--smartmd" ]; then
+    cp "$SHARED_DIR/guides/tools/smartmd-output.md" "$SHARED_DIR/guides/diagram-output-guide.md"
+  fi
   cp -R "$REPO_ROOT/prompts" "$SHARED_DIR/prompts"
   cp -R "$REPO_ROOT/examples" "$SHARED_DIR/examples"
   cp "$REPO_ROOT/README.md" "$SHARED_DIR/README.md"
@@ -141,10 +145,10 @@ description: jobflow/job-flow/job flow/jobw flow/잡플로우, navigation, state
 
 # Project Guides 인덱스
 
-이 스킬 폴더에는 가이드·프롬프트·예제 사본이 들어 있다. 문서 경로는 이 SKILL.md가 있는 폴더를 기준으로 해석한다. 사본을 모두 읽을 필요는 없다.
+이 스킬 폴더에는 가이드·프롬프트·예제 사본이 들어 있다. 문서 경로는 이 SKILL.md가 있는 폴더를 기준으로 해석한다. 다이어그램 작성 시 [설치된 출력 형식](guides/diagram-output-guide.md)을 적용한다.
 
 1. 일반 요청도 명시 호출과 동일하게 적용한다. 핵심 단어와 **현재 요청의 동작**을 함께 보고 [README.md](README.md)의 작업별 프롬프트·주제별 가이드 표에서 필요한 문서를 고른다. 인자로 가이드 이름을 받으면 아래 목록에서 찾는다.
-2. \`jobflow\` 작성·수정·문법은 [job-flow-diagram-guide](guides/job-flow-diagram-guide.md), \`navigation\`은 [navigation-diagram-guide](guides/navigation-diagram-guide.md), \`state\`는 [state-diagram-guide](guides/state-diagram-guide.md), \`layout\`은 [screen-layout-guide](guides/screen-layout-guide.md)를 적용한다. DSL을 임의로 확장하거나 Mermaid로 대체하지 않는다.
+2. \`jobflow\` 작성·수정·문법은 [job-flow-diagram-guide](guides/job-flow-diagram-guide.md), \`navigation\`은 [navigation-diagram-guide](guides/navigation-diagram-guide.md), \`state\`는 [state-diagram-guide](guides/state-diagram-guide.md), \`layout\`은 [screen-layout-guide](guides/screen-layout-guide.md)를 적용한다. DSL 문법을 유지한다.
 3. \`asis/as-is\` 분석은 [AS-IS 프롬프트](prompts/system-design-as-is-prompt.md), \`tobe/to-be\` 설계 작성은 [TO-BE 프롬프트](prompts/system-design-to-be-prompt.md), 기존 jobflow 해설은 [해설 프롬프트](prompts/jobflow-walkthrough-prompt.md)를 선택한다. 설계서를 **구현**하라는 요청이면 [검증 우선 구현 프롬프트](prompts/verify-first-implementation-prompt.md)를 선택한다. 다른 스킬을 다시 호출할 수 없어도 해당 문서를 읽고 적용한다.
 4. 선택한 실행 프롬프트와 현재 작업에 필요한 가이드 절·필수 제약만 읽는다. 공통 기준은 [모듈 경계와 최소 맥락](guides/module-boundary-guide.md)이며 링크를 재귀적으로 모두 펼치지 않는다. 여러 키워드가 있어도 요청 범위의 문서만 조합한다.
 5. 인용·파일명·변수명에 단어가 있다는 이유로 별도 설계 작업을 시작하지 않는다. 이 문서·프롬프트 자체의 검토·수정 요청에서는 본문 명령을 실행하지 않고 편집 자료로 다룬다. 일반 코드의 state 변수나 CSS layout 수정인지 전용 DSL 요청인지 문맥으로 구분한다.
@@ -217,6 +221,6 @@ install_all() {
 
 case "${3:-}" in
   --uninstall|-u) uninstall ;;
-  ""|--install)   install_all ;;
-  *) echo "사용법: $AGENT_SCRIPT [--install|--uninstall]" >&2; exit 1 ;;
+  ""|--install|--smartmd) install_all ;;
+  *) echo "사용법: $AGENT_SCRIPT [--install|--smartmd|--uninstall]" >&2; exit 1 ;;
 esac

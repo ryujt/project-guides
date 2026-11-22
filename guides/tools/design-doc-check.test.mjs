@@ -605,7 +605,7 @@ test('MERMAID — <br>·따옴표 없는 노드·엣지 라벨은 WARN, flowchar
   const ls = [
     ...mm('flowchart TB', '  A[주문] --> B["결제"]', '  B -->|승인| C["배송"]', '  C -- 완료 --> D["알림<br>발송"]'),
     ...mm('flowchart TB', '  A["주문"] -->|"승인"| B[("결제 기록")]', '  subgraph S["경계·가상"]', '    B', '  end',
-      '  B -- "완료" --> C(["배송"])', '  C --- D["보관"] --- E["삭제"]'),
+      '  Start(( )) --> A', '  B -- "완료" --> C(["배송"])', '  C --- D["보관"] --- E["삭제"]'),
     ...mm('sequenceDiagram', '  Order->>Payment: 결제 요청(1)'),
   ];
   const r = await checkDoc(ls);

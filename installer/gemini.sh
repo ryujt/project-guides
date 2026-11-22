@@ -20,13 +20,13 @@
 set -eu
 
 usage() {
-  echo "사용법: gemini.sh [--install|--uninstall]" >&2
+  echo "사용법: gemini.sh [--install|--smartmd|--uninstall]" >&2
   exit 1
 }
 
 [ "$#" -le 1 ] || usage
 case "${1:-}" in
-  ""|--install|--uninstall|-u) ;;
+  ""|--install|--smartmd|--uninstall|-u) ;;
   *) usage ;;
 esac
 

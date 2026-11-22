@@ -1,5 +1,7 @@
 # Navigation Diagram Guide
 
+Navigation·State·Job Flow의 최종 문서 표기는 [설치된 출력 형식](diagram-output-guide.md)을 따른다. 아래 DSL과 예제는 작성·검토에 사용한다.
+
 ## 목적
 
 **사용자가 어느 화면에서 어느 화면으로, 무엇 때문에 이동하는가**를 스크립트로 표현해 이용 시나리오를 설계·분석한다. 이 문서는 `navigation`의 작성 문법과 의미를 정의한다.

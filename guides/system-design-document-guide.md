@@ -1,5 +1,7 @@
 # 시스템 설계 문서 양식 — AS-IS·TO-BE 공통
 
+Navigation·State·Job Flow의 최종 문서 표기는 [설치된 출력 형식](diagram-output-guide.md)을 따른다. 아래 DSL과 예제는 작성·검토에 사용한다.
+
 시스템 수준 AS-IS·TO-BE 문서에 더 자세한 **절 번호·제목·표 열·그림 규칙·ID·검증**이 필요할 때 선택해 참고하는 양식이다. 문서 내용·파일 분리는 [AS-IS 프롬프트](../prompts/system-design-as-is-prompt.md)와 [TO-BE 프롬프트](../prompts/system-design-to-be-prompt.md), 고정 구조·화면별 HTML은 [공통 산출물 배치 가이드](system-design-output-guide.md)를 우선한다. 이 양식의 상세 파일 예시·필수 목록이 두 프롬프트의 생성·분할 범위를 확대하거나 대체하지 않는다.
 
 Markdown 문서·다이어그램의 tools.camp 링크 생성 여부 확인과 전달은 [편집 링크 전달 기준](diagram-editor-link-guide.md)을 따른다.
@@ -110,7 +112,7 @@ docs/design/{DATE}/
 | `details/layout/<screen>.md` | 화면 목적·진입/접근 조건·주소 또는 식별자, `layout` 블록과 영역 트리·배치 순서 설명, 영역별 역할·입력·출력·상호작용과 계약 링크, 적용되는 로딩·빈값·오류·권한 상태의 표시·배치 차이, 반응형 차이가 있으면 폭별 블록과 적용 조건, 근거·제안·미확인 범위 |
 
 - Job Flow 이외의 각 문서는 기준 날짜·범위·AS-IS 근거 또는 TO-BE 제안 상태, 핵심 문서의 해당 절 링크를 남긴다. 두 구성 설명서는 서로와 관련 경계 상세를 연결한다. Navigation은 생성된 Job Flow와 필요한 구성·경계 상세를, 화면별 Layout은 핵심 §7·관련 Navigation·사용하는 계약을 링크하고 Navigation도 등장 화면의 Layout을 링크한다. Job Flow의 기준·계약·근거는 소유 문서에서 연결하며 Job Flow 파일에 역방향 링크 목록을 붙이지 않는다. 해당하지 않는 동작이나 확인하지 못한 근거는 이유와 함께 구분한다.
-- Job Flow는 서비스·객체 협력, Navigation은 사용자가 보는 화면 이동과 그 판단, Screen Layout은 화면 안의 영역 배치·포함 관계를 설명한다. 각각 [Job Flow 가이드](job-flow-diagram-guide.md)·[Navigation 가이드](navigation-diagram-guide.md)·[Layout 가이드](screen-layout-guide.md)를 문법·의미의 원본으로 삼고 Mermaid로 바꾸거나 임의 문법을 추가하지 않는다.
+- Job Flow는 서비스·객체 협력, Navigation은 사용자가 보는 화면 이동과 그 판단, Screen Layout은 화면 안의 영역 배치·포함 관계를 설명한다. 각각 [Job Flow 가이드](job-flow-diagram-guide.md)·[Navigation 가이드](navigation-diagram-guide.md)·[Layout 가이드](screen-layout-guide.md)를 문법·의미의 원본으로 삼는다.
 - **화면 전수 식별**: 대표 시나리오에 등장한 화면만으로 범위를 정하지 않는다. AS-IS는 대상 라우트·화면 등록·진입점과 사용자 과업을, TO-BE는 요구·화면 계획과 유지 화면을 대조해 범위 안의 모든 화면을 찾는다. 주소 없는 앱 화면과 사용자 과업의 주요 오버레이·Dialog도 독립된 화면 식별자로 포함한다. 화면 내부 영역·컴포넌트는 해당 화면 파일 안에서 상세히 설명하며 모든 컴포넌트에 별도 파일을 강제하지 않는다.
 - Screen Layout은 정상 화면의 블록만 두고 끝내지 않는다. 각 영역이 무엇을 표시하고 어떤 입력·동작을 받아 어떤 결과를 내는지, 적용되는 상태에서 무엇이 바뀌는지 설명한다. 상태 전이 자체는 소유 경계의 `state`·계약 원본을 링크한다. 반응형 조건은 본문에 쓰고, 필요한 화면 폭별로 `layout` 블록을 나누며 새 DSL 연산자를 만들지 않는다.
 - UI나 화면 이동이 없는 시나리오도 Navigation 파일은 생성한다. 진입 조건·완료 결과, `해당 없음 — <UI 또는 이동이 없는 이유>`와 생성한 경우에만 대응 Job Flow 링크를 적고 가짜 화면이나 이동 화살표를 만들지 않는다.

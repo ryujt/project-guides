@@ -1,5 +1,7 @@
 # 프론트엔드 네비게이션 다이어그램 작성 프롬프트
 
+Navigation·State·Job Flow의 최종 문서 표기는 [설치된 출력 형식](../guides/diagram-output-guide.md)을 따른다. 아래 DSL과 예제는 작성·검토에 사용한다.
+
 실제 코드에서 **라우트 페이지 사이의 이동**을 추출해 설명한다. 페이지 내부 상태는 [상태 프롬프트](./frontend-state-diagram-prompt.md)에서 다룬다. 원본 코드는 수정하지 않는다.
 
 ## 파일 저장 위치

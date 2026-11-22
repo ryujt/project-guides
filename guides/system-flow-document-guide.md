@@ -1,5 +1,7 @@
 # System Flow Document Guide
 
+Navigation·State·Job Flow의 최종 문서 표기는 [설치된 출력 형식](diagram-output-guide.md)을 따른다. 아래 DSL과 예제는 작성·검토에 사용한다.
+
 ## 목적
 
 **시스템을 이해하는 최소 조각**에서 시작해 동적 흐름과 정적 구성을 함께 설명한다. 프론트엔드·백엔드·워커·외부 시스템·저장소·배치가 섞인 시스템에도 적용하며, 다음 중 필요한 가이드만 읽는다.
@@ -424,7 +426,7 @@ Gateway가 반드시 orchestrator인 것은 아니다. 업무 상태의 변경 �
 | 독립 서비스 간 API/queue/topic 메시지 흐름 | 경계 계약 표와 `jobflow`; 시간 순서는 Mermaid `sequenceDiagram`으로 보완 |
 | 상태 전이 | `state`; 필요한 별도 상태 관점은 Mermaid `stateDiagram-v2`로 보완 |
 
-선택한 독자 DSL을 원본으로 유지한다. Mermaid는 정적 구성·시간 순서 같은 추가 관점을 보완하며 기존 jobflow/state를 대체하지 않는다.
+선택한 DSL로 업무 흐름과 상태 전이를 작성하고 [설치된 출력 형식](diagram-output-guide.md)에 따라 문서에 넣는다. 정적 구성·시간 순서는 별도의 Mermaid 그림으로 보완할 수 있다.
 
 ### jobflow 규칙
 

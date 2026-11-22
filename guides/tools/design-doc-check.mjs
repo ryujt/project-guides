@@ -740,6 +740,7 @@ function flowLabelProblems(line) {
       let k = j;
       while (k < n && line[k] === ' ') k += 1;
       if (line[k] === '"') { i = k; continue; }
+      if (line.slice(i, j) === '((' && line.startsWith('))', k)) { i = k + 2; continue; }
       let e = k;
       while (e < n && line[e] !== CLOSER[c]) e = line[e] === '"' ? skipQuoted(line, e) : e + 1;
       while (e + 1 < n && ')]}'.includes(line[e + 1])) e += 1; // (( ))·([ ]) 같은 겹 닫힘까지 보인다

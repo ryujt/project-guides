@@ -1,5 +1,7 @@
 # 설치 및 사용 방법
 
+기본 설치는 Navigation·State를 Mermaid 코드 블록으로, Job Flow를 상대 경로로 삽입한 SVG 이미지로 작성하도록 설정한다. 기존 SmartMD 코드 블록을 사용하려면 `bash installer/install.sh --smartmd`로 설치한다. 같은 명령에서 옵션을 바꿔 재설치하면 이후 작성할 문서에 적용된다. [다이어그램 출력 가이드](guides/diagram-output-guide.md)
+
 이 저장소의 `guides/`·`prompts/` 문서와 `examples/` 예제를 개인 스킬과 함께 설치한다. `installer/install.sh`는 Claude Code·Codex·Gemini CLI를 한 번에 설치한다. 각각 설치하려면 `installer/claude.sh`·`installer/codex.sh`·`installer/gemini.sh`를 사용한다. 기본 설치 경로는 Claude Code가 `~/.claude/skills`, Codex가 `~/.agents/skills`, Gemini CLI가 `~/.gemini/skills`다. Codex·Gemini CLI용 스킬은 공통 생성기 `installer/agent-skills.sh`가 같은 내용으로 만든다.
 
 ## 1. 설치

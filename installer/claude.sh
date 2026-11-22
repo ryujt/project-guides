@@ -23,6 +23,7 @@
 # 설정에 추가할 JSON 조각을 출력한다.
 
 set -eu
+install_option="${1:-}"
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 SKILLS_DIR="${CLAUDE_SKILLS_DIR:-$HOME/.claude/skills}"
@@ -303,6 +304,9 @@ install_shared_skill() {
   rm -rf "${SHARED_DIR:?}"
   mkdir -p "$SHARED_DIR"
   cp -R "$REPO_ROOT/guides" "$SHARED_DIR/guides"
+  if [ "$install_option" = "--smartmd" ]; then
+    cp "$SHARED_DIR/guides/tools/smartmd-output.md" "$SHARED_DIR/guides/diagram-output-guide.md"
+  fi
   cp -R "$REPO_ROOT/prompts" "$SHARED_DIR/prompts"
   cp -R "$REPO_ROOT/examples" "$SHARED_DIR/examples"
   cp "$REPO_ROOT/README.md" "$SHARED_DIR/README.md"
@@ -327,7 +331,7 @@ description: 프로젝트 설계·문서화·구현 가이드 인덱스. 설계 
 
 # Project Guides 인덱스
 
-이 스킬 폴더에는 가이드·프롬프트·예제 사본이 들어 있다. 문서 경로는 이 SKILL.md가 있는 폴더를 기준으로 해석한다. 사본을 모두 읽을 필요는 없다.
+이 스킬 폴더에는 가이드·프롬프트·예제 사본이 들어 있다. 문서 경로는 이 SKILL.md가 있는 폴더를 기준으로 해석한다. 다이어그램 작성 시 [설치된 출력 형식](guides/diagram-output-guide.md)을 적용한다.
 
 1. 먼저 이 폴더의 \`README.md\` 를 읽는다. "어떤 상황에 어떤 문서를 참조하는가"의 트리거 표와 워크플로별 문서 묶음이 정리되어 있다.
 2. 이 스킬 호출 시 인자로 가이드 이름(예: \`state-diagram\`, \`prd\`, \`method-R\`)이 전달되면, 아래 목록에서 이름이 가장 잘 일치하는 가이드 파일을 찾아 현재 작업에 필요한 절과 필수 제약을 읽고 적용한다.
@@ -508,6 +512,6 @@ install_all() {
 
 case "${1:-}" in
   --uninstall|-u) uninstall ;;
-  ""|--install)   install_all ;;
-  *) echo "사용법: claude.sh [--uninstall]" >&2; exit 1 ;;
+  ""|--install|--smartmd) install_all ;;
+  *) echo "사용법: claude.sh [--install|--smartmd|--uninstall|-u]" >&2; exit 1 ;;
 esac

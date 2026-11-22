@@ -212,3 +212,30 @@ test('propagates child failures and stops before the next installer', () => {
     assert.equal(readFileSync(log, 'utf8'), 'claude\ncodex\ngemini\n');
   }, true);
 });
+
+test('switches the installed output guide on all three tools across reinstalls', () => {
+  withInstallation(({ source, claudeSkills, codexSkills, geminiSkills, run }) => {
+    for (const [args, profile] of [
+      [[], 'diagram-output-guide.md'],
+      [['--smartmd'], 'tools/smartmd-output.md'],
+      [['--install'], 'diagram-output-guide.md'],
+    ]) {
+      succeeded(run(args));
+      for (const skills of [claudeSkills, codexSkills, geminiSkills]) {
+        const guides = path.join(skills, 'project-guides/guides');
+        assert.equal(readFileSync(path.join(guides, 'diagram-output-guide.md'), 'utf8'),
+          readFileSync(path.join(source, 'guides', profile), 'utf8'));
+        for (const [kind, input, expected] of [
+          ['navigation', 'Catalog --> (/list) : 조회', /N0 -->\|"조회"\| N1/],
+          ['state', '<S> --> Ready', /A\(\( \)\)/],
+          ['jobflow', 'Object: Reader, Index\nReader.Open --> Index.Find', /<metadata>[^<]*Reader.Open --&gt; Index.Find<\/metadata>/],
+        ]) {
+          const result = spawnSync(process.execPath, [path.join(guides, 'tools/render-diagram.mjs'), kind],
+            { input, encoding: 'utf8' });
+          succeeded(result);
+          assert.match(result.stdout, expected);
+        }
+      }
+    }
+  });
+});

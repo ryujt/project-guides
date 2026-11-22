@@ -1,12 +1,12 @@
 #!/bin/sh
 # Claude Code·Codex·Gemini CLI 스킬 통합 설치 프로그램.
-# 사용법: bash installer/install.sh [--install|--uninstall|-u]
+# 사용법: bash installer/install.sh [--install|--smartmd|--uninstall|-u]
 # 설치 위치와 Claude 설정은 각 설치 프로그램의 환경변수를 그대로 사용한다.
 
 set -eu
 
 usage() {
-  echo '사용법: install.sh [--install|--uninstall|-u]' >&2
+  echo '사용법: install.sh [--install|--smartmd|--uninstall|-u]' >&2
   exit 1
 }
 
@@ -15,7 +15,7 @@ if [ "$#" -eq 0 ]; then
   set -- --install
 fi
 case "$1" in
-  --install) action=--install; operation='설치·업데이트' ;;
+  --install|--smartmd) action="$1"; operation='설치·업데이트' ;;
   --uninstall|-u) action=--uninstall; operation='제거' ;;
   *) usage ;;
 esac

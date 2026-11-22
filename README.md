@@ -1,5 +1,7 @@
 # Project Guides
 
+기본 설치는 Navigation·State를 Mermaid 코드 블록으로, Job Flow를 상대 경로로 삽입한 SVG 이미지로 작성하도록 설정한다. 기존 SmartMD 코드 블록을 사용하려면 `bash installer/install.sh --smartmd`로 설치한다. 같은 명령에서 옵션을 바꿔 재설치하면 이후 작성할 문서에 적용된다. [다이어그램 출력 가이드](guides/diagram-output-guide.md)
+
 프로젝트를 설계·구현할 때 AI에게 전달하는 프롬프트와 개발 가이드 모음이다. **각 조각이 상대의 구현을 몰라도 공개 계약으로 협력하고, 한 작업에 필요한 맥락을 작게 유지하는 것**을 목표로 한다.
 
 - [`guides/`](guides/): 설계 원칙·문서 양식·독자 다이어그램 DSL과 검사 도구(`tools/`). 필요한 주제만 참조한다.

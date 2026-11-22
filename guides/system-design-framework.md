@@ -1,5 +1,7 @@
 # System Design Framework
 
+Navigation·State·Job Flow의 최종 문서 표기는 [설치된 출력 형식](diagram-output-guide.md)을 따른다. 아래 DSL과 예제는 작성·검토에 사용한다.
+
 요구사항을 **책임 경계, 계약, 흐름, 검증 가능한 설계**로 바꾸는 프레임워크다. 문서의 개수보다 기능 하나를 구현하거나 바꿀 때 필요한 맥락이 명확한지를 확인한다. 경계와 계약의 공통 기준은 [모듈 경계 가이드](./module-boundary-guide.md), 확대할 깊이는 [Method-R](./method-R.md)을 따른다.
 
 ## 적용 방법과 산출물 선택

@@ -1,5 +1,7 @@
 # AS-IS·TO-BE 공통 산출물 배치 가이드
 
+Navigation·State·Job Flow의 최종 문서 표기는 [설치된 출력 형식](diagram-output-guide.md)을 따른다. 아래 DSL과 예제는 작성·검토에 사용한다.
+
 AS-IS·TO-BE 설계 문서의 저장 위치·고정 폴더 구조·화면별 HTML·누락 검증을 정의한다. 문서 내용과 Job Flow 파일의 작성 기준은 [AS-IS 프롬프트](../prompts/system-design-as-is-prompt.md)·[TO-BE 프롬프트](../prompts/system-design-to-be-prompt.md)를 따른다.
 
 ## 저장 위치와 고정 구조

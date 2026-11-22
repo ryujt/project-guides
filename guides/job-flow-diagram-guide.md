@@ -1,5 +1,7 @@
 # Job Flow Diagram Guide
 
+Navigation·State·Job Flow의 최종 문서 표기는 [설치된 출력 형식](diagram-output-guide.md)을 따른다. 아래 DSL과 예제는 작성·검토에 사용한다.
+
 Job Flow는 시스템을 여러 조각으로 나눴을 때 각 조각(이하 객체) 사이의 관계를 표현한다.
 각 객체가 가능한 한 다른 객체의 존재를 모르고 자신의 책임에 집중하도록 그리는 것이 원칙이다.
 이 원칙을 적용하는 데 [Orchestrator-Worker 패턴](orchestrator-worker-pattern-guide.md)이 자주 사용된다.

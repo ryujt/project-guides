@@ -1,5 +1,7 @@
 # 프론트엔드 상태 다이어그램 작성 프롬프트
 
+Navigation·State·Job Flow의 최종 문서 표기는 [설치된 출력 형식](../guides/diagram-output-guide.md)을 따른다. 아래 DSL과 예제는 작성·검토에 사용한다.
+
 화면 이동 없이 벌어지는 상태 변화를 **상태 소유자별로** 문서화한다. 독립된 수명주기를 구분하고 원본 코드는 수정하지 않는다. 화면 간 이동은 [Navigation 프롬프트](./frontend-navigation-diagram-prompt.md)에서 다룬다.
 
 ## 파일 저장 위치

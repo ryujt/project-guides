@@ -7,6 +7,7 @@ description: 이 저장소의 가이드·프롬프트를 Claude Code 개인 스�
 
 1. 저장소 루트에서 다음을 실행한다.
    - 인자가 `uninstall` 인 경우: `bash installer/claude.sh --uninstall`
+   - 인자가 `--smartmd`인 경우: `bash installer/claude.sh --smartmd`
    - 그 외(인자 없음 포함): `bash installer/claude.sh`
    - 이 명령은 Claude Code용이다. Claude Code·Codex·Gemini CLI 통합 설치·업데이트는 `bash installer/install.sh`, 통합 제거는 `bash installer/install.sh --uninstall`로 안내한다.
 2. 스크립트 출력에 나온 설치(또는 제거)된 스킬 목록과 훅 등록·해제 결과를 사용자에게 요약해 보여준다. `node`·`python3`가 없어 설정 파일을 고치지 못했다는 경고가 나오면 출력된 JSON 조각을 그대로 전달한다.
