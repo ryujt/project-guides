@@ -75,6 +75,7 @@ Gemini CLI는 `~/.gemini/skills`와 함께 별칭 경로 `~/.agents/skills`(Code
 |---|---|
 | `/system-design-as-is` | 기존 코드베이스를 분석해 AS-IS 설계 분석 문서 생성 |
 | `/system-design-to-be` | 요구·제약으로 신규·개선 TO-BE 설계 문서 생성(AS-IS 없이 시작 가능) |
+| `/scenario-state-analysis` | AS-IS·TO-BE 설계에도 포함되는 시나리오 기반 상태 전이 분석서 한 파일을 단독 생성 |
 | `/feature-design` | 특정 요구사항 하나를 영향 범위로 한정한 기능 설계 문서 생성 |
 | `/frontend-user-design` | 회원가입·로그인·세션·탈퇴 등 회원제 프론트엔드 설계 |
 | `/frontend-navigation-diagram` | 화면·API 흐름 navigation 다이어그램 작성 |
@@ -127,6 +128,7 @@ Markdown 문서·다이어그램 작성·수정 결과의 전달은 [편집 링�
 | `tobe`, `to-be`, `to be`, `TO-BE`, `투비` 신규·개선 설계 작성 | `system-design-to-be` |
 | `jobflow`, `job-flow`, `job flow`, `잡플로우` 작성·수정·문법 확인 | `project-guides` → jobflow 가이드 |
 | 기존 `jobflow` 해설·상세 설명서 작성 | `jobflow-walkthrough` |
+| 시나리오 기반 상태 전이 분석서 작성, 업무 시나리오별 상태도 분석 | `scenario-state-analysis` |
 | `navigation` 화면 흐름, `state` 상태 전이 작성·수정 | 해당 다이어그램 스킬과 전용 DSL 가이드 |
 | `layout`, `레이아웃`, `PRD`, `method-R`, 모듈 경계 등 가이드 적용 | `project-guides` → 해당 가이드 |
 | TO-BE 등 설계서를 구현 | `verify-first-implementation` |

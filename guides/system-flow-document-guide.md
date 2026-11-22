@@ -290,26 +290,21 @@ Dashboard --> (/reports/render) : 렌더 요청
 
 SSE, WebSocket, queue, scheduler, timeout/cancel 은 별도 섹션으로 분리한다.
 
-아래는 ApiServer와 Worker가 독립 서비스로서 중앙 업무 조율 없이 메시지를 발행·구독하고 Client에 결과를 알리는 공개 협력이다. 프로세스가 다르다는 사실만으로 Client를 제품 외부라고 단정하지 않는다. 조율 방식은 [Method-R](method-R.md#4-시스템-설계-책임상태-소유권과-협력), 메시지·헤더는 [Job Flow 가이드](job-flow-diagram-guide.md)를 따른다.
+아래는 ApiServer와 Worker가 독립 서비스로서 중앙 업무 조율 없이 메시지를 발행·구독하고 Client에 결과를 알리는 공개 협력이다. 프로세스가 다르다는 사실만으로 Client를 제품 외부라고 단정하지 않는다. 조율 방식은 [Method-R](method-R.md#4-시스템-설계-책임상태-소유권과-협력), 구독 표기는 [시스템 수준의 이벤트 수신](job-flow-diagram-guide.md#시스템-수준의-이벤트-수신)을 따른다.
 
 ```jobflow
 scope: ReportSystem
-Object: ApiServer, MessageBus, Worker
-ApiServer.StartJob --> MessageBus.message.JobRequested
-MessageBus.message.JobRequested --> Worker.message.JobRequested
-Worker.message.JobRequested --> MessageBus.message.JobCompleted
-MessageBus.message.JobCompleted --> ApiServer.message.JobCompleted
-```
-
-```jobflow
-scope: ReportClientExchange
-Object: Client, ApiServer
+Object: Client, ApiServer, Worker
 Client.SendStartMessage --> ApiServer.message.StartRequest
 ApiServer.message.StartRequest --> Client.message.StartAccepted
-ApiServer.message.JobCompleted --> Client.message.JobCompleted
+Worker.OnJobRequested --> Worker.RenderReport
+ApiServer.OnJobCompleted --> Client.message.JobCompleted
 ```
 
-`StartJob`은 작업 시작이라는 공개 계약이다. MessageBus가 구독 구성에 따라 전달하고 Worker의 완료 메시지가 오면 ApiServer가 Client에 별도 알림을 보낸다. 접수 응답과 이후 완료 알림은 다른 계약이다. Worker의 handler·Client의 listener와 화면 반영은 각 소유자 내부에서만 연다.
+- 클라이언트가 API 서버에 보고서 생성을 요청한다.
+- API 서버는 요청을 접수하면 클라이언트에 접수 응답을 보내고 작업 요청 이벤트를 발행한다.
+- 작업 서비스는 작업 요청 이벤트를 받으면 보고서를 생성하고, 생성이 끝나면 완료 이벤트를 발행한다.
+- API 서버는 완료 이벤트를 받으면 클라이언트에 결과를 알린다.
 
 비동기 흐름에서는 다음을 명시한다.
 

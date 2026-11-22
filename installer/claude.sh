@@ -57,6 +57,7 @@ desc_of() {
     frontend-user-design)        echo "회원가입·로그인·세션·계정 복구·탈퇴 등 회원제 프론트엔드 설계 문서를 생성한다" ;;
     frontend-navigation-diagram) echo "화면 이동과 그 판단에 필요한 API·처리를 navigation DSL로 작성한다" ;;
     frontend-state-diagram)      echo "프론트엔드 객체·화면의 상태 전이를 state DSL 다이어그램으로 작성한다" ;;
+    scenario-state-analysis)     echo "시나리오 기반 상태 전이 분석서를 작성한다. 업무 시나리오마다 사건·조건에 따른 객체의 상태 변화와 연쇄 영향을 분석한다" ;;
     frontend-prototype)          echo "실제 제품 같은 웹 또는 데스크톱 프론트엔드 프로토타입을 구현한다. UX/UI 완성도에 집중하고 백엔드 없이 가상 데이터·상태 변화로 사용 흐름을 체험한다. '프론트엔드 프로토타입', '화면 흐름 시뮬레이션', '백엔드 없는 프로토타입' 요청 시 사용" ;;
     jobflow-walkthrough)         echo "이미 작성된 jobflow 를 등장 객체·계약·대표 시나리오와 연결해 해설하고 연결·책임을 검토한다" ;;
     multi-agent-task)            echo "Architect·Critic·Developer·Tester 등 여러 전문 에이전트가 분업·상호 견제하며 작업을 수행한다" ;;
@@ -78,6 +79,7 @@ keywords_of() {
     frontend-user-design)        echo "회원가입|회원제|계정 복구|탈퇴|인증 설계|로그인 설계" ;;
     frontend-navigation-diagram) echo "navigation|네비게이션|내비게이션|화면 이동 흐름|화면 흐름" ;;
     frontend-state-diagram)      echo "state diagram|state 다이어그램|상태 다이어그램|상태 전이|상태전이" ;;
+    scenario-state-analysis)     echo "시나리오 기반 상태 전이 분석서|시나리오별 상태 전이 분석|시나리오별 상태도|scenario-state-analysis" ;;
     frontend-prototype)          echo "프로토타입|prototype|화면 흐름 시뮬레이션" ;;
     jobflow-walkthrough)         echo "jobflow|job flow|job-flow|잡플로우|잡 플로우|walkthrough|워크스루" ;;
     multi-agent-task)            echo "멀티 에이전트|멀티에이전트|multi-agent|multi agent|multiagent" ;;
