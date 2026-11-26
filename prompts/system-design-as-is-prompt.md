@@ -30,7 +30,9 @@
 
 ## scenario-state-analysis.md
 
-**시나리오 기반 상태 전이 분석서**를 작성하고 `system-design-as-is.md`의 관련 기능에서 해당 시나리오 절로 연결한다. UI 유무와 관계없이 사용자가 겪을 수 있는 상황을 폭넓게 찾는다. 각 상황을 재현하는 방법, 현재 확인된 결과와 상태 변화, 미확인 경로를 기록해 E2E 테스트와 설계 검토의 근거로 삼는다. [참여자별 시도와 독립 사건](../guides/scenario-state-analysis-guide.md#참여자별-시도와-독립-사건)을 후보 ID와 대조한다. 검증용이면 [상세 사례 판정 기준](../guides/scenario-state-analysis-guide.md#시스템-검증용-사례의-깊이)에 따라 불변조건·금지 전이·복합 사건의 관찰값을 명시한다. 고객의 비정상 순서·잘못된 대상 선택, 운영자와 외부 제공자가 먼저 일으키는 사건, 두 주체의 요청이 겹치는 결과를 포함한다. [공통 작성 가이드의 AS-IS 기준](../guides/scenario-state-analysis-guide.md)
+**시나리오 기반 상태 전이 분석서**를 작성하고 `system-design-as-is.md`의 관련 기능에서 해당 시나리오 절로 연결한다. UI 유무와 관계없이 사용자가 겪을 수 있는 상황을 폭넓게 찾는다. 각 상황을 재현하는 방법, 현재 확인된 결과와 상태 변화, 미확인 경로를 기록해 E2E 테스트와 설계 검토의 근거로 삼는다. [참여자별 시도와 독립 사건](../guides/scenario-state-analysis-guide.md#참여자별-시도와-독립-사건)을 사례 ID와 대조한다. 검증용이면 [상세 사례 판정 기준](../guides/scenario-state-analysis-guide.md#시스템-검증용-사례의-깊이)에 따라 불변조건·금지 전이·복합 사건의 관찰값을 명시한다. 고객의 비정상 순서·잘못된 대상 선택, 운영자와 외부 제공자가 먼저 일으키는 사건, 두 주체의 요청이 겹치는 결과를 포함한다. [공통 작성 가이드의 AS-IS 기준](../guides/scenario-state-analysis-guide.md)
+
+각 그림에 [상태도 하단 설명](../guides/state-diagram-guide.md#상태도-하단-설명)을 붙이고, 사례의 준비·판정 가능 여부에 따라 [테스트 케이스와 설계 검토 항목](../guides/scenario-state-analysis-guide.md#테스트-케이스와-설계-검토-항목)의 소제목을 적용한다.
 
 ## job-flow 폴더
 

@@ -24,7 +24,7 @@
 | --- | --- | --- |
 | 기존 시스템의 현재 구조 분석 | [system-design-as-is-prompt](prompts/system-design-as-is-prompt.md) | 대상 UI 전체의 페이지·장면·과업 조사와 시나리오별 상세 분석, 현재 업무의 시나리오 기반 상태 전이 분석서 |
 | 시스템 신규·개선 설계 | [system-design-to-be-prompt](prompts/system-design-to-be-prompt.md) | 요구·제약과 목표 구조·시나리오 검증, 목표 업무의 시나리오 기반 상태 전이 분석서. AS-IS는 있는 경우 참고 |
-| 시나리오 기반 상태 전이 분석서만 작성 | [scenario-state-analysis-prompt](prompts/scenario-state-analysis-prompt.md) | 이용자·운영자·연동 주체별 시도와 경합, 허용·금지 전이 및 E2E 판정 증적 정리 |
+| 시나리오 기반 상태 전이 분석서만 작성 | [scenario-state-analysis-prompt](prompts/scenario-state-analysis-prompt.md) | 이용자·운영자·연동 주체별 시도와 경합, 상태도 하단 해설, E2E 테스트 케이스와 설계 검토 항목 |
 | 기능 하나 추가·변경 설계 | [feature-design-prompt](prompts/feature-design-prompt.md) | 대상 책임 모듈과 직접 관련된 계약 |
 | 사이트 전체 설계 | [site-design-prompt](prompts/site-design-prompt.md) | 채택한 기능·화면에 해당하는 DSL |
 | 회원·인증·세션·탈퇴 설계 | [frontend-user-design-prompt](prompts/frontend-user-design-prompt.md) | 채택할 회원 흐름, 보안·데이터 경계 |

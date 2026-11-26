@@ -99,10 +99,14 @@ test('installs and updates every tool, registers one Claude hook, and removes on
       }
       for (const name of ['scenario-state-analysis', 'system-design-as-is', 'system-design-to-be']) {
         const prompt = readFileSync(path.join(skills, 'project-guides/prompts', `${name}-prompt.md`), 'utf8');
-        for (const section of ['참여자별-시도와-독립-사건', '시스템-검증용-사례의-깊이']) {
+        for (const section of ['참여자별-시도와-독립-사건', '시스템-검증용-사례의-깊이', '테스트-케이스와-설계-검토-항목']) {
           assert.ok(prompt.includes(`(../guides/scenario-state-analysis-guide.md#${section})`),
             `${name}: missing ${section}`);
         }
+      }
+      for (const name of ['frontend-state-diagram', 'scenario-state-analysis', 'system-design-as-is', 'system-design-to-be']) {
+        const prompt = readFileSync(path.join(skills, 'project-guides/prompts', `${name}-prompt.md`), 'utf8');
+        assert.ok(prompt.includes('(../guides/state-diagram-guide.md#상태도-하단-설명)'), `${name}: missing state explanation guide`);
       }
       assert.match(index, /\[편집 링크 전달 기준\]\(guides\/diagram-editor-link-guide\.md\)/);
       for (const name of ['guides/diagram-editor-link-guide.md', 'guides/tools/create-editor-link.py']) {
