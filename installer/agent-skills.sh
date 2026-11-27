@@ -46,6 +46,7 @@ slug_of() {
 desc_of() {
   # 스킬 검색·자동 매칭에 쓰이는 한 줄 설명. 미등록 프롬프트는 제목으로 대체한다.
   case "$1" in
+    code-review-report)          echo "코드 리뷰 보고서 작성 요청에 사용한다. 기존 코드의 동작과 구조를 검토하고 발견 사항의 근거, 우선순위와 개선안을 보고한다" ;;
     system-design-as-is)         echo "asis/as-is/as is/AS-IS(애즈이즈) 분석·설계 문서 작성. 기존 코드와 계약으로 현재 시스템 구조를 분석할 때 사용한다" ;;
     system-design-to-be)         echo "tobe/to-be/to be/TO-BE(투비) 신규·개선 설계 문서 작성. 요구·제약으로 목표 시스템을 설계할 때 사용하며 기존 분석 없이 시작할 수 있다" ;;
     feature-design)              echo "feature-design, 기능 설계, 기능 추가·변경 요구 하나의 영향 범위·FR·추적성을 설계 문서로 작성할 때 사용한다" ;;

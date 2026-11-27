@@ -86,6 +86,7 @@ Gemini CLI는 `~/.gemini/skills`와 함께 별칭 경로 `~/.agents/skills`(Code
 | `/ux-ui-improvement` | 리서치·벤치마킹 기반 UX/UI 개선 설계 |
 | `/verify-first-implementation` | 설계서·요구사항 구현(작은 단위·설계 가정 검증 → 재사용 단위 확정 → 조립) |
 | `/comprehensive-test` | “심층 테스트”, “종합 테스트” 요청 시 위험에 맞는 검증·진단·결함 수정 |
+| `/code-review-report` | 기존 코드의 동작과 구조를 분석해 문제별 근거·우선순위·개선안을 담은 보고서 작성 |
 | `/site-design` | 사이트 전체 설계 문서 생성 |
 
 ### 가이드 인덱스

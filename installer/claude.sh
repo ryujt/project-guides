@@ -63,6 +63,7 @@ desc_of() {
     multi-agent-task)            echo "Architect·Critic·Developer·Tester 등 여러 전문 에이전트가 분업·상호 견제하며 작업을 수행한다" ;;
     ux-ui-improvement)           echo "유사 서비스 벤치마킹·오픈소스 리서치를 기반으로 UX/UI 개선 설계안을 도출한다" ;;
     comprehensive-test)          echo "변경 위험에 맞는 계측·테스트·결함 수정으로 품질을 검증한다. 필요한 검증이 통과하면 반복을 끝낸다" ;;
+    code-review-report)          echo "기존 코드의 동작과 구조를 검토하고 발견 사항의 근거, 우선순위와 개선안을 보고한다" ;;
     site-design)                 echo "사이트(웹 서비스) 전체 설계 문서를 생성한다" ;;
     verify-first-implementation) echo "설계서를 구현하거나 요구사항으로 프로젝트를 구현할 때 작은 단위와 설계 가정을 먼저 검증하고, 통과한 단위를 재사용 단위(라이브러리·서비스 등)로 확정해 조립한다. '설계서를 구현해줘', '모듈별로 먼저 검증한 뒤 조립' 요청 시 사용. 한 모듈 안에서 끝나고 외부 가정이 없는 작은 수정에는 쓰지 않는다" ;;
     *)                           title_of "$2" ;;
@@ -85,6 +86,7 @@ keywords_of() {
     multi-agent-task)            echo "멀티 에이전트|멀티에이전트|multi-agent|multi agent|multiagent" ;;
     ux-ui-improvement)           echo "ux 개선|ui 개선|ux/ui|ux·ui|벤치마킹" ;;
     comprehensive-test)          echo "심층 테스트|통합 테스트|종합 테스트|e2e|comprehensive test" ;;
+    code-review-report)          echo "코드 리뷰 보고서|코드 분석 및 개선 보고서|code review report|code-review-report" ;;
     site-design)                 echo "사이트 설계|site design|site-design|서비스 전체 설계" ;;
     verify-first-implementation) echo "설계서 구현|설계서를 구현|설계서대로 구현|검증 우선|verify-first|verify first" ;;
     *)                           echo "" ;;
